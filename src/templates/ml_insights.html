@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Model Insights</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">Crime Dashboard</a>
+            <div class="d-flex">
+                <a href="/logout" class="btn btn-outline-light">Logout</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <h2>ML Model Insights</h2>
+        {% if not metrics %}
+            <div class="alert alert-warning">Model metrics not available.</div>
+        {% else %}
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-bg-success mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Accuracy</h5>
+                        <p class="display-6">
+                          {% if metrics.accuracy is not none %}
+                            {{ metrics.accuracy | round(3) }}
+                          {% else %}
+                            N/A
+                          {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-bg-info mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Macro Avg F1</h5>
+                        <p class="display-6">
+                          {% if metrics['macro avg']['f1-score'] is not none %}
+                            {{ metrics['macro avg']['f1-score'] | round(3) }}
+                          {% else %}
+                            N/A
+                          {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-bg-primary mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Weighted Avg F1</h5>
+                        <p class="display-6">
+                          {% if metrics['weighted avg']['f1-score'] is not none %}
+                            {{ metrics['weighted avg']['f1-score'] | round(3) }}
+                          {% else %}
+                            N/A
+                          {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Confusion Matrix</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered text-center align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th></th>
+                                        {% for label in confusion.labels %}
+                                            <th>{{ label }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row, label in confusion_rows %}
+                                    <tr>
+                                        <th class="table-dark">{{ label }}</th>
+                                        {% for val in row %}
+                                            <td>{{ val }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Per-Class Metrics (Classification Report)</h5>
+                        <a href="{{ report_csv }}" class="btn btn-outline-primary btn-sm mb-2" download>Download as CSV</a>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Class</th>
+                                        <th>Precision</th>
+                                        <th>Recall</th>
+                                        <th>F1-score</th>
+                                        <th>Support</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in report_table %}
+                                    <tr>
+                                        <td>{{ row.label }}</td>
+                                        <td>{{ row.precision | round(3) }}</td>
+                                        <td>{{ row.recall | round(3) }}</td>
+                                        <td>{{ row.f1 | round(3) }}</td>
+                                        <td>{{ row.support }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">ROC Curve</h5>
+                        {% if roc_img %}
+                        <img src="data:image/png;base64,{{ roc_img }}" class="img-fluid" alt="ROC Curve" />
+                        {% else %}
+                        <div class="alert alert-info">ROC curve not available for this model.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Feature Importance</h5>
+                        {% if features and features|length > 0 %}
+                        <canvas id="featureChart"></canvas>
+                        <script>
+                            const featureLabels = {{ features | map(attribute=0) | list | tojson }};
+                            const featureValues = {{ features | map(attribute=1) | list | tojson }};
+                            new Chart(document.getElementById('featureChart'), {
+                                type: 'bar',
+                                data: {
+                                    labels: featureLabels,
+                                    datasets: [{
+                                        label: 'Importance',
+                                        data: featureValues,
+                                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                                    }]
+                                },
+                                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+                            });
+                        </script>
+                        {% else %}
+                        <div class="alert alert-info">Feature importance not available for this model.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html> 

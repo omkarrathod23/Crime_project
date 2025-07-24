@@ -1,0 +1,11 @@
+label,precision,recall,f1,support
+Assault,0.0,0.0,0.0,3.0
+Burglary,1.0,0.25,0.4,8.0
+Drug Possession,0.25,0.2857142857142857,0.26666666666666666,7.0
+Fraud,1.0,0.2,0.3333333333333333,5.0
+Homicide,0.25,0.5,0.3333333333333333,2.0
+Hostage Situation,0.0,0.0,0.0,3.0
+Kidnapping,0.0,0.0,0.0,5.0
+Sexual Harassment,0.0,0.0,0.0,0.0
+Theft,0.0,0.0,0.0,1.0
+Vandalism,0.2,0.14285714285714285,0.16666666666666666,7.0

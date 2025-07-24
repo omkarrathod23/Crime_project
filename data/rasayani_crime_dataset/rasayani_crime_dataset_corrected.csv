@@ -1,0 +1,202 @@
+Locality,Latitude,Longitude,Crime Description,Crime Domain,Weapon Used,Hour,Victim Age,Victim Gender,Criminal Name
+Turade,18.849313,73.161882,Theft,Property Crime,Knife,19,37,Other,Suresh Pawar
+Gulsunde,18.855719,73.180133,Theft,Cybercrime,Blunt Object,11,45,Female,Unknown
+Gulsunde,18.85698,73.180129,Drug Possession,Property Crime,Poison,9,16,Other,Sunil Shinde
+Waveghar,18.85075,73.170588,Kidnapping,Other,Knife,16,48,Male,Unknown
+Rees,18.837312,73.159761,Burglary,Other,Unknown,20,38,Female,Sunil Shinde
+Gulsunde,18.856779,73.178544,Drug Possession,Other,Blunt Object,7,11,Male,Suresh Pawar
+Mohopada,18.846096,73.183401,Drug Possession,Other,,1,68,Other,Ravi Patil
+Waveghar,18.850905,73.170626,Drug Possession,Other,Unknown,18,19,Other,Kiran Deshmukh
+Rees,18.836744,73.158797,Sexual Harassment,Property Crime,Unknown,8,41,Male,Unknown
+Turade,18.848545,73.161041,Kidnapping,Cybercrime,Poison,23,24,Female,Suresh Pawar
+Kambe,18.844378,73.188611,Kidnapping,Violent Crime,,2,47,Male,Unknown
+Turade,18.849848,73.162516,Vandalism,Violent Crime,Blunt Object,15,55,Other,Kiran Deshmukh
+Rees,18.836434,73.158953,Theft,Other,Knife,5,40,Female,Suresh Pawar
+Karade,18.842436,73.16664,Homicide,Cybercrime,Firearm,11,64,Female,Kiran Deshmukh
+Gulsunde,18.855788,73.178717,Kidnapping,Drug-Related,Blunt Object,15,50,Male,Sunil Shinde
+Waveghar,18.8497,73.170905,Fraud,Property Crime,Firearm,23,30,Female,Kiran Deshmukh
+Turade,18.84975,73.162243,Homicide,Other,Firearm,1,31,Female,Ravi Patil
+Chambarli,18.838635,73.162088,Assault,Drug-Related,Firearm,5,52,Female,Kiran Deshmukh
+Chambarli,18.83846,73.163232,Drug Possession,Drug-Related,Knife,19,64,Female,Anjali Jadhav
+Turade,18.848019,73.161824,Sexual Harassment,Violent Crime,Unknown,4,49,Other,Sunil Shinde
+Rees,18.836646,73.159878,Kidnapping,Cybercrime,Knife,22,67,Male,Sunil Shinde
+Dapivali,18.847112,73.17184,Fraud,Cybercrime,Unknown,12,22,Female,Kiran Deshmukh
+Chambarli,18.838071,73.162975,Sexual Harassment,Other,Poison,7,40,Female,Suresh Pawar
+Gulsunde,18.85544,73.179018,Drug Possession,Violent Crime,Blunt Object,11,13,Male,Unknown
+Chambarli,18.838671,73.162552,Kidnapping,Other,Poison,11,50,Female,Anjali Jadhav
+Ambivali,18.841246,73.179479,Homicide,Violent Crime,Knife,21,20,Male,Sunil Shinde
+Waveghar,18.849884,73.170755,Kidnapping,Drug-Related,Unknown,20,56,Female,Sunil Shinde
+Dapivali,18.847323,73.172676,Hostage Situation,Violent Crime,Firearm,11,22,Male,Anjali Jadhav
+Turade,18.848863,73.161764,Hostage Situation,Property Crime,Firearm,13,33,Male,Anjali Jadhav
+Gulsunde,18.856145,73.180092,Vandalism,Other,,21,66,Other,Unknown
+Chambarli,18.838779,73.162046,Theft,Other,Unknown,22,20,Male,Unknown
+Chambarli,18.839371,73.16374,Hostage Situation,Cybercrime,,16,10,Other,Anjali Jadhav
+Siddheshwari,18.843321,73.174485,Sexual Harassment,Property Crime,Blunt Object,21,15,Male,Kiran Deshmukh
+Karade,18.84298,73.167861,Assault,Drug-Related,,7,52,Male,Sunil Shinde
+Karade,18.843284,73.166646,Hostage Situation,Cybercrime,Poison,11,22,Male,Kiran Deshmukh
+Waveghar,18.849906,73.169252,Hostage Situation,Cybercrime,Blunt Object,13,70,Male,Unknown
+Turade,18.848346,73.161925,Fraud,Property Crime,,10,24,Male,Sunil Shinde
+Dapivali,18.847597,73.17193,Burglary,Cybercrime,,18,42,Female,Anjali Jadhav
+Turade,18.849585,73.161304,Theft,Other,Firearm,15,37,Male,Ravi Patil
+Rees,18.836335,73.159641,Drug Possession,Violent Crime,Knife,15,49,Female,Kiran Deshmukh
+Karade,18.842294,73.167002,Burglary,Property Crime,,11,36,Male,Kiran Deshmukh
+Ambivali,18.841248,73.180948,Hostage Situation,Violent Crime,Unknown,10,28,Male,Ravi Patil
+Siddheshwari,18.84231,73.174333,Hostage Situation,Other,Blunt Object,0,33,Male,Kiran Deshmukh
+Siddheshwari,18.842825,73.174681,Fraud,Cybercrime,Knife,16,41,Other,Unknown
+Siddheshwari,18.843661,73.175124,Burglary,Property Crime,Unknown,0,13,Male,Ravi Patil
+Dapivali,18.847986,73.172097,Homicide,Property Crime,Poison,18,11,Female,Ravi Patil
+Siddheshwari,18.843734,73.174583,Hostage Situation,Other,Knife,23,52,Other,Anjali Jadhav
+Karade,18.842528,73.166145,Fraud,Drug-Related,,5,58,Female,Ravi Patil
+Gulsunde,18.85621,73.180169,Drug Possession,Cybercrime,Firearm,20,15,Male,Kiran Deshmukh
+Karade,18.842504,73.167772,Theft,Property Crime,Knife,0,63,Female,Kiran Deshmukh
+Karade,18.843125,73.166978,Sexual Harassment,Drug-Related,Unknown,13,66,Female,Sunil Shinde
+Turade,18.848901,73.161646,Drug Possession,Property Crime,Poison,11,22,Male,Ravi Patil
+Waveghar,18.850366,73.170231,Burglary,Drug-Related,,16,30,Male,Kiran Deshmukh
+Kambe,18.844238,73.188635,Burglary,Cybercrime,Firearm,5,12,Other,Suresh Pawar
+Turade,18.848373,73.161384,Vandalism,Drug-Related,Unknown,20,70,Female,Sunil Shinde
+Dapivali,18.846667,73.172635,Burglary,Other,Blunt Object,5,51,Male,Kiran Deshmukh
+Turade,18.849432,73.162374,Vandalism,Property Crime,Knife,7,48,Male,Suresh Pawar
+Rees,18.836369,73.158843,Kidnapping,Other,,13,38,Female,Sunil Shinde
+Mohopada,18.846851,73.182869,Kidnapping,Other,Poison,10,17,Male,Suresh Pawar
+Dapivali,18.847072,73.17311,Hostage Situation,Other,Poison,15,62,Male,Kiran Deshmukh
+Siddheshwari,18.843747,73.175702,Burglary,Drug-Related,Knife,8,16,Female,Suresh Pawar
+Rees,18.837933,73.159699,Homicide,Other,Firearm,5,42,Other,Sunil Shinde
+Mohopada,18.846294,73.184107,Drug Possession,Property Crime,Poison,7,39,Male,Kiran Deshmukh
+Gulsunde,18.85574,73.178561,Sexual Harassment,Cybercrime,Knife,10,42,Male,Ravi Patil
+Kambe,18.845739,73.187888,Burglary,Property Crime,Blunt Object,0,38,Male,Sunil Shinde
+Karade,18.842865,73.167385,Assault,Other,Blunt Object,11,35,Female,Ravi Patil
+Turade,18.848751,73.16237,Burglary,Drug-Related,Knife,20,49,Other,Kiran Deshmukh
+Dapivali,18.847829,73.171739,Vandalism,Violent Crime,Knife,1,28,Male,Sunil Shinde
+Kambe,18.84553,73.187667,Drug Possession,Property Crime,,19,67,Female,Ravi Patil
+Kambe,18.844372,73.188717,Fraud,Violent Crime,Unknown,17,50,Male,Ravi Patil
+Waveghar,18.849922,73.169917,Drug Possession,Drug-Related,Unknown,4,44,Other,Sunil Shinde
+Gulsunde,18.856655,73.17881,Burglary,Other,,3,39,Female,Sunil Shinde
+Chambarli,18.837807,73.162297,Hostage Situation,Cybercrime,Poison,21,56,Other,Ravi Patil
+Rees,18.837769,73.158489,Theft,Property Crime,Unknown,0,24,Other,Kiran Deshmukh
+Siddheshwari,18.842316,73.174103,Theft,Property Crime,Knife,6,12,Male,Ravi Patil
+Ambivali,18.840868,73.179596,Hostage Situation,Violent Crime,Poison,19,53,Female,Kiran Deshmukh
+Kambe,18.845189,73.188892,Drug Possession,Violent Crime,Knife,20,43,Female,Kiran Deshmukh
+Waveghar,18.850532,73.170097,Sexual Harassment,Other,Knife,12,61,Male,Sunil Shinde
+Rees,18.837018,73.159303,Fraud,Violent Crime,,5,56,Other,Kiran Deshmukh
+Turade,18.84842,73.161806,Drug Possession,Cybercrime,Firearm,20,13,Female,Anjali Jadhav
+Waveghar,18.850144,73.169901,Assault,Drug-Related,Knife,1,27,Other,Kiran Deshmukh
+Ambivali,18.841093,73.180411,Theft,Other,Blunt Object,7,22,Female,Suresh Pawar
+Waveghar,18.85063,73.170211,Vandalism,Other,Knife,7,54,Female,Kiran Deshmukh
+Karade,18.842029,73.166612,Vandalism,Drug-Related,Blunt Object,16,62,Other,Sunil Shinde
+Dapivali,18.847419,73.172037,Hostage Situation,Other,Firearm,0,36,Female,Kiran Deshmukh
+Dapivali,18.846758,73.173275,Vandalism,Cybercrime,Firearm,11,60,Male,Suresh Pawar
+Gulsunde,18.856104,73.178773,Hostage Situation,Cybercrime,Blunt Object,23,29,Other,Ravi Patil
+Ambivali,18.841844,73.179642,Assault,Violent Crime,Knife,7,60,Male,Ravi Patil
+Siddheshwari,18.842439,73.174315,Theft,Property Crime,Blunt Object,7,68,Female,Unknown
+Chambarli,18.837638,73.162888,Fraud,Violent Crime,,5,60,Female,Unknown
+Gulsunde,18.856532,73.180384,Drug Possession,Other,Unknown,14,35,Male,Sunil Shinde
+Mohopada,18.846775,73.184454,Hostage Situation,Cybercrime,Unknown,0,35,Female,Unknown
+Dapivali,18.847234,73.171578,Homicide,Other,Poison,20,67,Male,Sunil Shinde
+Karade,18.84301,73.166936,Vandalism,Property Crime,Blunt Object,2,20,Male,Sunil Shinde
+Gulsunde,18.856028,73.180218,Kidnapping,Other,Firearm,9,41,Female,Kiran Deshmukh
+Kambe,18.844321,73.188979,Fraud,Other,,8,52,Male,Ravi Patil
+Dapivali,18.847892,73.172245,Sexual Harassment,Other,Knife,17,62,Male,Unknown
+Rees,18.836936,73.158154,Burglary,Property Crime,Blunt Object,16,36,Other,Suresh Pawar
+Karade,18.841718,73.167003,Burglary,Property Crime,Blunt Object,5,53,Female,Unknown
+Karade,18.841925,73.166233,Drug Possession,Violent Crime,,2,36,Male,Ravi Patil
+Gulsunde,18.856815,73.179534,Assault,Drug-Related,Firearm,1,56,Female,Suresh Pawar
+Kambe,18.844373,73.188974,Hostage Situation,Property Crime,Blunt Object,8,14,Male,Ravi Patil
+Mohopada,18.846084,73.18329,Sexual Harassment,Cybercrime,Unknown,21,37,Other,Ravi Patil
+Turade,18.848545,73.16277,Drug Possession,Cybercrime,Firearm,23,32,Other,Suresh Pawar
+Gulsunde,18.856512,73.178996,Fraud,Other,Unknown,6,61,Female,Ravi Patil
+Waveghar,18.849945,73.17035,Vandalism,Cybercrime,Knife,1,68,Other,Anjali Jadhav
+Turade,18.848243,73.162463,Fraud,Drug-Related,Blunt Object,0,67,Other,Ravi Patil
+Siddheshwari,18.843097,73.175427,Assault,Cybercrime,Knife,8,68,Other,Ravi Patil
+Karade,18.842059,73.167641,Burglary,Violent Crime,Blunt Object,8,57,Female,Suresh Pawar
+Turade,18.849567,73.161459,Homicide,Property Crime,,20,52,Female,Sunil Shinde
+Waveghar,18.849846,73.170968,Vandalism,Violent Crime,Poison,12,32,Female,Unknown
+Karade,18.842891,73.166082,Sexual Harassment,Drug-Related,Firearm,21,46,Male,Kiran Deshmukh
+Ambivali,18.841109,73.180178,Vandalism,Property Crime,Knife,9,41,Female,Sunil Shinde
+Waveghar,18.849144,73.170545,Fraud,Drug-Related,,23,43,Male,Anjali Jadhav
+Karade,18.842999,73.167176,Assault,Drug-Related,Unknown,1,28,Male,Suresh Pawar
+Rees,18.836197,73.158894,Burglary,Other,,23,48,Female,Suresh Pawar
+Siddheshwari,18.842536,73.174819,Vandalism,Other,Firearm,0,37,Male,Kiran Deshmukh
+Waveghar,18.850274,73.169597,Homicide,Cybercrime,Firearm,2,53,Other,Suresh Pawar
+Turade,18.848636,73.161782,Kidnapping,Other,Firearm,6,41,Other,Unknown
+Kambe,18.845913,73.188911,Hostage Situation,Violent Crime,Unknown,18,39,Female,Anjali Jadhav
+Dapivali,18.847511,73.172895,Vandalism,Property Crime,,8,30,Female,Ravi Patil
+Mohopada,18.845041,73.183339,Assault,Drug-Related,Unknown,0,58,Female,Ravi Patil
+Karade,18.843012,73.166505,Vandalism,Cybercrime,Firearm,0,61,Male,Sunil Shinde
+Siddheshwari,18.843954,73.175733,Drug Possession,Other,,19,26,Female,Anjali Jadhav
+Siddheshwari,18.842623,73.175674,Kidnapping,Property Crime,Unknown,15,48,Other,Suresh Pawar
+Dapivali,18.846343,73.1727,Burglary,Other,Knife,9,63,Male,Kiran Deshmukh
+Dapivali,18.847611,73.173454,Sexual Harassment,Drug-Related,Unknown,13,29,Other,Kiran Deshmukh
+Chambarli,18.838342,73.163165,Assault,Cybercrime,Firearm,15,70,Other,Kiran Deshmukh
+Chambarli,18.838177,73.16327,Kidnapping,Other,Unknown,17,61,Other,Kiran Deshmukh
+Gulsunde,18.855283,73.180127,Drug Possession,Other,Knife,23,31,Male,Anjali Jadhav
+Ambivali,18.840606,73.179197,Drug Possession,Drug-Related,Poison,2,62,Male,Ravi Patil
+Gulsunde,18.855955,73.178726,Drug Possession,Violent Crime,Firearm,20,51,Male,Ravi Patil
+Waveghar,18.850178,73.170701,Drug Possession,Property Crime,Knife,10,70,Other,Ravi Patil
+Kambe,18.844261,73.188209,Homicide,Cybercrime,Unknown,14,53,Other,Anjali Jadhav
+Rees,18.837751,73.159866,Homicide,Property Crime,Poison,6,14,Male,Ravi Patil
+Karade,18.842745,73.166639,Burglary,Violent Crime,Poison,20,28,Other,Ravi Patil
+Dapivali,18.847803,73.173384,Homicide,Violent Crime,Poison,18,10,Female,Suresh Pawar
+Gulsunde,18.856963,73.178791,Drug Possession,Property Crime,Unknown,0,11,Female,Sunil Shinde
+Turade,18.849047,73.162101,Drug Possession,Cybercrime,Knife,12,46,Male,Suresh Pawar
+Karade,18.842331,73.166305,Drug Possession,Violent Crime,Blunt Object,11,61,Female,Kiran Deshmukh
+Gulsunde,18.855361,73.180166,Burglary,Other,Firearm,0,50,Other,Unknown
+Turade,18.849447,73.161217,Drug Possession,Violent Crime,Firearm,20,11,Female,Suresh Pawar
+Turade,18.848781,73.161125,Assault,Other,Firearm,5,47,Female,Anjali Jadhav
+Gulsunde,18.856802,73.18045,Assault,Property Crime,Firearm,19,51,Other,Suresh Pawar
+Dapivali,18.846721,73.172827,Assault,Other,,20,38,Other,Anjali Jadhav
+Ambivali,18.840006,73.180601,Vandalism,Other,Unknown,6,38,Female,Kiran Deshmukh
+Karade,18.842544,73.167531,Vandalism,Drug-Related,Knife,8,34,Female,Unknown
+Siddheshwari,18.842195,73.174546,Fraud,Drug-Related,Unknown,14,43,Male,Ravi Patil
+Siddheshwari,18.842544,73.175064,Kidnapping,Cybercrime,Firearm,7,38,Female,Unknown
+Rees,18.836551,73.159623,Fraud,Drug-Related,,8,59,Male,Kiran Deshmukh
+Waveghar,18.850207,73.16947,Assault,Drug-Related,,14,70,Other,Ravi Patil
+Ambivali,18.840399,73.180377,Drug Possession,Drug-Related,Firearm,14,10,Male,Anjali Jadhav
+Siddheshwari,18.843016,73.17499,Hostage Situation,Cybercrime,Unknown,19,12,Other,Anjali Jadhav
+Ambivali,18.840795,73.180733,Sexual Harassment,Property Crime,Poison,22,21,Female,Sunil Shinde
+Kambe,18.844692,73.18878,Sexual Harassment,Drug-Related,Unknown,11,35,Female,Suresh Pawar
+Dapivali,18.846641,73.172649,Sexual Harassment,Other,Poison,0,19,Female,Sunil Shinde
+Gulsunde,18.855069,73.179265,Hostage Situation,Drug-Related,Unknown,12,66,Male,Unknown
+Mohopada,18.846317,73.183329,Assault,Drug-Related,Poison,10,38,Male,Kiran Deshmukh
+Gulsunde,18.856713,73.180276,Burglary,Drug-Related,,0,67,Other,Suresh Pawar
+Chambarli,18.837523,73.162265,Homicide,Drug-Related,Knife,19,61,Male,Ravi Patil
+Chambarli,18.837961,73.163437,Assault,Other,Unknown,8,61,Male,Sunil Shinde
+Rees,18.836958,73.1592,Fraud,Other,Blunt Object,17,25,Male,Unknown
+Kambe,18.844377,73.187228,Fraud,Drug-Related,Blunt Object,19,26,Female,Kiran Deshmukh
+Rees,18.837573,73.159419,Homicide,Property Crime,Firearm,12,16,Female,Anjali Jadhav
+Dapivali,18.847781,73.172363,Vandalism,Other,Poison,17,54,Female,Kiran Deshmukh
+Karade,18.841542,73.166574,Vandalism,Drug-Related,,15,53,Male,Suresh Pawar
+Dapivali,18.847333,73.172338,Fraud,Drug-Related,Firearm,10,37,Other,Unknown
+Mohopada,18.846727,73.183776,Vandalism,Property Crime,Unknown,1,59,Male,Suresh Pawar
+Kambe,18.845301,73.187312,Vandalism,Cybercrime,,12,38,Other,Ravi Patil
+Chambarli,18.838119,73.162894,Kidnapping,Violent Crime,Poison,1,36,Female,Ravi Patil
+Siddheshwari,18.842316,73.175549,Hostage Situation,Violent Crime,Poison,22,13,Other,Kiran Deshmukh
+Dapivali,18.847183,73.171591,Burglary,Property Crime,Knife,1,67,Male,Anjali Jadhav
+Kambe,18.845303,73.188676,Vandalism,Drug-Related,Poison,19,59,Female,Suresh Pawar
+Turade,18.848975,73.161636,Kidnapping,Violent Crime,Blunt Object,1,12,Female,Kiran Deshmukh
+Gulsunde,18.855271,73.180088,Homicide,Cybercrime,Knife,22,44,Other,Ravi Patil
+Waveghar,18.850617,73.170715,Assault,Violent Crime,Blunt Object,5,27,Female,Unknown
+Mohopada,18.845011,73.183853,Sexual Harassment,Other,,8,15,Other,Kiran Deshmukh
+Rees,18.836509,73.158358,Kidnapping,Other,Blunt Object,16,25,Female,Kiran Deshmukh
+Chambarli,18.838666,73.163636,Drug Possession,Violent Crime,Blunt Object,21,14,Female,Suresh Pawar
+Siddheshwari,18.842521,73.175811,Drug Possession,Drug-Related,Blunt Object,18,24,Other,Unknown
+Karade,18.842258,73.167892,Homicide,Violent Crime,,14,63,Other,Kiran Deshmukh
+Karade,18.842148,73.167736,Vandalism,Drug-Related,Blunt Object,13,33,Male,Unknown
+Waveghar,18.850645,73.169307,Sexual Harassment,Drug-Related,Firearm,21,64,Female,Sunil Shinde
+Dapivali,18.846555,73.173197,Vandalism,Cybercrime,Poison,6,19,Male,Sunil Shinde
+Kambe,18.845898,73.188525,Assault,Violent Crime,Firearm,8,69,Other,Anjali Jadhav
+Karade,18.841654,73.166557,Theft,Property Crime,Poison,19,35,Other,Anjali Jadhav
+Rees,18.836182,73.159692,Sexual Harassment,Other,Blunt Object,11,59,Female,Unknown
+Rees,18.836407,73.159547,Kidnapping,Violent Crime,,18,47,Other,Anjali Jadhav
+Gulsunde,18.855237,73.180355,Homicide,Drug-Related,Blunt Object,12,39,Male,Suresh Pawar
+Turade,18.848434,73.16114,Burglary,Violent Crime,Unknown,0,63,Female,Anjali Jadhav
+Karade,18.841746,73.167813,Drug Possession,Violent Crime,,20,41,Other,Sunil Shinde
+Chambarli,18.838646,73.163603,Theft,Other,Firearm,4,51,Male,Kiran Deshmukh
+Dapivali,18.847783,73.172956,Hostage Situation,Drug-Related,Poison,21,24,Female,Suresh Pawar
+Kambe,18.844731,73.188406,Vandalism,Violent Crime,,6,36,Other,Suresh Pawar
+Karade,18.843344,73.167626,Sexual Harassment,Cybercrime,Knife,0,17,Other,Unknown
+Mohopada,18.845964,73.183617,Drug Possession,Property Crime,,8,64,Other,Unknown
+Siddheshwari,18.842645,73.174961,Drug Possession,Violent Crime,Poison,12,45,Female,Unknown
+Kambe,18.845372,73.188202,Homicide,Property Crime,Unknown,1,48,Other,Suresh Pawar
+Mohopada,18.845622,73.184161,Fraud,Drug-Related,Poison,1,21,Male,Suresh Pawar
+Karade,18.842997,73.166082,Hostage Situation,Drug-Related,Poison,15,37,Female,Ravi Patil
+mohopada,23.0,32.0,fds,sfd,fds,12,44,Male,hhh
