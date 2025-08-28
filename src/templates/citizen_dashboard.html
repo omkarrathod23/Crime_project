@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citizen Dashboard - Crime Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
+        <div class="container">
+            <a class="navbar-brand text-white" href="#">
+                <i class="fas fa-shield-alt"></i> Citizen Portal
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text text-white me-3">
+                    <i class="fas fa-user-circle"></i> {{ current_user.name }}
+                </span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <!-- Welcome Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h2 class="card-title">
+                            <i class="fas fa-home"></i> Welcome, {{ current_user.name }}!
+                        </h2>
+                        <p class="card-text">Manage your FIR reports and stay informed about safety in your area.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">File New FIR</h5>
+                        <p class="card-text">Report a crime incident with location details</p>
+                        <a href="{{ url_for('add_fir') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> File FIR
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-search fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Track FIR Status</h5>
+                        <p class="card-text">Check the status of your submitted reports</p>
+                        <a href="#fir-reports" class="btn btn-success">
+                            <i class="fas fa-eye"></i> View Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-info-circle fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">Safety Tips</h5>
+                        <p class="card-text">Learn about crime prevention and safety measures</p>
+                        <a href="#safety-tips" class="btn btn-info">
+                            <i class="fas fa-book"></i> Read Tips
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FIR Reports Section -->
+        <div class="row mb-4" id="fir-reports">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list"></i> Your FIR Reports
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if fir_reports %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Crime Type</th>
+                                            <th>Location</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for fir in fir_reports %}
+                                        <tr>
+                                            <td>{{ fir.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>{{ fir.crime_type }}</td>
+                                            <td>
+                                                <small class="text-muted">
+                                                    {{ fir.lat|round(6) }}, {{ fir.lon|round(6) }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                {% if fir.status == 'pending' %}
+                                                    <span class="badge bg-warning">Pending</span>
+                                                {% elif fir.status == 'verified' %}
+                                                    <span class="badge bg-info">Verified</span>
+                                                {% elif fir.status == 'assigned' %}
+                                                    <span class="badge bg-primary">Assigned</span>
+                                                {% elif fir.status == 'in_progress' %}
+                                                    <span class="badge bg-warning">In Progress</span>
+                                                {% elif fir.status == 'closed' %}
+                                                    <span class="badge bg-success">Closed</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#firModal{{ fir.id }}">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No FIR reports yet</h5>
+                                <p class="text-muted">File your first FIR report to get started</p>
+                                <a href="{{ url_for('add_fir') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> File Your First FIR
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Safety Tips Section -->
+        <div class="row mb-4" id="safety-tips">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shield-alt"></i> Safety Tips & Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="alert alert-info">
+                                    <h6><i class="fas fa-lightbulb"></i> Emergency Numbers</h6>
+                                    <ul class="mb-0">
+                                        <li><strong>Police:</strong> 100</li>
+                                        <li><strong>Ambulance:</strong> 102</li>
+                                        <li><strong>Fire:</strong> 101</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="alert alert-warning">
+                                    <h6><i class="fas fa-exclamation-triangle"></i> Safety Guidelines</h6>
+                                    <ul class="mb-0">
+                                        <li>Always report suspicious activities</li>
+                                        <li>Keep emergency contacts handy</li>
+                                        <li>Be aware of your surroundings</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIR Detail Modals -->
+    {% if fir_reports %}
+        {% for fir in fir_reports %}
+        <div class="modal fade" id="firModal{{ fir.id }}" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">FIR Report Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Date:</strong> {{ fir.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                                <p><strong>Crime Type:</strong> {{ fir.crime_type }}</p>
+                                <p><strong>Status:</strong> 
+                                    {% if fir.status == 'pending' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% elif fir.status == 'verified' %}
+                                        <span class="badge bg-info">Verified</span>
+                                    {% elif fir.status == 'assigned' %}
+                                        <span class="badge bg-primary">Assigned</span>
+                                    {% elif fir.status == 'in_progress' %}
+                                        <span class="badge bg-warning">In Progress</span>
+                                    {% elif fir.status == 'closed' %}
+                                        <span class="badge bg-success">Closed</span>
+                                    {% endif %}
+                                </p>
+                                <p><strong>Location:</strong> {{ fir.lat|round(6) }}, {{ fir.lon|round(6) }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Description:</strong></p>
+                                <p class="text-muted">{{ fir.description }}</p>
+                                {% if fir.admin_notes %}
+                                    <p><strong>Admin Notes:</strong></p>
+                                    <p class="text-muted">{{ fir.admin_notes }}</p>
+                                {% endif %}
+                                {% if fir.police_notes %}
+                                    <p><strong>Police Notes:</strong></p>
+                                    <p class="text-muted">{{ fir.police_notes }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

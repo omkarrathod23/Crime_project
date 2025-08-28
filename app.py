@@ -1,8 +1,11 @@
 import matplotlib
 matplotlib.use('Agg')
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from werkzeug.utils import secure_filename
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import os
 import pandas as pd
+from datetime import datetime
 import matplotlib.pyplot as plt
 import seaborn as sns
 import random
@@ -11,9 +14,57 @@ from models.model import predict_crime_type
 from src.eda import load_data
 from sklearn.cluster import KMeans
 import folium
+from models.database import db, User, Department, FIRReport, CrimeData, init_db, create_otp_for_user, verify_otp
+from src.auth import admin_required, police_required, citizen_required, get_user_by_email, get_department_for_location
 
 app = Flask(__name__, template_folder='src/templates')
 app.secret_key = 'your_secret_key'  # Change this in production
+
+# Database configuration
+# Use a fresh DB filename to avoid old schema conflicts
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///crime_management_v2.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# File upload configuration
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# OTP SMS configuration (demo: fixed number override)
+OTP_TEST_PHONE = os.environ.get('OTP_TEST_PHONE', '7249398891')
+
+def send_sms_otp(phone_number: str, otp_code: str) -> None:
+    """Send OTP via SMS. Uses Twilio if configured; never displays OTP in UI."""
+    account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+    auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
+    from_number = os.environ.get('TWILIO_FROM_NUMBER')
+    # Always send to the configured test phone, per requirement
+    target = OTP_TEST_PHONE
+    try:
+        if account_sid and auth_token and from_number:
+            # Lazy import; avoid hard dependency when not configured
+            from twilio.rest import Client  # type: ignore
+            client = Client(account_sid, auth_token)
+            client.messages.create(to=target, from_=from_number, body=f"Your OTP is: {otp_code}")
+        else:
+            # No SMS provider configured; do not expose OTP in UI
+            # Optionally log to server for testing only (remove in production)
+            print(f"[OTP DEMO - no SMS provider] OTP generated and would be sent to {target}.")
+    except Exception as e:
+        print(f"Failed to send SMS OTP: {e}")
+
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'citizen_login'
+
+# Initialize database
+init_db(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 DATA_PATH = os.path.join('data', 'rasayani_crime_dataset')
 STATIC_IMG_PATH = os.path.join('static', 'images')
@@ -38,6 +89,22 @@ def load_crime_data(folder_path=None):
 def get_top_crime_types(df, n=5):
     return df['crime_description'].value_counts().head(n)
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def save_uploaded_file(file):
+    """Save uploaded file and return filename"""
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        # Add timestamp to avoid filename conflicts
+        name, ext = os.path.splitext(filename)
+        filename = f"{name}_{int(datetime.now().timestamp())}{ext}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        return filename
+    return None
+
 # Load model and data once
 model = joblib.load('models/crime_type_rf.joblib')
 data = load_crime_data()
@@ -46,41 +113,261 @@ data = load_crime_data()
 def home():
     return render_template('home.html')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        if username == 'rasayani' and password == 'rasayani123':
-            session['logged_in'] = True
-            session['user'] = username
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid credentials!')
-    return render_template('login.html')
+@app.route('/citizen')
+def citizen_portal():
+    return redirect(url_for('citizen_login'))
 
+@app.route('/police')
+def police_portal():
+    return redirect(url_for('police_login'))
+
+@app.route('/admin')
+def admin_portal():
+    return redirect(url_for('admin_login'))
+
+# Authentication routes
+@app.route('/citizen/login', methods=['GET', 'POST'])
+def citizen_login():
+    if current_user.is_authenticated:
+        if getattr(current_user, 'is_citizen', lambda: False)():
+            return redirect(url_for('citizen_dashboard'))
+        logout_user()
+        flash('Please log in with a Citizen account.', 'info')
+    
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = get_user_by_email(email)
+        
+        if user and user.check_password(password) and user.is_citizen():
+            # Generate OTP for citizens as requested
+            otp = create_otp_for_user(user.id)
+            session['pending_user_id'] = user.id
+            session['otp_sent'] = True
+            send_sms_otp(user.phone or OTP_TEST_PHONE, otp)
+            return redirect(url_for('citizen_otp_verification'))
+        else:
+            flash('Invalid credentials or insufficient privileges!', 'error')
+    
+    return render_template('login_citizen.html')
+
+@app.route('/citizen/otp', methods=['GET', 'POST'])
+def citizen_otp_verification():
+    if 'pending_user_id' not in session or not session.get('otp_sent'):
+        return redirect(url_for('citizen_login'))
+    if request.method == 'POST':
+        otp = request.form['otp']
+        user_id = session['pending_user_id']
+        if verify_otp(user_id, otp):
+            user = User.query.get(user_id)
+            login_user(user)
+            session.pop('pending_user_id', None)
+            session.pop('otp_sent', None)
+            flash('OTP verified successfully!', 'success')
+            return redirect(url_for('citizen_dashboard'))
+        else:
+            flash('Invalid or expired OTP!', 'error')
+    return render_template('citizen_otp.html')
+
+@app.route('/police/login', methods=['GET', 'POST'])
+def police_login():
+    if current_user.is_authenticated:
+        # If already logged in as police, go to dashboard
+        if getattr(current_user, 'is_police', lambda: False)():
+            return redirect(url_for('police_dashboard'))
+        # If logged in as another role, sign out and show police login
+        logout_user()
+        flash('Please log in with a Police account.', 'info')
+    
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = get_user_by_email(email)
+        
+        if user and user.check_password(password) and user.is_police():
+            # Generate OTP for two-step verification
+            otp = create_otp_for_user(user.id)
+            session['pending_user_id'] = user.id
+            session['otp_sent'] = True
+            
+            # Send OTP via SMS to configured phone
+            send_sms_otp(user.phone or OTP_TEST_PHONE, otp)
+            return redirect(url_for('police_otp_verification'))
+        else:
+            flash('Invalid credentials or insufficient privileges!', 'error')
+    
+    return render_template('login_police.html')
+
+@app.route('/police/otp', methods=['GET', 'POST'])
+def police_otp_verification():
+    if 'pending_user_id' not in session or not session.get('otp_sent'):
+        return redirect(url_for('police_login'))
+    
+    if request.method == 'POST':
+        otp = request.form['otp']
+        user_id = session['pending_user_id']
+        
+        if verify_otp(user_id, otp):
+            user = User.query.get(user_id)
+            login_user(user)
+            session.pop('pending_user_id', None)
+            session.pop('otp_sent', None)
+            flash('OTP verified successfully!', 'success')
+            return redirect(url_for('police_dashboard'))
+        else:
+            flash('Invalid or expired OTP!', 'error')
+    
+    return render_template('police_otp.html')
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if current_user.is_authenticated:
+        if getattr(current_user, 'is_admin', lambda: False)():
+            return redirect(url_for('admin_dashboard'))
+        logout_user()
+        flash('Please log in with an Admin account.', 'info')
+    
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = get_user_by_email(email)
+        
+        if user and user.check_password(password) and user.is_admin():
+            # Generate OTP and send SMS
+            otp_code = create_otp_for_user(user.id)
+            send_sms_otp(OTP_TEST_PHONE, otp_code)
+            session['pending_user_id'] = user.id
+            session['otp_sent'] = True
+            flash('OTP sent to your registered phone number.', 'success')
+            return redirect(url_for('admin_otp_verification'))
+        else:
+            flash('Invalid credentials!', 'error')
+    
+    return render_template('login_admin.html')
+
+@app.route('/admin/otp', methods=['GET', 'POST'])
+def admin_otp_verification():
+    if 'pending_user_id' not in session or not session.get('otp_sent'):
+        return redirect(url_for('admin_login'))
+    
+    if request.method == 'POST':
+        otp = request.form['otp']
+        user_id = session['pending_user_id']
+        
+        if verify_otp(user_id, otp):
+            user = User.query.get(user_id)
+            login_user(user)
+            session.pop('pending_user_id', None)
+            session.pop('otp_sent', None)
+            flash('OTP verified successfully!', 'success')
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Invalid or expired OTP!', 'error')
+    
+    return render_template('admin_otp.html')
+
+@app.route('/register/citizen', methods=['GET', 'POST'])
+def register_citizen():
+    if current_user.is_authenticated:
+        return redirect(url_for('citizen_dashboard'))
+    
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+        phone = request.form.get('phone', '')
+        
+        if User.query.filter_by(email=email).first():
+            flash('Email already registered!', 'error')
+            return render_template('register_citizen.html')
+        
+        user = User(name=name, email=email, role='citizen', phone=phone)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        
+        flash('Registration successful! Please login.', 'success')
+        return redirect(url_for('citizen_login'))
+    
+    return render_template('register_citizen.html')
+
+# Dashboard routes
 @app.route('/dashboard')
 def dashboard():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    df = data
-    total_crimes = len(df)
-    top_types = get_top_crime_types(df)
-    # Generate and save bar chart
-    plt.figure(figsize=(8,4))
-    sns.barplot(x=top_types.values, y=top_types.index, palette='viridis')
-    plt.title('Top 5 Crime Types')
-    plt.xlabel('Count')
-    plt.tight_layout()
-    chart_path = os.path.join(STATIC_IMG_PATH, 'chart.png')
-    plt.savefig(chart_path)
-    plt.close()
-    return render_template('dashboard.html', total_crimes=total_crimes, top_types=top_types, chart_url='/static/images/chart.png')
+    if not current_user.is_authenticated:
+        return redirect(url_for('login_citizen'))
+    
+    # Redirect to appropriate dashboard based on role
+    if current_user.is_admin():
+        return redirect(url_for('admin_dashboard'))
+    elif current_user.is_police():
+        return redirect(url_for('police_dashboard'))
+    else:
+        return redirect(url_for('citizen_dashboard'))
+
+@app.route('/citizen/dashboard')
+@login_required
+@citizen_required
+def citizen_dashboard():
+    # Get user's FIR reports
+    fir_reports = FIRReport.query.filter_by(user_id=current_user.id).order_by(FIRReport.timestamp.desc()).all()
+    return render_template('citizen_dashboard.html', fir_reports=fir_reports)
+
+@app.route('/police/dashboard')
+@login_required
+@police_required
+def police_dashboard():
+    # Get FIR reports for this department
+    fir_reports = FIRReport.query.filter_by(department_id=current_user.department_id).order_by(FIRReport.timestamp.desc()).all()
+    
+    # Get department info
+    department = Department.query.get(current_user.department_id)
+    
+    # Calculate counts for dashboard stats
+    pending_count = len([fir for fir in fir_reports if fir.status == 'pending'])
+    in_progress_count = len([fir for fir in fir_reports if fir.status == 'in_progress'])
+    closed_count = len([fir for fir in fir_reports if fir.status == 'closed'])
+    total_count = len(fir_reports)
+    
+    return render_template('police_dashboard.html', 
+                         fir_reports=fir_reports, 
+                         department=department,
+                         pending_count=pending_count,
+                         in_progress_count=in_progress_count,
+                         closed_count=closed_count,
+                         total_count=total_count)
+
+@app.route('/admin/dashboard')
+@login_required
+@admin_required
+def admin_dashboard():
+    # Get pending FIR reports
+    pending_firs = FIRReport.query.filter_by(status='pending').order_by(FIRReport.timestamp.desc()).all()
+    
+    # Get all departments
+    departments = Department.query.all()
+    
+    # Get all users
+    users = User.query.all()
+    
+    # Get statistics
+    total_fir_count = FIRReport.query.count()
+    pending_count = len(pending_firs)
+    department_count = Department.query.count()
+    user_count = User.query.count()
+    
+    return render_template('admin_dashboard.html',
+                         pending_firs=pending_firs,
+                         departments=departments,
+                         users=users,
+                         total_fir_count=total_fir_count,
+                         pending_count=pending_count,
+                         department_count=department_count,
+                         user_count=user_count)
 
 @app.route('/predict', methods=['GET', 'POST'])
+@login_required
 def predict():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     df = data
     locations = sorted(df['locality'].unique())
     prediction = None
@@ -93,9 +380,8 @@ def predict():
     return render_template('predict.html', locations=locations, prediction=prediction)
 
 @app.route('/eda')
+@login_required
 def eda():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     df = load_data()
     if df is None:
         return render_template('eda.html', error='Could not load crime data.', total_crimes=None, top_types_labels=[], top_types_values=[], trend_labels=[], trend_values=[], recent_cases=[], summary_stats={})
@@ -159,9 +445,8 @@ def eda():
     )
 
 @app.route('/hotspot', methods=['GET', 'POST'])
+@login_required
 def hotspot():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     df = load_data()
     if df is None or 'latitude' not in df.columns or 'longitude' not in df.columns:
         return render_template('hotspot.html', error='Could not load location data.', map_path=None, localities=[], selected_locality=None, criminals=[])
@@ -220,55 +505,206 @@ def hotspot():
     return render_template('hotspot.html', error=None, map_path=map_path, localities=all_localities, selected_locality=selected_locality, criminals=criminals)
 
 @app.route('/fir/add', methods=['GET', 'POST'])
+@login_required
+@citizen_required
 def add_fir():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    message = None
     if request.method == 'POST':
         # Get form data
-        fields = [
-            'Locality', 'Latitude', 'Longitude', 'Crime Description', 'Crime Domain',
-            'Weapon Used', 'Hour', 'Victim Age', 'Victim Gender', 'Criminal Name'
-        ]
-        fir_data = {field: request.form.get(field, '').strip() for field in fields}
+        description = request.form.get('description', '').strip()
+        crime_type = request.form.get('crime_type', '').strip()
+        lat = float(request.form.get('latitude', 0))
+        lon = float(request.form.get('longitude', 0))
+        
         # Basic validation
-        required_fields = ['Locality', 'Latitude', 'Longitude', 'Crime Description', 'Crime Domain', 'Hour', 'Victim Age', 'Victim Gender']
-        missing = [f for f in required_fields if not fir_data[f]]
-        if missing:
-            message = f"Missing required fields: {', '.join(missing)}"
+        if not description or not crime_type or lat == 0 or lon == 0:
+            flash('Please fill all required fields!', 'error')
+            return render_template('add_fir.html')
+        
+        # Handle file upload
+        evidence_file = None
+        if 'evidence_file' in request.files:
+            file = request.files['evidence_file']
+            if file.filename:
+                evidence_file = save_uploaded_file(file)
+        
+        # Create new FIR report
+        fir = FIRReport(
+            user_id=current_user.id,
+            description=description,
+            crime_type=crime_type,
+            lat=lat,
+            lon=lon,
+            evidence_file=evidence_file,
+            status='pending'
+        )
+        
+        db.session.add(fir)
+        db.session.commit()
+        
+        flash('FIR submitted successfully! It will be reviewed by an admin.', 'success')
+        return redirect(url_for('citizen_dashboard'))
+    
+    return render_template('add_fir.html')
+
+# Admin FIR management routes
+@app.route('/admin/fir/<int:fir_id>/verify', methods=['POST'])
+@login_required
+@admin_required
+def verify_fir_location(fir_id):
+    fir = FIRReport.query.get_or_404(fir_id)
+    
+    if fir.status != 'pending':
+        flash('FIR is not in pending status!', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    # Find appropriate department for the location
+    department = get_department_for_location(fir.lat, fir.lon)
+    
+    if department:
+        fir.department_id = department.id
+        fir.status = 'assigned'
+        fir.updated_at = datetime.utcnow()
+        fir.admin_notes = f"Location verified and assigned to {department.name}"
+        flash(f'FIR assigned to {department.name}', 'success')
+    else:
+        fir.status = 'verified'
+        fir.updated_at = datetime.utcnow()
+        fir.admin_notes = "Location verified but no department found in area"
+        flash('Location verified but no department found in area', 'warning')
+    
+    db.session.commit()
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/fir/<int:fir_id>/assign', methods=['POST'])
+@login_required
+@admin_required
+def assign_fir_department(fir_id):
+    fir = FIRReport.query.get_or_404(fir_id)
+    department_id = request.form.get('department_id')
+    
+    if department_id:
+        department = Department.query.get(department_id)
+        fir.department_id = department.id
+        fir.status = 'assigned'
+        fir.updated_at = datetime.utcnow()
+        fir.admin_notes = f"Manually assigned to {department.name}"
+        flash(f'FIR assigned to {department.name}', 'success')
+    else:
+        fir.department_id = None
+        fir.status = 'verified'
+        fir.admin_notes = "Department assignment removed"
+        flash('Department assignment removed', 'info')
+    
+    db.session.commit()
+    return redirect(url_for('admin_dashboard'))
+
+# Admin: verify and assign (combined action used by admin dashboard)
+@app.route('/admin/fir/<int:fir_id>/verify-assign', methods=['POST'])
+@login_required
+@admin_required
+def verify_and_assign_fir(fir_id):
+    fir = FIRReport.query.get_or_404(fir_id)
+    department_id = request.form.get('department_id')
+    admin_notes = request.form.get('admin_notes', '')
+
+    # If department chosen, verify + assign
+    if department_id:
+        department = Department.query.get(department_id)
+        if department:
+            fir.department_id = department.id
+            fir.status = 'assigned'
+            fir.updated_at = datetime.utcnow()
+            fir.admin_notes = admin_notes or f"Verified and assigned to {department.name}"
+            flash(f'FIR verified and assigned to {department.name}', 'success')
         else:
-            # Save to CSV
-            import csv
-            csv_path = os.path.join('data', 'rasayani_crime_dataset', 'rasayani_crime_dataset.csv')
-            file_exists = os.path.isfile(csv_path)
-            with open(csv_path, 'a', newline='', encoding='utf-8') as csvfile:
-                writer = csv.DictWriter(csvfile, fieldnames=fields)
-                if not file_exists:
-                    writer.writeheader()
-                writer.writerow(fir_data)
-            message = "FIR submitted successfully!"
-    return render_template('add_fir.html', message=message)
+            flash('Selected department not found.', 'error')
+    else:
+        # Only verify if no department provided
+        fir.status = 'verified'
+        fir.updated_at = datetime.utcnow()
+        fir.admin_notes = admin_notes or 'Verified by admin'
+        flash('FIR verified. No department selected.', 'info')
+
+    db.session.commit()
+    return redirect(url_for('admin_dashboard'))
+
+# Admin: reject FIR
+@app.route('/admin/fir/<int:fir_id>/reject', methods=['POST'])
+@login_required
+@admin_required
+def reject_fir(fir_id):
+    fir = FIRReport.query.get_or_404(fir_id)
+    reason = request.form.get('rejection_reason', '').strip()
+
+    fir.status = 'rejected'
+    fir.updated_at = datetime.utcnow()
+    fir.admin_notes = f"Rejected: {reason}" if reason else 'Rejected by admin'
+    db.session.commit()
+
+    flash('FIR rejected successfully.', 'info')
+    return redirect(url_for('admin_dashboard'))
+
+# Police FIR management routes
+@app.route('/police/fir/<int:fir_id>/update', methods=['POST'])
+@login_required
+@police_required
+def update_fir_status(fir_id):
+    fir = FIRReport.query.get_or_404(fir_id)
+    
+    # Check if FIR belongs to this department
+    if fir.department_id != current_user.department_id:
+        flash('Access denied!', 'error')
+        return redirect(url_for('police_dashboard'))
+    
+    status = request.form.get('status')
+    notes = request.form.get('notes', '')
+    
+    if status in ['in_progress', 'closed']:
+        fir.status = status
+        fir.police_notes = notes
+        db.session.commit()
+        flash(f'FIR status updated to {status}', 'success')
+    else:
+        flash('Invalid status!', 'error')
+    
+    return redirect(url_for('police_dashboard'))
 
 @app.route('/fir/records')
+@login_required
 def fir_records():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    import csv
-    csv_path = os.path.join('data', 'rasayani_crime_dataset', 'rasayani_crime_dataset.csv')
-    firs = []
-    headers = []
-    if os.path.isfile(csv_path):
-        with open(csv_path, newline='', encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            headers = reader.fieldnames
-            for row in reader:
-                firs.append(row)
-    return render_template('fir_records.html', firs=firs, headers=headers)
+    # Get FIR reports based on user role
+    if current_user.is_admin():
+        # Admin sees all FIR reports
+        firs = FIRReport.query.order_by(FIRReport.timestamp.desc()).all()
+    elif current_user.is_police():
+        # Police users see only their department's FIR reports
+        firs = FIRReport.query.filter_by(department_id=current_user.department_id).order_by(FIRReport.timestamp.desc()).all()
+    else:
+        # Citizens see only their own FIR reports
+        firs = FIRReport.query.filter_by(user_id=current_user.id).order_by(FIRReport.timestamp.desc()).all()
+    
+    # Convert to list of dictionaries for template compatibility
+    fir_list = []
+    for fir in firs:
+        fir_dict = {
+            'ID': fir.id,
+            'Description': fir.description,
+            'Crime Type': fir.crime_type,
+            'Status': fir.status,
+            'Location': f"{fir.lat:.4f}, {fir.lon:.4f}",
+            'Submitted': fir.timestamp.strftime('%Y-%m-%d %H:%M'),
+            'User': fir.user.name,
+            'Department': fir.department.name if fir.department else 'Unassigned',
+            'Notes': fir.admin_notes or fir.police_notes or ''
+        }
+        fir_list.append(fir_dict)
+    
+    headers = ['ID', 'Description', 'Crime Type', 'Status', 'Location', 'Submitted', 'User', 'Department', 'Notes']
+    return render_template('fir_records.html', firs=fir_list, headers=headers)
 
 @app.route('/analytics')
+@login_required
 def analytics():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     df = load_data()
     if df is None:
         # Pass empty lists to avoid template errors
@@ -358,9 +794,8 @@ def analytics():
     )
 
 @app.route('/ml-insights')
+@login_required
 def ml_insights():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
     import numpy as np
     import pandas as pd
@@ -455,9 +890,11 @@ def ml_insights():
     return render_template('ml_insights.html', metrics=metrics, confusion=confusion, features=features, report_table=report_table, roc_img=roc_img, report_csv=report_csv, shap_img=shap_img, confusion_rows=confusion_rows)
 
 @app.route('/logout')
+@login_required
 def logout():
-    session.clear()
-    return redirect(url_for('login'))
+    logout_user()
+    flash('You have been logged out successfully.', 'info')
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True)

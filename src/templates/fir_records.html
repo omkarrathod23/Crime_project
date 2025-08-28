@@ -26,30 +26,36 @@
                 <label for="areaFilter" class="form-label">Filter by Area (Locality):</label>
                 <select id="areaFilter" class="form-select">
                     <option value="">All Areas</option>
-                    {% set localities = firs | map(attribute='Locality') | unique | list %}
-                    {% for loc in localities %}
-                        <option value="{{ loc }}">{{ loc }}</option>
-                    {% endfor %}
+                    {% if 'Locality' in headers %}
+                        {% set localities = firs | map(attribute='Locality') | unique | list %}
+                        {% for loc in localities %}
+                            <option value="{{ loc }}">{{ loc }}</option>
+                        {% endfor %}
+                    {% endif %}
                 </select>
             </div>
             <div class="col-md-3">
                 <label for="crimeTypeFilter" class="form-label">Filter by Crime Type:</label>
                 <select id="crimeTypeFilter" class="form-select">
                     <option value="">All Types</option>
-                    {% set crime_types = firs | map(attribute='Crime Description') | unique | list %}
-                    {% for ct in crime_types %}
-                        <option value="{{ ct }}">{{ ct }}</option>
-                    {% endfor %}
+                    {% if 'Crime Description' in headers %}
+                        {% set crime_types = firs | map(attribute='Crime Description') | unique | list %}
+                        {% for ct in crime_types %}
+                            <option value="{{ ct }}">{{ ct }}</option>
+                        {% endfor %}
+                    {% endif %}
                 </select>
             </div>
             <div class="col-md-3">
                 <label for="genderFilter" class="form-label">Filter by Victim Gender:</label>
                 <select id="genderFilter" class="form-select">
                     <option value="">All Genders</option>
-                    {% set genders = firs | map(attribute='Victim Gender') | unique | list %}
-                    {% for g in genders %}
-                        <option value="{{ g }}">{{ g }}</option>
-                    {% endfor %}
+                    {% if 'Victim Gender' in headers %}
+                        {% set genders = firs | map(attribute='Victim Gender') | unique | list %}
+                        {% for g in genders %}
+                            <option value="{{ g }}">{{ g }}</option>
+                        {% endfor %}
+                    {% endif %}
                 </select>
             </div>
             <div class="col-md-3">
@@ -127,19 +133,26 @@
             // Area filter
             $('#areaFilter').on('change', function() {
                 var val = $(this).val();
-                table.column(0).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
+                {% if 'Locality' in headers %}
+                var colIdx = {{ headers.index('Locality') }};
+                table.column(colIdx).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
+                {% endif %}
             });
             // Crime Type filter
             $('#crimeTypeFilter').on('change', function() {
                 var val = $(this).val();
+                {% if 'Crime Description' in headers %}
                 var colIdx = {{ headers.index('Crime Description') }};
                 table.column(colIdx).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
+                {% endif %}
             });
             // Gender filter
             $('#genderFilter').on('change', function() {
                 var val = $(this).val();
+                {% if 'Victim Gender' in headers %}
                 var colIdx = {{ headers.index('Victim Gender') }};
                 table.column(colIdx).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
+                {% endif %}
             });
             // Date range filter
             var minDate, maxDate;
@@ -164,11 +177,17 @@
                     if(typeof minDate === 'undefined' || typeof maxDate === 'undefined' || !minDate || !maxDate) {
                         return true;
                     }
-                    var dateIdx = {{ headers.index('Date') if 'Date' in headers else 0 }};
+                    // Check if Date column exists, otherwise disable date filtering
+                    {% if 'Date' in headers %}
+                    var dateIdx = {{ headers.index('Date') }};
                     var dateStr = data[dateIdx];
                     if(!dateStr) return false;
                     var date = moment(dateStr, 'YYYY-MM-DD');
                     return date.isBetween(minDate, maxDate, null, '[]');
+                    {% else %}
+                    // No date column available, return true for all records
+                    return true;
+                    {% endif %}
                 }
             );
         });

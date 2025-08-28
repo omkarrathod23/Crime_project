@@ -3,166 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome | Crime Management System</title>
+    <title>Crime Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        body {
-            min-height: 100vh;
-            background: url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1500&q=80') center center/cover no-repeat;
-            position: relative;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(20, 24, 38, 0.82);
-            z-index: 0;
-        }
-        .home-container {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            z-index: 1;
-        }
-        .hero-section {
-            text-align: center;
-            color: #fff;
-            margin-bottom: 2.5rem;
-            animation: fadeIn 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .hero-logo {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 1.2rem;
-        }
-        .hero-logo svg {
-            width: 90px;
-            height: 90px;
-            display: block;
-        }
-        .hero-title {
-            font-size: 2.8rem;
-            font-weight: 900;
-            letter-spacing: 2px;
-            margin-bottom: 0.7rem;
-            text-shadow: 0 4px 24px rgba(0,0,0,0.25);
-        }
-        .hero-desc {
-            font-size: 1.25rem;
-            font-weight: 400;
-            margin-bottom: 2.2rem;
-            color: #e0e0e0;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .hero-btn {
-            font-size: 1.2rem;
-            font-weight: 700;
-            padding: 0.85rem 2.5rem;
-            border-radius: 2rem;
-            background: linear-gradient(90deg, #0d6efd 60%, #ffc107 100%);
-            color: #fff;
-            border: none;
-            box-shadow: 0 4px 16px rgba(13,110,253,0.18);
-            transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
-        }
-        .hero-btn:hover {
-            background: linear-gradient(90deg, #0b5ed7 60%, #ffb300 100%);
-            color: #fff;
-            transform: translateY(-2px) scale(1.03);
-            box-shadow: 0 8px 32px rgba(13,110,253,0.25);
-        }
-        .features-section {
-            margin-top: 3rem;
-            color: #fff;
-        }
-        .feature-card {
-            background: rgba(255,255,255,0.10);
-            border-radius: 1.25rem;
-            box-shadow: 0 4px 16px rgba(13,110,253,0.10);
-            padding: 2rem 1.5rem;
-            text-align: center;
-            margin-bottom: 2rem;
-            transition: transform 0.18s, box-shadow 0.18s;
-        }
-        .feature-card:hover {
-            transform: translateY(-6px) scale(1.04);
-            box-shadow: 0 12px 32px rgba(13,110,253,0.18);
-        }
-        .feature-icon {
-            font-size: 2.5rem;
-            color: #ffc107;
-            margin-bottom: 1rem;
-        }
-        .feature-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        .feature-desc {
-            color: #e0e0e0;
-            font-size: 1rem;
-        }
-        @media (max-width: 768px) {
-            .hero-title { font-size: 2rem; }
-            .features-section { margin-top: 2rem; }
-        }
-    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div class="home-container">
-        <div class="hero-section">
-            <div class="hero-logo">
-                <!-- Police badge SVG icon -->
-                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="32" cy="32" r="30" fill="#0d6efd" stroke="#fff" stroke-width="4"/>
-                  <path d="M32 12 L38 28 L56 28 L41 39 L47 56 L32 45 L17 56 L23 39 L8 28 L26 28 Z" fill="#fff" stroke="#0d6efd" stroke-width="2"/>
-                  <circle cx="32" cy="32" r="6" fill="#0d6efd" stroke="#fff" stroke-width="2"/>
-                </svg>
+    <div class="container-fluid">
+        <!-- Header -->
+        <header class="bg-primary text-white text-center py-5">
+            <div class="container">
+                <h1 class="display-4"><i class="fas fa-shield-alt"></i> Crime Management System</h1>
+                <p class="lead">Comprehensive crime reporting, analysis, and management platform</p>
             </div>
-            <div class="hero-title">Crime Management System</div>
-            <div class="hero-desc">
-                Empowering law enforcement with real-time analytics, predictive policing, and secure digital FIR management. <br>
-                <span style="color:#ffc107;font-weight:600;">Protect. Predict. Prevent.</span>
-            </div>
-            <a href="/login" class="hero-btn"><i class="fa-solid fa-right-to-bracket me-2"></i>Login</a>
-        </div>
-        <div class="features-section container">
-            <div class="row justify-content-center">
-                <div class="col-12 col-md-4">
-                    <div class="feature-card">
-                        <i class="fa-solid fa-shield-halved feature-icon"></i>
-                        <div class="feature-title">Secure Digital FIRs</div>
-                        <div class="feature-desc">Easily file, manage, and search FIRs with robust security and privacy controls.</div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="feature-card">
-                        <i class="fa-solid fa-chart-line feature-icon"></i>
-                        <div class="feature-title">Real-Time Analytics</div>
-                        <div class="feature-desc">Visualize crime trends, hotspots, and predictive insights for smarter policing.</div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="feature-card">
-                        <i class="fa-solid fa-users feature-icon"></i>
-                        <div class="feature-title">Collaborative Platform</div>
-                        <div class="feature-desc">Seamless collaboration between officers, departments, and agencies.</div>
-                    </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container my-5">
+            <!-- Welcome Section -->
+            <div class="row mb-5">
+                <div class="col-12 text-center">
+                    <h2 class="mb-4">Welcome to the Crime Management System</h2>
+                    <p class="lead">Choose your portal to access the system</p>
                 </div>
             </div>
-        </div>
+
+            <!-- Portal Cards -->
+            <div class="row g-4">
+                <!-- Citizen Portal -->
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-lg border-0">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-user-circle fa-3x text-primary"></i>
+                            </div>
+                            <h4 class="card-title">Citizen Portal</h4>
+                            <p class="card-text">Report crimes, track FIR status, and access safety information.</p>
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('citizen_portal') }}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-sign-in-alt"></i> Login
+                                </a>
+                                <a href="{{ url_for('register_citizen') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-user-plus"></i> Register
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Department Portal -->
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-lg border-0">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-building fa-3x text-success"></i>
+                            </div>
+                            <h4 class="card-title">Police Portal</h4>
+                            <p class="card-text">Manage FIRs, update case status, and view department analytics.</p>
+                            <div class="d-grid">
+                                <a href="{{ url_for('police_portal') }}" class="btn btn-success btn-lg">
+                                    <i class="fas fa-sign-in-alt"></i> Login
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Portal -->
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-lg border-0">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-user-shield fa-3x text-danger"></i>
+                            </div>
+                            <h4 class="card-title">Admin Portal</h4>
+                            <p class="card-text">Verify locations, assign cases, and manage system operations.</p>
+                            <div class="d-grid">
+                                <a href="{{ url_for('admin_portal') }}" class="btn btn-danger btn-lg">
+                                    <i class="fas fa-sign-in-alt"></i> Login
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h3 class="text-center mb-4">System Features</h3>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="fas fa-file-alt fa-2x text-primary mb-2"></i>
+                                <h6>FIR Management</h6>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
+                                <h6>Crime Analytics</h6>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="fas fa-map-marker-alt fa-2x text-warning mb-2"></i>
+                                <h6>Hotspot Mapping</h6>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="fas fa-brain fa-2x text-info mb-2"></i>
+                                <h6>ML Predictions</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-white text-center py-4 mt-5">
+            <div class="container">
+                <p>&copy; 2024 Crime Management System. All rights reserved.</p>
+            </div>
+        </footer>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html> 
