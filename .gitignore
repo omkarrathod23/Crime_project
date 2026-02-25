@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+instance/
+.env
+uploads/
+eda_plots/
+static/hotspot_map.html

@@ -15,7 +15,9 @@ from src.eda import load_data
 from sklearn.cluster import KMeans
 import folium
 from models.database import db, User, Department, FIRReport, CrimeData, init_db, create_otp_for_user, verify_otp
-from src.auth import admin_required, police_required, citizen_required, get_user_by_email, get_department_for_location
+from src.auth import admin_required, police_required, citizen_required, get_user_by_email, get_department_for_location, load_user_from_request
+from src.auth_jwt import create_token
+from flask import make_response
 
 app = Flask(__name__, template_folder='src/templates')
 app.secret_key = 'your_secret_key'  # Change this in production
@@ -57,14 +59,17 @@ def send_sms_otp(phone_number: str, otp_code: str) -> None:
 # Initialize Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
+# We use request_loader for isolated role cookies
+login_manager.request_loader(load_user_from_request)
 login_manager.login_view = 'citizen_login'
 
 # Initialize database
 init_db(app)
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+# @login_manager.user_loader is replaced by request_loader for token support
+# @login_manager.user_loader
+# def load_user(user_id):
+#     return User.query.get(int(user_id))
 
 DATA_PATH = os.path.join('data', 'rasayani_crime_dataset')
 STATIC_IMG_PATH = os.path.join('static', 'images')
@@ -111,7 +116,8 @@ data = load_crime_data()
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    # Redirect to citizen login as the new primary entry point
+    return redirect(url_for('citizen_login'))
 
 @app.route('/citizen')
 def citizen_portal():
@@ -129,10 +135,10 @@ def admin_portal():
 @app.route('/citizen/login', methods=['GET', 'POST'])
 def citizen_login():
     if current_user.is_authenticated:
-        if getattr(current_user, 'is_citizen', lambda: False)():
+        if current_user.is_citizen():
             return redirect(url_for('citizen_dashboard'))
-        logout_user()
-        flash('Please log in with a Citizen account.', 'info')
+        flash(f'You are currently logged in with a {current_user.role} account. Please logout to switch to Citizen.', 'info')
+        return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
         email = request.form['email']
@@ -140,12 +146,15 @@ def citizen_login():
         user = get_user_by_email(email)
         
         if user and user.check_password(password) and user.is_citizen():
-            # Generate OTP for citizens as requested
-            otp = create_otp_for_user(user.id)
-            session['pending_user_id'] = user.id
-            session['otp_sent'] = True
-            send_sms_otp(user.phone or OTP_TEST_PHONE, otp)
-            return redirect(url_for('citizen_otp_verification'))
+            # Create JWT token for citizen
+            token = create_token(user.id, 'citizen')
+            
+            # Setup response with cookie
+            response = make_response(redirect(url_for('citizen_dashboard')))
+            response.set_cookie('citizen_token', token, httponly=True, max_age=86400)
+            
+            flash('Logged in as Citizen successfully!', 'success')
+            return response
         else:
             flash('Invalid credentials or insufficient privileges!', 'error')
     
@@ -173,11 +182,10 @@ def citizen_otp_verification():
 def police_login():
     if current_user.is_authenticated:
         # If already logged in as police, go to dashboard
-        if getattr(current_user, 'is_police', lambda: False)():
+        if current_user.is_police():
             return redirect(url_for('police_dashboard'))
-        # If logged in as another role, sign out and show police login
-        logout_user()
-        flash('Please log in with a Police account.', 'info')
+        flash(f'You are currently logged in with a {current_user.role} account. Please logout to switch to Police.', 'info')
+        return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
         email = request.form['email']
@@ -185,14 +193,15 @@ def police_login():
         user = get_user_by_email(email)
         
         if user and user.check_password(password) and user.is_police():
-            # Generate OTP for two-step verification
-            otp = create_otp_for_user(user.id)
-            session['pending_user_id'] = user.id
-            session['otp_sent'] = True
+            # Create JWT token for police
+            token = create_token(user.id, 'police')
             
-            # Send OTP via SMS to configured phone
-            send_sms_otp(user.phone or OTP_TEST_PHONE, otp)
-            return redirect(url_for('police_otp_verification'))
+            # Setup response with cookie
+            response = make_response(redirect(url_for('police_dashboard')))
+            response.set_cookie('police_token', token, httponly=True, max_age=86400)
+            
+            flash('Logged in as Police successfully!', 'success')
+            return response
         else:
             flash('Invalid credentials or insufficient privileges!', 'error')
     
@@ -222,10 +231,10 @@ def police_otp_verification():
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if current_user.is_authenticated:
-        if getattr(current_user, 'is_admin', lambda: False)():
+        if current_user.is_admin():
             return redirect(url_for('admin_dashboard'))
-        logout_user()
-        flash('Please log in with an Admin account.', 'info')
+        flash(f'You are currently logged in with a {current_user.role} account. Please logout to switch to Admin.', 'info')
+        return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
         email = request.form['email']
@@ -233,13 +242,15 @@ def admin_login():
         user = get_user_by_email(email)
         
         if user and user.check_password(password) and user.is_admin():
-            # Generate OTP and send SMS
-            otp_code = create_otp_for_user(user.id)
-            send_sms_otp(OTP_TEST_PHONE, otp_code)
-            session['pending_user_id'] = user.id
-            session['otp_sent'] = True
-            flash('OTP sent to your registered phone number.', 'success')
-            return redirect(url_for('admin_otp_verification'))
+            # Create JWT token for admin
+            token = create_token(user.id, 'admin')
+            
+            # Setup response with cookie
+            response = make_response(redirect(url_for('admin_dashboard')))
+            response.set_cookie('admin_token', token, httponly=True, max_age=86400)
+            
+            flash('Logged in as Admin successfully!', 'success')
+            return response
         else:
             flash('Invalid credentials!', 'error')
     
@@ -889,12 +900,37 @@ def ml_insights():
         shap_img = None
     return render_template('ml_insights.html', metrics=metrics, confusion=confusion, features=features, report_table=report_table, roc_img=roc_img, report_csv=report_csv, shap_img=shap_img, confusion_rows=confusion_rows)
 
+@app.route('/logout/citizen')
+def logout_citizen():
+    response = make_response(redirect(url_for('citizen_login')))
+    response.delete_cookie('citizen_token')
+    flash('Citizen logged out.', 'info')
+    return response
+
+@app.route('/logout/police')
+def logout_police():
+    response = make_response(redirect(url_for('police_login')))
+    response.delete_cookie('police_token')
+    flash('Police officer logged out.', 'info')
+    return response
+
+@app.route('/logout/admin')
+def logout_admin():
+    response = make_response(redirect(url_for('admin_login')))
+    response.delete_cookie('admin_token')
+    flash('Admin logged out.', 'info')
+    return response
+
 @app.route('/logout')
-@login_required
 def logout():
+    # Global logout for all portals
+    response = make_response(redirect(url_for('home')))
+    response.delete_cookie('citizen_token')
+    response.delete_cookie('police_token')
+    response.delete_cookie('admin_token')
     logout_user()
-    flash('You have been logged out successfully.', 'info')
-    return redirect(url_for('home'))
+    flash('Logged out from all portals.', 'info')
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)

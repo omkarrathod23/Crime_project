@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
+
 <body class="bg-light">
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-danger bg-danger">
@@ -19,7 +21,7 @@
                 <span class="navbar-text text-white me-3">
                     <i class="fas fa-user-circle"></i> {{ current_user.name }}
                 </span>
-                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                <a href="{{ url_for('logout_admin') }}" class="btn btn-outline-light btn-sm">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </div>
@@ -35,7 +37,8 @@
                         <h2 class="card-title">
                             <i class="fas fa-home"></i> Welcome, {{ current_user.name }}!
                         </h2>
-                        <p class="card-text">Manage the Crime Management System, verify citizen locations, and assign cases to departments.</p>
+                        <p class="card-text">Manage the Crime Management System, verify citizen locations, and assign
+                            cases to departments.</p>
                     </div>
                 </div>
             </div>
@@ -92,61 +95,58 @@
                     </div>
                     <div class="card-body">
                         {% if pending_firs %}
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Citizen</th>
-                                            <th>Crime Type</th>
-                                            <th>Location</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for fir in pending_firs %}
-                                        <tr>
-                                            <td>{{ fir.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
-                                            <td>{{ fir.user.name }}</td>
-                                            <td>{{ fir.crime_type }}</td>
-                                            <td>
-                                                <small class="text-muted">
-                                                    {{ fir.lat|round(6) }}, {{ fir.lon|round(6) }}
-                                                </small>
-                                                <br>
-                                                <button class="btn btn-sm btn-outline-info" 
-                                                        onclick="showLocationOnMap({{ fir.lat }}, {{ fir.lon }})">
-                                                    <i class="fas fa-map-marker-alt"></i> View on Map
-                                                </button>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#firModal{{ fir.id }}">
-                                                    <i class="fas fa-eye"></i> View
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-success" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#assignModal{{ fir.id }}">
-                                                    <i class="fas fa-check"></i> Verify & Assign
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#rejectModal{{ fir.id }}">
-                                                    <i class="fas fa-times"></i> Reject
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Citizen</th>
+                                        <th>Crime Type</th>
+                                        <th>Location</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for fir in pending_firs %}
+                                    <tr>
+                                        <td>{{ fir.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>{{ fir.user.name }}</td>
+                                        <td>{{ fir.crime_type }}</td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ fir.lat|round(6) }}, {{ fir.lon|round(6) }}
+                                            </small>
+                                            <br>
+                                            <button class="btn btn-sm btn-outline-info"
+                                                onclick="showLocationOnMap({{ fir.lat }}, {{ fir.lon }})">
+                                                <i class="fas fa-map-marker-alt"></i> View on Map
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                                data-bs-target="#firModal{{ fir.id }}">
+                                                <i class="fas fa-eye"></i> View
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal"
+                                                data-bs-target="#assignModal{{ fir.id }}">
+                                                <i class="fas fa-check"></i> Verify & Assign
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                                data-bs-target="#rejectModal{{ fir.id }}">
+                                                <i class="fas fa-times"></i> Reject
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                         {% else %}
-                            <div class="text-center py-4">
-                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                                <h5 class="text-success">No pending FIRs</h5>
-                                <p class="text-muted">All FIRs have been processed</p>
-                            </div>
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <h5 class="text-success">No pending FIRs</h5>
+                            <p class="text-muted">All FIRs have been processed</p>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -167,7 +167,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-4 mb-3">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body text-center">
@@ -180,7 +180,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-4 mb-3">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body text-center">
@@ -198,94 +198,96 @@
 
     <!-- FIR Detail Modals -->
     {% if pending_firs %}
-        {% for fir in pending_firs %}
-        <div class="modal fade" id="firModal{{ fir.id }}" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">FIR Report Details</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    {% for fir in pending_firs %}
+    <div class="modal fade" id="firModal{{ fir.id }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">FIR Report Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Date:</strong> {{ fir.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                            <p><strong>Citizen:</strong> {{ fir.user.name }}</p>
+                            <p><strong>Email:</strong> {{ fir.user.email }}</p>
+                            <p><strong>Crime Type:</strong> {{ fir.crime_type }}</p>
+                            <p><strong>Location:</strong> {{ fir.lat|round(6) }}, {{ fir.lon|round(6) }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Description:</strong></p>
+                            <p class="text-muted">{{ fir.description }}</p>
+                            <div id="map{{ fir.id }}" style="height: 200px; width: 100%; border: 1px solid #ddd;"></div>
+                        </div>
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Modal -->
+    <div class="modal fade" id="assignModal{{ fir.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Verify & Assign FIR</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('verify_and_assign_fir', fir_id=fir.id) }}">
                     <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>Date:</strong> {{ fir.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
-                                <p><strong>Citizen:</strong> {{ fir.user.name }}</p>
-                                <p><strong>Email:</strong> {{ fir.user.email }}</p>
-                                <p><strong>Crime Type:</strong> {{ fir.crime_type }}</p>
-                                <p><strong>Location:</strong> {{ fir.lat|round(6) }}, {{ fir.lon|round(6) }}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>Description:</strong></p>
-                                <p class="text-muted">{{ fir.description }}</p>
-                                <div id="map{{ fir.id }}" style="height: 200px; width: 100%; border: 1px solid #ddd;"></div>
-                            </div>
+                        <div class="mb-3">
+                            <label for="department_id" class="form-label">Assign to Department</label>
+                            <select class="form-select" id="department_id" name="department_id" required>
+                                <option value="">Select Department</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.city }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="admin_notes" class="form-label">Admin Notes</label>
+                            <textarea class="form-control" id="admin_notes" name="admin_notes" rows="3"
+                                placeholder="Add verification notes..."></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Verify & Assign</button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
+    </div>
 
-        <!-- Assign Modal -->
-        <div class="modal fade" id="assignModal{{ fir.id }}" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Verify & Assign FIR</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <form method="POST" action="{{ url_for('verify_and_assign_fir', fir_id=fir.id) }}">
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="department_id" class="form-label">Assign to Department</label>
-                                <select class="form-select" id="department_id" name="department_id" required>
-                                    <option value="">Select Department</option>
-                                    {% for dept in departments %}
-                                        <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.city }})</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="admin_notes" class="form-label">Admin Notes</label>
-                                <textarea class="form-control" id="admin_notes" name="admin_notes" rows="3" placeholder="Add verification notes..."></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-success">Verify & Assign</button>
-                        </div>
-                    </form>
+    <!-- Reject Modal -->
+    <div class="modal fade" id="rejectModal{{ fir.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reject FIR</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
+                <form method="POST" action="{{ url_for('reject_fir', fir_id=fir.id) }}">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="rejection_reason" class="form-label">Rejection Reason</label>
+                            <textarea class="form-control" id="rejection_reason" name="rejection_reason" rows="3"
+                                placeholder="Provide reason for rejection..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Reject FIR</button>
+                    </div>
+                </form>
             </div>
         </div>
-
-        <!-- Reject Modal -->
-        <div class="modal fade" id="rejectModal{{ fir.id }}" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Reject FIR</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <form method="POST" action="{{ url_for('reject_fir', fir_id=fir.id) }}">
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="rejection_reason" class="form-label">Rejection Reason</label>
-                                <textarea class="form-control" id="rejection_reason" name="rejection_reason" rows="3" placeholder="Provide reason for rejection..." required></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-danger">Reject FIR</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
+    </div>
+    {% endfor %}
     {% endif %}
 
     <!-- Department Management Modal -->
@@ -368,7 +370,8 @@
                                     <td>{{ user.name }}</td>
                                     <td>{{ user.email }}</td>
                                     <td>
-                                        <span class="badge bg-{{ 'primary' if user.role == 'citizen' else 'success' if user.role == 'department_user' else 'danger' }}">
+                                        <span
+                                            class="badge bg-{{ 'primary' if user.role == 'citizen' else 'success' if user.role == 'department_user' else 'danger' }}">
                                             {{ user.role.replace('_', ' ').title() }}
                                         </span>
                                     </td>
@@ -404,6 +407,5 @@
         }
     </script>
 </body>
+
 </html>
-
-
