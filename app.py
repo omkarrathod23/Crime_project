@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import random
 import joblib
-from models.model import predict_crime_type
+from models.model import predict_crime_type, get_feature_importance, explain_prediction
 from src.eda import load_data
 from sklearn.cluster import KMeans
 import folium
-from models.database import db, User, Department, FIRReport, CrimeData, init_db, create_otp_for_user, verify_otp
 from src.auth import admin_required, police_required, citizen_required, get_user_by_email, get_department_for_location, load_user_from_request
+from models.database import db, User, Department, FIRReport, CrimeData, AnonymousReport, init_db, create_otp_for_user, verify_otp
 from src.auth_jwt import create_token
 from flask import make_response
 
@@ -340,13 +340,17 @@ def police_dashboard():
     closed_count = len([fir for fir in fir_reports if fir.status == 'closed'])
     total_count = len(fir_reports)
     
+    # Get anonymous reports for this department (pending ones)
+    ano_reports = AnonymousReport.query.filter_by(status='pending').order_by(AnonymousReport.timestamp.desc()).all()
+    
     return render_template('police_dashboard.html', 
                          fir_reports=fir_reports, 
                          department=department,
                          pending_count=pending_count,
                          in_progress_count=in_progress_count,
                          closed_count=closed_count,
-                         total_count=total_count)
+                         total_count=total_count,
+                         ano_reports=ano_reports)
 
 @app.route('/admin/dashboard')
 @login_required
@@ -367,6 +371,9 @@ def admin_dashboard():
     department_count = Department.query.count()
     user_count = User.query.count()
     
+    # Get pending anonymous reports
+    pending_ano_reports = AnonymousReport.query.filter_by(status='pending').order_by(AnonymousReport.timestamp.desc()).all()
+    
     return render_template('admin_dashboard.html',
                          pending_firs=pending_firs,
                          departments=departments,
@@ -374,7 +381,8 @@ def admin_dashboard():
                          total_fir_count=total_fir_count,
                          pending_count=pending_count,
                          department_count=department_count,
-                         user_count=user_count)
+                         user_count=user_count,
+                         pending_ano_reports=pending_ano_reports)
 
 @app.route('/predict', methods=['GET', 'POST'])
 @login_required
@@ -382,13 +390,27 @@ def predict():
     df = data
     locations = sorted(df['locality'].unique())
     prediction = None
+    explanation = None
+    feature_importance = None
+    
     if request.method == 'POST':
         location = request.form['location']
         date = request.form['date']
         hour = request.form['hour']
         features = {'locality': location, 'hour': hour, 'date': date}
+        
+        # Get prediction
         prediction = predict_crime_type(model, features, df)
-    return render_template('predict.html', locations=locations, prediction=prediction)
+        
+        # Get XAI data
+        explanation = explain_prediction(features, df, prediction)
+        feature_importance = get_feature_importance(model)
+        
+    return render_template('predict.html', 
+                         locations=locations, 
+                         prediction=prediction,
+                         explanation=explanation,
+                         feature_importance=feature_importance)
 
 @app.route('/eda')
 @login_required
@@ -899,6 +921,66 @@ def ml_insights():
     except Exception as e:
         shap_img = None
     return render_template('ml_insights.html', metrics=metrics, confusion=confusion, features=features, report_table=report_table, roc_img=roc_img, report_csv=report_csv, shap_img=shap_img, confusion_rows=confusion_rows)
+
+# Anonymous Crime Reporting Routes
+@app.route('/report/anonymous', methods=['GET', 'POST'])
+def report_anonymous():
+    if request.method == 'POST':
+        crime_type = request.form.get('crime_type')
+        description = request.form.get('description')
+        lat = float(request.form.get('latitude', 0))
+        lon = float(request.form.get('longitude', 0))
+        
+        # Handle file upload
+        evidence_file = None
+        if 'evidence_file' in request.files:
+            file = request.files['evidence_file']
+            if file and file.filename:
+                evidence_file = save_uploaded_file(file)
+                
+        new_report = AnonymousReport(
+            crime_type=crime_type,
+            description=description,
+            lat=lat,
+            lon=lon,
+            evidence_file=evidence_file
+        )
+        
+        db.session.add(new_report)
+        db.session.commit()
+        
+        return render_template('report_success.html', tracking_id=new_report.tracking_id)
+        
+    return render_template('report_anonymous.html')
+
+@app.route('/report/track', methods=['GET', 'POST'])
+def track_report():
+    report = None
+    if request.method == 'POST':
+        tracking_id = request.form.get('tracking_id', '').strip().upper()
+        report = AnonymousReport.query.filter_by(tracking_id=tracking_id).first()
+        if not report:
+            flash('Invalid Tracking ID. Please check and try again.', 'error')
+            
+    return render_template('track_report.html', report=report)
+
+@app.route('/admin/ano-report/<int:report_id>/update', methods=['POST'])
+@login_required
+@admin_required
+def update_ano_report(report_id):
+    report = AnonymousReport.query.get_or_404(report_id)
+    status = request.form.get('status')
+    notes = request.form.get('admin_notes', '')
+    
+    if status in ['reviewed', 'assigned', 'closed']:
+        report.status = status
+        report.admin_notes = notes
+        db.session.commit()
+        flash(f'Anonymous report {report.tracking_id} updated.', 'success')
+    else:
+        flash('Invalid status!', 'error')
+        
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/logout/citizen')
 def logout_citizen():

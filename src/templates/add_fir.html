@@ -113,6 +113,12 @@
                     <div class="alert alert-info border-0 shadow-sm mb-4">{{ message }}</div>
                     {% endif %}
 
+                    <div class="alert alert-warning border-0 small mb-4">
+                        <i class="fas fa-shield-alt"></i> <strong>Safety Note:</strong> If you want to report this crime
+                        <strong>without revealing your identity</strong>, please use our
+                        <a href="{{ url_for('report_anonymous') }}" class="alert-link">Anonymous Reporting Module</a>.
+                    </div>
+
                     <form method="POST" action="{{ url_for('add_fir') }}" enctype="multipart/form-data">
                         <div class="row g-4">
                             <!-- Crime Type -->

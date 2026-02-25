@@ -4,8 +4,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import os
 import secrets
+import string
 
 db = SQLAlchemy()
+
+def generate_tracking_id():
+    """Generates a unique 12-character alphanumeric tracking ID."""
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(secrets.choice(chars) for _ in range(12))
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -66,6 +72,20 @@ class FIRReport(db.Model):
     evidence_file = db.Column(db.String(255), nullable=True)  # Path to uploaded file
     admin_notes = db.Column(db.Text, nullable=True)
     police_notes = db.Column(db.Text, nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class AnonymousReport(db.Model):
+    __tablename__ = 'anonymous_reports'
+    id = db.Column(db.Integer, primary_key=True)
+    tracking_id = db.Column(db.String(12), unique=True, nullable=False, default=generate_tracking_id)
+    crime_type = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    lat = db.Column(db.Float, nullable=False)
+    lon = db.Column(db.Float, nullable=False)
+    evidence_file = db.Column(db.String(255), nullable=True)
+    status = db.Column(db.String(20), default='pending') # pending, reviewed, assigned, closed
+    admin_notes = db.Column(db.Text, nullable=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

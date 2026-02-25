@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Report Success - Crime Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .tracking-id {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0d6efd;
+            letter-spacing: 2px;
+            background: #e9ecef;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            font-family: monospace;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ffeeba;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="success-card">
+        <i class="fas fa-check-circle text-success fa-5x mb-4"></i>
+        <h1 class="fw-bold">Report Submitted Anonymously</h1>
+        <p class="text-muted">Your report has been securely recorded. Please save your tracking ID below to check the
+            status of your report later.</p>
+
+        <div class="tracking-id">{{ tracking_id }}</div>
+
+        <div class="d-grid gap-2">
+            <button onclick="copyToClipboard('{{ tracking_id }}')" class="btn btn-primary">
+                <i class="fas fa-copy me-2"></i> Copy Tracking ID
+            </button>
+            <a href="{{ url_for('track_report') }}" class="btn btn-outline-secondary">Track Report Status</a>
+            <a href="{{ url_for('home') }}" class="btn btn-link">Back to Home</a>
+        </div>
+
+        <div class="warning-box">
+            <i class="fas fa-exclamation-triangle"></i> <strong>Important:</strong> We do not store your personal
+            details. If you lose this Tracking ID, you will not be able to track this report.
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Tracking ID copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+
+</html>
