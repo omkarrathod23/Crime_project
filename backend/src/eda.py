@@ -9,16 +9,35 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 DATA_PATH = "data/rasayani_crime_dataset/rasayani_crime_dataset_corrected.csv"
 
-# Utility to load data
-def load_data(filepath=DATA_PATH):
+# Utility to load data from MongoDB
+def load_data():
     try:
-        df = pd.read_csv(filepath)
-        # Normalize column names
-        df.columns = [c.strip().lower().replace(' ', '_') for c in df.columns]
-        logging.info(f"Loaded data with shape: {df.shape}")
+        from models.database import CrimeData
+        # Fetch all records from MongoDB
+        crimes = CrimeData.objects.all()
+        if not crimes:
+            logging.warning("No crime data found in MongoDB.")
+            return None
+        
+        # Convert to DataFrame
+        data = []
+        for c in crimes:
+            data.append({
+                'date': c.date,
+                'time': c.time,
+                'crime_description': c.crime_description,
+                'locality': c.locality,
+                'latitude': c.latitude,
+                'longitude': c.longitude,
+                'victim_gender': c.victim_gender,
+                'victim_age': c.victim_age
+            })
+        
+        df = pd.DataFrame(data)
+        logging.info(f"Loaded {len(df)} records from MongoDB.")
         return df
     except Exception as e:
-        logging.error(f"Failed to load data: {e}")
+        logging.error(f"Failed to load data from MongoDB: {e}")
         return None
 
 PLOT_DIR = "eda_plots"

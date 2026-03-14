@@ -19,7 +19,7 @@
                 <span class="navbar-text text-white me-3">
                     <i class="fas fa-user-circle"></i> {{ current_user.name }}
                 </span>
-                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </div>
@@ -167,7 +167,7 @@
                         <i class="fas fa-chart-bar fa-3x text-info mb-3"></i>
                         <h5 class="card-title">Department Analytics</h5>
                         <p class="card-text">View crime trends and statistics for your jurisdiction</p>
-                        <a href="{{ url_for('analytics') }}" class="btn btn-info">
+                        <a href="{{ url_for('analysis.analytics') }}" class="btn btn-info">
                             <i class="fas fa-chart-line"></i> View Analytics
                         </a>
                     </div>
@@ -180,7 +180,7 @@
                         <i class="fas fa-map-marker-alt fa-3x text-warning mb-3"></i>
                         <h5 class="card-title">Hotspot Mapping</h5>
                         <p class="card-text">Visualize crime hotspots in your area</p>
-                        <a href="{{ url_for('hotspot') }}" class="btn btn-warning">
+                        <a href="{{ url_for('analysis.hotspot') }}" class="btn btn-warning">
                             <i class="fas fa-map"></i> View Hotspots
                         </a>
                     </div>
@@ -249,7 +249,7 @@
                         <h5 class="modal-title">Update FIR Status</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <form method="POST" action="{{ url_for('update_fir_status', fir_id=fir.id) }}">
+                    <form method="POST" action="{{ url_for('fir.update_fir_status', fir_id=fir.id) }}">
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label for="status" class="form-label">Status</label>

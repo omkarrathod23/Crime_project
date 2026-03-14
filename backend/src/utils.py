@@ -6,6 +6,26 @@ import pandas as pd
 from geopy.geocoders import Nominatim
 import time
 import os
+from werkzeug.utils import secure_filename
+from datetime import datetime
+
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def save_uploaded_file(file, upload_folder):
+    """Save uploaded file and return filename"""
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        # Add timestamp to avoid filename conflicts
+        name, ext = os.path.splitext(filename)
+        filename = f"{name}_{int(datetime.now().timestamp())}{ext}"
+        filepath = os.path.join(upload_folder, filename)
+        file.save(filepath)
+        return filename
+    return None
 
 def print_divider():
     print("\n" + "-"*40 + "\n")

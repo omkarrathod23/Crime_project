@@ -21,7 +21,7 @@
                 <span class="navbar-text text-white me-3">
                     <i class="fas fa-user-circle"></i> {{ current_user.name }}
                 </span>
-                <a href="{{ url_for('logout_admin') }}" class="btn btn-outline-light btn-sm">
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </div>
@@ -39,6 +39,55 @@
                         </h2>
                         <p class="card-text">Manage the Crime Management System, verify citizen locations, and assign
                             cases to departments.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Citizen Verification Panel -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-id-card"></i> Citizen Verification</h5>
+                    </div>
+                    <div class="card-body">
+                        {% set pending_citizens = pending_citizens or users|selectattr('role','equalto','citizen')|selectattr('verification_status','equalto','Pending')|list %}
+                        {% if pending_citizens %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Registered</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for c in pending_citizens %}
+                                    <tr>
+                                        <td>{{ c.name }}</td>
+                                        <td>{{ c.email }}</td>
+                                        <td>{{ c.phone or '-' }}</td>
+                                        <td>{{ c.created_at.strftime('%Y-%m-%d') }}</td>
+                                        <td>
+                                            <form method="POST" action="{{ url_for('auth.admin_citizen_approve', user_id=c.id) }}" class="d-inline">
+                                                <button class="btn btn-sm btn-success"><i class="fas fa-check"></i> Approve</button>
+                                            </form>
+                                            <form method="POST" action="{{ url_for('auth.admin_citizen_deny', user_id=c.id) }}" class="d-inline">
+                                                <button class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Deny</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-3 text-muted">No pending citizen verifications.</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -238,9 +287,96 @@
                         <i class="fas fa-chart-bar fa-3x text-warning mb-3"></i>
                         <h5 class="card-title">System Analytics</h5>
                         <p class="card-text">View system-wide statistics and reports</p>
-                        <a href="{{ url_for('analytics') }}" class="btn btn-warning">
+                        <a href="{{ url_for('analysis.analytics') }}" class="btn btn-warning">
                             <i class="fas fa-chart-line"></i> View
                         </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Workload Widget -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-broadcast-tower"></i> Department Workload</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for dept in departments %}
+                        <div class="mb-2">
+                            <strong>{{ dept.name }}</strong>
+                            <div class="progress" style="height: 18px;">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: {{ dept.workload_percent }}%;" aria-valuenow="{{ dept.workload_percent }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ dept.workload }} cases
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Officer Panel -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-user-tie"></i> Officer Panel</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Shift</th>
+                                    <th>Case Load</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for officer in officers %}
+                                <tr>
+                                    <td>{{ officer.name }}</td>
+                                    <td>{{ officer.shift }}</td>
+                                    <td>{{ officer.case_load }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Logs -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-shield-alt"></i> System Logs</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in system_logs %}
+                                <tr>
+                                    <td>{{ log.time }}</td>
+                                    <td>{{ log.user }}</td>
+                                    <td>{{ log.action }}</td>
+                                    <td>{{ log.status }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -314,13 +450,7 @@
         </div>
     </div>
 
-    <!-- Reject Modal -->
-    <div class="modal fade" id="rejectModal{{ fir.id }}" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Reject FIR</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
                 </div>
                 <form method="POST" action="{{ url_for('reject_fir', fir_id=fir.id) }}">
                     <div class="modal-body">
@@ -341,15 +471,7 @@
     {% endfor %}
     {% endif %}
 
-    <!-- Anonymous Report Modals (Admin) -->
-    {% if pending_ano_reports %}
-    {% for report in pending_ano_reports %}
-    <div class="modal fade" id="anoModal{{ report.id }}" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title">Review Anonymous Report</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
                 </div>
                 <form method="POST" action="{{ url_for('update_ano_report', report_id=report.id) }}">
                     <div class="modal-body">

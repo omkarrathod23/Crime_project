@@ -14,7 +14,7 @@
             <div class="col-md-6 col-lg-5">
                 <!-- Header -->
                 <div class="text-center mb-4">
-                    <a href="{{ url_for('home') }}" class="text-decoration-none">
+                    <a href="{{ url_for('main.home') }}" class="text-decoration-none">
                         <i class="fas fa-arrow-left fa-2x text-primary mb-3"></i>
                     </a>
                     <h2 class="text-primary"><i class="fas fa-user-plus"></i> Citizen Registration</h2>
@@ -109,7 +109,7 @@
                         
                         <div class="text-center">
                             <p class="mb-0">Already have an account?</p>
-                            <a href="{{ url_for('citizen_login') }}" class="btn btn-outline-primary">
+                            <a href="{{ url_for('auth.citizen_login') }}" class="btn btn-outline-primary">
                                 <i class="fas fa-sign-in-alt"></i> Login
                             </a>
                         </div>
