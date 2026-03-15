@@ -4,14 +4,9 @@
   "description": "A modular Python project for crime data analysis, prediction, and management using the Rasayani dataset.",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "backend": "cd backend && python app.py",
-    "frontend": "cd frontend && npm run dev"
+    "start": "cd backend && python app.py"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "concurrently": "^9.2.1"
-  }
+  "license": "ISC"
 }

@@ -1,3 +1,11 @@
-body { background-color: #f8f9fa; }
-.card { border-radius: 1rem; }
-.btn-lg { font-size: 1.25rem; } 
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 1rem;
+}
+
+.btn-lg {
+    font-size: 1.25rem;
+}

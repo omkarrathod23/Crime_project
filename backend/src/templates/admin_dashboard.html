@@ -449,8 +449,13 @@
             </div>
         </div>
     </div>
-
-        </div>
+    <!-- Reject Modal -->
+    <div class="modal fade" id="rejectModal{{ fir.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reject FIR</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form method="POST" action="{{ url_for('reject_fir', fir_id=fir.id) }}">
                     <div class="modal-body">
@@ -463,42 +468,6 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-danger">Reject FIR</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-    {% endif %}
-
-        </div>
-                </div>
-                <form method="POST" action="{{ url_for('update_ano_report', report_id=report.id) }}">
-                    <div class="modal-body">
-                        <p><strong>Tracking ID:</strong> <code class="fw-bold">{{ report.tracking_id }}</code></p>
-                        <p><strong>Crime Type:</strong> {{ report.crime_type }}</p>
-                        <p><strong>Location:</strong> {{ report.lat|round(6) }}, {{ report.lon|round(6) }}</p>
-                        <hr>
-                        <p><strong>Description:</strong></p>
-                        <p class="text-muted small">{{ report.description }}</p>
-
-                        <div class="mb-3">
-                            <label class="form-label">Update Status</label>
-                            <select class="form-select" name="status">
-                                <option value="reviewed">Mark as Reviewed</option>
-                                <option value="assigned">Assigned for Investigation</option>
-                                <option value="closed">Closed / No Action</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Official Notes (Visible to Tracker)</label>
-                            <textarea class="form-control" name="admin_notes" rows="3"
-                                placeholder="Add notes for the reporter..."></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
                     </div>
                 </form>
             </div>

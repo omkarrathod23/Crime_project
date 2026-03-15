@@ -3,122 +3,314 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crime Management System - Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Login | Crime Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
         body {
-            min-height: 100vh;
-            background: url('https://thumbs.dreamstime.com/b/emergency-response-police-cars-chase-fog-night-emergency-response-police-cars-chase-fog-night-293135057.jpg') center center/cover no-repeat;
-            position: relative;
-        }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(30, 34, 45, 0.75);
-            z-index: 0;
-        }
-        .login-container {
+            background: var(--bg-gradient);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
             position: relative;
-            z-index: 1;
         }
-        .login-card {
-            border-radius: 1.5rem;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            background: rgba(255, 255, 255, 0.97);
-            padding: 2.5rem 2.5rem 2rem 2.5rem;
-            max-width: 400px;
+
+        /* Animated Mesh Gradient Background */
+        .mesh-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            animation: fadeIn 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            z-index: -1;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: move-bg 20s infinite alternate;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(40px); }
+
+        .mesh-bg div {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+        }
+
+        .blob-1 { background: #3b82f6; top: -100px; left: -100px; animation: orbit 15s infinite; }
+        .blob-2 { background: #1d4ed8; bottom: -150px; right: -100px; animation: orbit 20s infinite reverse; }
+        .blob-3 { background: #6366f1; top: 40%; left: 60%; animation: orbit 18s infinite; }
+
+        @keyframes orbit {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(100px, 50px) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes move-bg {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.2); }
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .logo-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 10px rgba(37, 99, 235, 0.4));
+        }
+
+        .header h1 {
+            color: var(--text-main);
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 14px 14px 14px 45px;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .input-wrapper input:focus + i {
+            color: var(--primary);
+        }
+
+        .login-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+            transform: scale(1.01);
+        }
+
+        .login-btn:active {
+            transform: scale(0.98);
+        }
+
+        .footer-links {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideDown 0.4s ease-out;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: #86efac;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .login-logo {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        .login-logo svg {
-            width: 70px;
-            height: 70px;
-            display: block;
-        }
-        .login-title {
-            font-weight: 700;
-            color: #232526;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            letter-spacing: 1px;
-        }
-        .form-label {
-            font-weight: 500;
-            color: #343a40;
-        }
-        .form-control {
-            border-radius: 0.75rem;
-            font-size: 1.1rem;
-        }
-        .btn-primary {
-            border-radius: 0.75rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
-            transition: background 0.2s, box-shadow 0.2s;
-        }
-        .btn-primary:hover {
-            background: #0b5ed7;
-            box-shadow: 0 4px 16px rgba(13, 110, 253, 0.25);
-        }
-        .alert {
-            border-radius: 0.75rem;
-            font-size: 1rem;
-        }
-        @media (max-width: 576px) {
-            .login-card {
-                padding: 1.5rem 1rem;
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .glass-card {
+                padding: 30px 20px;
+                border-radius: 0;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                background: var(--bg-gradient);
+                backdrop-filter: none;
+                border: none;
+            }
+            .login-container {
+                max-width: 100%;
+                padding: 0;
             }
         }
     </style>
 </head>
 <body>
+    <div class="mesh-bg">
+        <div class="blob-1"></div>
+        <div class="blob-2"></div>
+        <div class="blob-3"></div>
+    </div>
+
     <div class="login-container">
-        <div class="login-card">
-            <div class="login-logo mb-2">
-                <!-- Police badge SVG icon -->
-                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="32" cy="32" r="30" fill="#0d6efd" stroke="#fff" stroke-width="4"/>
-                  <path d="M32 12 L38 28 L56 28 L41 39 L47 56 L32 45 L17 56 L23 39 L8 28 L26 28 Z" fill="#fff" stroke="#0d6efd" stroke-width="2"/>
-                  <circle cx="32" cy="32" r="6" fill="#0d6efd" stroke="#fff" stroke-width="2"/>
-                </svg>
-            </div>
-            <h2 class="login-title mb-4">Crime Management System</h2>
-            {% with messages = get_flashed_messages() %}
-              {% if messages %}
-                <div class="alert alert-danger" role="alert">
-                  {{ messages[0] }}
+        <div class="glass-card">
+            <div class="header">
+                <div class="logo-icon">
+                    <i class="fas fa-shield-halved"></i>
                 </div>
+                <h1>Welcome Back</h1>
+                <p>Enter your credentials to access the portal</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ 'error' if category == 'error' else 'success' }}">
+                    <i class="fas fa-{{ 'circle-exclamation' if category == 'error' else 'circle-check' }}"></i>
+                    {{ message }}
+                  </div>
+                {% endfor %}
               {% endif %}
             {% endwith %}
-            <form method="POST" action="">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required autofocus>
+
+            <form action="{{ url_for('auth.login') }}" method="POST">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" placeholder="name@crime.gov" required>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 mt-2">Login</button>
+
+                <button type="submit" class="login-btn">
+                    <span>Sign In</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
             </form>
+
+            <div class="footer-links">
+                <a href="{{ url_for('main.home') }}"><i class="fas fa-chevron-left"></i> Back to Home</a>
+                <a href="{{ url_for('auth.register_citizen') }}">New account? <b>Register</b></a>
+            </div>
         </div>
     </div>
 </body>
-</html> 
+</html>

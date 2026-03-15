@@ -1,12 +1,20 @@
 import { useState } from 'react'
 import './App.css'
+import Login from './components/Login'
 
 function App() {
-  const [view, setView] = useState('landing') // landing, citizen, police, admin
+  const [view, setView] = useState('landing') // landing, login, citizen, police, admin
+  const [loginRole, setLoginRole] = useState('citizen')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   const handlePortalSelect = (portal) => {
-    setView(portal)
+    setLoginRole(portal)
+    setView('login')
+  }
+
+  const handleLoginSuccess = (role) => {
+    setView(role)
+    setIsLoggedIn(true)
   }
 
   const handleBack = () => {
@@ -66,6 +74,16 @@ function App() {
           &copy; 2024 Crime Management System. All rights reserved.
         </footer>
       </div>
+    )
+  }
+
+  if (view === 'login') {
+    return (
+      <Login 
+        initialRole={loginRole} 
+        onBack={handleBack} 
+        onLoginSuccess={handleLoginSuccess} 
+      />
     )
   }
 
