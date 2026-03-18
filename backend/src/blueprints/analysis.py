@@ -7,92 +7,43 @@ import folium
 from sklearn.cluster import KMeans
 from models.model import predict_crime_type
 from src.eda import load_data
+from models.database import Criminal
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 analysis_bp = Blueprint('analysis', __name__)
 
-# Helper to load crime data from MongoDB
-def load_crime_data():
-    return load_data()
-
-@analysis_bp.route('/predict', methods=['GET', 'POST'])
+@analysis_bp.route('/criminals', methods=['GET'])
 @login_required
-def predict():
-    df = load_crime_data()
-    locations = sorted(df['locality'].unique()) if not df.empty else []
-    prediction = None
-    if request.method == 'POST':
-        location = request.form['location']
-        date = request.form['date']
-        hour = request.form['hour']
-        features = {'locality': location, 'hour': hour, 'date': date}
-        # Assuming the model is loaded in the blueprint or passed via current_app
-        model_path = os.path.join(current_app.root_path, 'models', 'crime_type_rf.joblib')
-        if os.path.exists(model_path):
-            model = joblib.load(model_path)
-            prediction = predict_crime_type(model, features, df)
-    return render_template('predict.html', locations=locations, prediction=prediction)
-
-@analysis_bp.route('/eda')
-@login_required
-def eda():
-    df = load_data()
-    if df is None:
-        return render_template('eda.html', error='Could not load crime data.', total_crimes=None, top_types_labels=[], top_types_values=[], trend_labels=[], trend_values=[], recent_cases=[], summary_stats={})
+def criminals_list():
+    query = request.args.get('search', '')
+    status_filter = request.args.get('status', '')
+    priority_filter = request.args.get('priority', '')
     
-    total_crimes = len(df)
-    top_types = df['crime_description'].value_counts().head(5)
-    top_types_labels = [str(x) for x in top_types.index]
-    top_types_values = [int(x) for x in top_types.values]
-    
-    recent_cases = []
-    if 'date' in df.columns:
-        df['date'] = pd.to_datetime(df['date'], errors='coerce')
-        try:
-            df_sorted = df.sort_values('date', ascending=False)
-        except Exception:
-            df_sorted = df
-        recent_cases = df_sorted.head(10).to_dict(orient='records')
-    else:
-        recent_cases = df.head(10).to_dict(orient='records')
-    
-    num_unique_crime_types = df['crime_description'].nunique() if 'crime_description' in df.columns else 0
-    most_common_crime_types = df['crime_description'].value_counts().head(3).to_dict() if 'crime_description' in df.columns else {}
-    most_affected_areas = df['locality'].value_counts().head(3).to_dict() if 'locality' in df.columns else {}
-    
-    def get_time_of_day(hour):
-        try:
-            h = int(hour)
-            if 5 <= h < 12: return 'Morning'
-            elif 12 <= h < 18: return 'Afternoon'
-            else: return 'Night'
-        except: return 'Unknown'
-    
-    if 'hour' in df.columns:
-        df['time_of_day'] = df['hour'].apply(get_time_of_day)
-        crimes_by_time_of_day = df['time_of_day'].value_counts().to_dict()
-    else:
-        crimes_by_time_of_day = {}
+    mongo_query = {}
+    if query:
+        mongo_query['name__icontains'] = query
+    if status_filter:
+        mongo_query['status'] = status_filter
+    if priority_filter:
+        mongo_query['priority'] = priority_filter
         
-    summary_stats = {
-        'total_crimes': total_crimes,
-        'num_unique_crime_types': num_unique_crime_types,
-        'most_common_crime_types': most_common_crime_types,
-        'most_affected_areas': most_affected_areas,
-        'crimes_by_time_of_day': crimes_by_time_of_day
+    criminals = Criminal.objects(**mongo_query).order_by('-created_at')
+    
+    # Stats for the page
+    stats = {
+        'total': Criminal.objects.count(),
+        'active': Criminal.objects(status='Active').count(),
+        'caught': Criminal.objects(status='Caught').count(),
+        'high_priority': Criminal.objects(priority='High').count()
     }
-    return render_template(
-        'eda.html',
-        total_crimes=total_crimes,
-        top_types_labels=top_types_labels,
-        top_types_values=top_types_values,
-        trend_labels=[],
-        trend_values=[],
-        error=None,
-        recent_cases=recent_cases,
-        summary_stats=summary_stats
-    )
+    
+    return render_template('criminals.html', 
+                         criminals=criminals, 
+                         stats=stats,
+                         search_query=query,
+                         status_filter=status_filter,
+                         priority_filter=priority_filter)
 
 @analysis_bp.route('/hotspot', methods=['GET', 'POST'])
 @login_required
@@ -146,7 +97,11 @@ def hotspot():
     map_path = os.path.join(map_dir, 'hotspot_map.html')
     m.save(map_path)
     
-    criminals = filtered_df[['crime_description', 'crime_domain', 'weapon_used', 'victim_age', 'victim_gender', 'criminal_name', 'hour', 'locality']].to_dict(orient='records') if len(filtered_df) > 0 else []
+    # Use real Criminal model for the table instead of CSV data if possible
+    criminals = list(Criminal.objects(last_known_location__icontains=selected_locality if selected_locality and selected_locality != 'All' else '').limit(20))
+    if not criminals:
+        criminals = filtered_df[['crime_description', 'crime_domain', 'weapon_used', 'victim_age', 'victim_gender', 'criminal_name', 'hour', 'locality']].to_dict(orient='records') if len(filtered_df) > 0 else []
+    
     return render_template('hotspot.html', error=None, map_path='static/hotspot_map.html', localities=all_localities, selected_locality=selected_locality, criminals=criminals)
 
 @analysis_bp.route('/analytics')

@@ -135,7 +135,7 @@
             border-color: var(--police-accent);
         }
 
-        .text-muted {
+        .text-police-muted {
             color: #cbd5e1 !important;
         }
 
@@ -155,13 +155,13 @@
             <div class="col-lg-2 d-none d-lg-block police-sidebar position-fixed">
                 <div class="p-4 mb-4">
                     <h5 class="fw-bold text-white mb-0"><i class="fas fa-shield-halved text-info me-2"></i>{{ department.name if department else 'POLICE HUB' }}</h5>
-                    <small class="text-muted">JURISDICTION: {{ department.city if department else 'ACTIVE' }}</small>
+                    <small class="text-police-muted">JURISDICTION: {{ department.city if department else 'ACTIVE' }}</small>
                 </div>
                 
                 <nav class="mt-2">
                     <a href="{{ url_for('main.police_dashboard') }}" class="police-nav-link active"><i class="fas fa-desktop"></i> Dashboard</a>
 
-                    <a href="{{ url_for('analysis.hotspot') }}" class="police-nav-link"><i class="fas fa-users-viewfinder"></i> Criminal Database</a>
+                    <a href="{{ url_for('analysis.criminals_list') }}" class="police-nav-link"><i class="fas fa-users-viewfinder"></i> Criminal Database</a>
 
                     <a href="{{ url_for('fir.fir_records') }}" class="police-nav-link"><i class="fas fa-folder-tree"></i> Investigations</a>
 
@@ -178,7 +178,7 @@
                         </div>
                         <div class="overflow-hidden">
                             <div class="small fw-bold text-truncate text-white">{{ current_user.name }}</div>
-                            <div class="extra-small text-muted">{{ current_user.shift|default('On Duty') }}</div>
+                            <div class="extra-small text-police-muted">{{ current_user.shift|default('On Duty') }}</div>
                         </div>
                     </div>
                 </div>
@@ -192,7 +192,7 @@
                         <h2 class="fw-bold mb-1">{{ department.name if department else 'Operational Overview' }}</h2>
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb extra-small m-0">
-                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Command</a></li>
+                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-police-muted">Command</a></li>
                                 <li class="breadcrumb-item active text-info" aria-current="page">Operational Dashboard</li>
                             </ol>
                         </nav>
@@ -212,7 +212,7 @@
                     <div class="col-md-3">
                         <div class="police-card p-4">
                             <div class="d-flex justify-content-between mb-3">
-                                <span class="extra-small text-uppercase fw-bold text-muted">Pending Dispatch</span>
+                                <span class="extra-small text-uppercase fw-bold text-police-muted">Pending Dispatch</span>
                                 <i class="fas fa-hourglass-half text-warning"></i>
                             </div>
                             <h3 class="fw-bold mb-0" id="pending-count">{{ pending_count }}</h3>
@@ -225,7 +225,7 @@
                     <div class="col-md-3">
                         <div class="police-card p-4 border-info-subtle">
                             <div class="d-flex justify-content-between mb-3">
-                                <span class="extra-small text-uppercase fw-bold text-muted">Active Cases</span>
+                                <span class="extra-small text-uppercase fw-bold text-police-muted">Active Cases</span>
                                 <i class="fas fa-wave-square text-info"></i>
                             </div>
                             <h3 class="fw-bold mb-0 text-info" id="active-count">{{ in_progress_count }}</h3>
@@ -238,7 +238,7 @@
                     <div class="col-md-3">
                         <div class="police-card p-4">
                             <div class="d-flex justify-content-between mb-3">
-                                <span class="extra-small text-uppercase fw-bold text-muted">Resolved Units</span>
+                                <span class="extra-small text-uppercase fw-bold text-police-muted">Resolved Units</span>
                                 <i class="fas fa-check-double text-success"></i>
                             </div>
                             <h3 class="fw-bold mb-0 text-success" id="resolved-count">{{ closed_count }}</h3>
@@ -251,12 +251,12 @@
                     <div class="col-md-3">
                         <div class="police-card p-4">
                             <div class="d-flex justify-content-between mb-3">
-                                <span class="extra-small text-uppercase fw-bold text-muted">System Total</span>
-                                <i class="fas fa-database text-muted"></i>
+                                <span class="extra-small text-uppercase fw-bold text-police-muted">System Total</span>
+                                <i class="fas fa-database text-police-muted"></i>
                             </div>
                             <h3 class="fw-bold mb-0" id="total-count">{{ total_count }}</h3>
 
-                            <div class="extra-small text-muted mt-3"><i class="fas fa-arrow-up text-success me-1"></i> 12% from last cycle</div>
+                            <div class="extra-small text-police-muted mt-3"><i class="fas fa-arrow-up text-success me-1"></i> 12% from last cycle</div>
                         </div>
                     </div>
                 </div>
@@ -284,7 +284,7 @@
                                     <div class="table-responsive">
                                         <table class="table table-dark table-hover align-middle mb-0">
                                             <thead>
-                                                <tr class="extra-small text-muted text-uppercase">
+                                                <tr class="extra-small text-police-muted text-uppercase">
                                                     <th>ID</th>
                                                     <th>Citizen Source</th>
                                                     <th>Category</th>
@@ -299,7 +299,7 @@
                                                     <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
                                                     <td class="small">{{ f.user.name }}</td>
                                                     <td><span class="badge bg-danger bg-opacity-10 text-danger extra-small">{{ f.crime_type }}</span></td>
-                                                    <td class="extra-small text-muted">{{ f.timestamp.strftime('%H:%M | %d %b') }}</td>
+                                                    <td class="extra-small text-police-muted">{{ f.timestamp.strftime('%H:%M | %d %b') }}</td>
                                                     <td class="text-end">
                                                         <form method="POST" action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}" class="d-inline">
                                                             <input type="hidden" name="status" value="in_progress">
@@ -316,7 +316,7 @@
                                     <div class="table-responsive">
                                         <table class="table table-dark table-hover align-middle mb-0">
                                             <thead>
-                                                <tr class="extra-small text-muted text-uppercase">
+                                                <tr class="extra-small text-police-muted text-uppercase">
                                                     <th>ID</th>
                                                     <th>Operational Intel</th>
                                                     <th>Last Sync</th>
@@ -328,7 +328,7 @@
                                                 <tr>
                                                     <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
                                                     <td class="small font-monospace text-truncate" style="max-width: 200px;">{{ f.police_notes or 'NO INTEL PROVIDED' }}</td>
-                                                    <td class="extra-small text-muted">{{ f.updated_at.strftime('%H:%M | %d %b') if f.updated_at else '-' }}</td>
+                                                    <td class="extra-small text-police-muted">{{ f.updated_at.strftime('%H:%M | %d %b') if f.updated_at else '-' }}</td>
                                                     <td class="text-end">
                                                         <form method="POST" action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}" class="d-inline">
                                                             <input type="hidden" name="status" value="closed">
@@ -345,7 +345,7 @@
                                     <div class="table-responsive">
                                         <table class="table table-dark table-hover align-middle mb-0">
                                             <thead>
-                                                <tr class="extra-small text-muted text-uppercase">
+                                                <tr class="extra-small text-police-muted text-uppercase">
                                                     <th>ID</th>
                                                     <th>Category</th>
                                                     <th>Resolution Date</th>
@@ -355,8 +355,8 @@
                                                 {% for f in fir_closed %}
                                                 <tr>
                                                     <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
-                                                    <td><span class="badge bg-light bg-opacity-10 text-muted extra-small">{{ f.crime_type }}</span></td>
-                                                    <td class="extra-small text-muted">{{ f.updated_at.strftime('%d %b %Y') if f.updated_at else '-' }}</td>
+                                                    <td><span class="badge bg-light bg-opacity-10 text-police-muted extra-small">{{ f.crime_type }}</span></td>
+                                                    <td class="extra-small text-police-muted">{{ f.updated_at.strftime('%d %b %Y') if f.updated_at else '-' }}</td>
                                                 </tr>
                                                 {% endfor %}
                                             </tbody>
@@ -373,10 +373,10 @@
                                 <div class="col-md-4">
                                     <div class="kanban-column">
                                         <div class="d-flex justify-content-between mb-3">
-                                            <span class="small fw-bold text-muted">OFF-QUEUE</span>
+                                            <span class="small fw-bold text-police-muted">OFF-QUEUE</span>
                                             <span class="badge bg-secondary rounded-pill">0</span>
                                         </div>
-                                        <div class="extra-small text-center text-muted mt-5">No items pending assignment</div>
+                                        <div class="extra-small text-center text-police-muted mt-5">No items pending assignment</div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -413,7 +413,7 @@
                         <div class="police-card p-4 mb-4">
                             <h5 class="fw-bold mb-3">Target Database</h5>
                             <div class="input-group mb-3">
-                                <span class="input-group-text bg-transparent border-end-0 border-light border-opacity-10"><i class="fas fa-search text-muted"></i></span>
+                                <span class="input-group-text bg-transparent border-end-0 border-light border-opacity-10"><i class="fas fa-search text-police-muted"></i></span>
                                 <input type="text" class="form-control search-command border-start-0" placeholder="Identity lookup...">
                             </div>
                             <div class="list-group list-group-flush">
@@ -421,7 +421,7 @@
                                 <div class="list-group-item bg-transparent border-light border-opacity-10 px-0 d-flex justify-content-between align-items-center">
                                     <div>
                                         <div class="small fw-bold text-white">{{ criminal.name }}</div>
-                                        <div class="extra-small text-muted">{{ criminal.crimes|truncate(30) }}</div>
+                                        <div class="extra-small text-police-muted">{{ criminal.crimes|truncate(30) }}</div>
                                     </div>
                                     <span class="badge {{ 'bg-danger' if criminal.risk_level == 'High' else 'bg-warning' }} bg-opacity-10 {{ 'text-danger' if criminal.risk_level == 'High' else 'text-warning' }} extra-small">{{ criminal.risk_level }}</span>
                                 </div>
@@ -438,7 +438,7 @@
                             </div>
                             <div class="d-flex align-items-center gap-3">
                                 <div class="flex-grow-1">
-                                    <div class="extra-small text-muted mb-1">Confidence Score</div>
+                                    <div class="extra-small text-police-muted mb-1">Confidence Score</div>
                                     <div class="progress" style="height: 6px;">
                                         <div class="progress-bar bg-info" style="width: 88%;"></div>
                                     </div>
@@ -478,7 +478,7 @@
                     <div class="modal-body p-4">
                         <div class="row g-4">
                             <div class="col-md-12">
-                                <label class="small fw-bold text-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Incident Category</label>
+                                <label class="small fw-bold text-police-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Incident Category</label>
                                 <select name="crime_type" class="form-select text-uppercase fw-bold" required>
                                     <option value="" selected disabled>Select Operational Status</option>
                                     <option value="THEFT">THEFT / LARCENY</option>
@@ -493,11 +493,11 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="small fw-bold text-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Latitude Coordinate</label>
+                                <label class="small fw-bold text-police-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Latitude Coordinate</label>
                                 <input type="number" step="any" name="latitude" id="modal-lat" class="form-control font-monospace" placeholder="0.000000" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="small fw-bold text-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Longitude Coordinate</label>
+                                <label class="small fw-bold text-police-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Longitude Coordinate</label>
                                 <input type="number" step="any" name="longitude" id="modal-lon" class="form-control font-monospace" placeholder="0.000000" required>
                             </div>
                             <div class="col-12">
@@ -507,11 +507,11 @@
                                 <div id="modal-locationStatus" class="extra-small text-info mt-2 text-center text-uppercase fw-bold" style="letter-spacing: 1px;">Ready for sync...</div>
                             </div>
                             <div class="col-12">
-                                <label class="small fw-bold text-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Operational Brief</label>
+                                <label class="small fw-bold text-police-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Operational Brief</label>
                                 <textarea name="description" class="form-control" style="height: 120px;" placeholder="Provide detailed tactical summary..." required></textarea>
                             </div>
                             <div class="col-12">
-                                <label class="small fw-bold text-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Intel / Evidence Attachment</label>
+                                <label class="small fw-bold text-police-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Intel / Evidence Attachment</label>
                                 <div class="input-group">
                                     <input type="file" name="evidence_file" class="form-control" id="inputGroupFile02">
                                     <label class="input-group-text bg-secondary bg-opacity-50 border-secondary text-white" for="inputGroupFile02">UPLOAD</label>
@@ -520,7 +520,7 @@
                         </div>
                     </div>
                     <div class="modal-footer border-top-0 pt-0">
-                        <button type="button" class="btn btn-link btn-sm text-muted text-decoration-none" data-bs-dismiss="modal">ABORT MISSION</button>
+                        <button type="button" class="btn btn-link btn-sm text-police-muted text-decoration-none" data-bs-dismiss="modal">ABORT MISSION</button>
                         <button type="submit" class="btn btn-primary px-5 py-2 fw-bold text-uppercase" style="letter-spacing: 1px;">
                             <i class="fas fa-upload me-2"></i>Submit Case
                         </button>
@@ -558,7 +558,7 @@
                                     <td class="small fw-bold text-info">#${f.display_id}</td>
                                     <td class="small">${f.user_name}</td>
                                     <td><span class="badge bg-danger bg-opacity-10 text-danger extra-small">${f.crime_type}</span></td>
-                                    <td class="extra-small text-muted">${f.timestamp}</td>
+                                    <td class="extra-small text-police-muted">${f.timestamp}</td>
                                     <td class="text-end">
                                         <form method="POST" action="/fir/police/fir/${f.id}/update" class="d-inline">
                                             <input type="hidden" name="status" value="in_progress">
@@ -570,7 +570,7 @@
                         });
                         tableBody.innerHTML = html;
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No new reports</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-police-muted">No new reports</td></tr>';
                     }
 
                     // Update Active Reports table
@@ -582,7 +582,7 @@
                                 <tr>
                                     <td class="small fw-bold text-info">#${f.display_id}</td>
                                     <td class="small font-monospace text-truncate" style="max-width: 200px;">${f.notes}</td>
-                                    <td class="extra-small text-muted">${f.updated_at}</td>
+                                    <td class="extra-small text-police-muted">${f.updated_at}</td>
                                     <td class="text-end">
                                         <form method="POST" action="/fir/police/fir/${f.id}/update" class="d-inline">
                                             <input type="hidden" name="status" value="closed">
@@ -603,8 +603,8 @@
                             html += `
                                 <tr>
                                     <td class="small fw-bold text-info">#${f.display_id}</td>
-                                    <td><span class="badge bg-light bg-opacity-10 text-muted extra-small">${f.crime_type}</span></td>
-                                    <td class="extra-small text-muted">${f.updated_at}</td>
+                                    <td><span class="badge bg-light bg-opacity-10 text-police-muted extra-small">${f.crime_type}</span></td>
+                                    <td class="extra-small text-police-muted">${f.updated_at}</td>
                                 </tr>
                             `;
                         });
@@ -658,7 +658,7 @@
             }
 
 
-            const coords = {{ heatmap_coords|tojson if heatmap_coords else '[]' }};
+            const coords = {{ heatmap_coords|tojson|safe if heatmap_coords else '[]' }};
             if (coords.length > 0) {
                 const map = L.map('police-map', { zoomControl: false }).setView(coords[0], 13);
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {

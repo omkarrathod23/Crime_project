@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criminal Intelligence Database</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --police-bg: #020617;
+            --police-card: #1e293b;
+            --police-accent: #38bdf8;
+            --police-danger: #ef4444;
+            --police-warning: #f59e0b;
+            --police-success: #10b981;
+            --glass: rgba(30, 41, 59, 0.7);
+        }
+
+        body {
+            background-color: var(--police-bg);
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(239, 68, 68, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        .header-title {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #fff, var(--police-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .criminal-card {
+            height: 100%;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .criminal-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--police-accent);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+
+        .profile-img {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(4px);
+        }
+
+        .priority-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .sidebar-filter {
+            position: sticky;
+            top: 2rem;
+        }
+
+        .form-control-police {
+            background: rgba(15, 23, 42, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+        }
+
+        .form-control-police:focus {
+            border-color: var(--police-accent) !important;
+            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.1) !important;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            opacity: 0.9;
+        }
+
+        .text-police-muted {
+            color: rgba(248, 250, 252, 0.5) !important;
+            font-weight: 600;
+        }
+
+        .modal-content {
+            background: var(--police-bg);
+            border: 1px solid var(--police-accent);
+            color: white;
+        }
+
+        .modal-header { border-bottom: 1px solid rgba(56, 189, 248, 0.2); }
+        .modal-footer { border-top: 1px solid rgba(56, 189, 248, 0.2); }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-4">
+        <!-- Header -->
+        <header class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="header-title fw-bold mb-0">CRIMINAL INTELLIGENCE</h2>
+                <p class="text-muted small">CENTRAL COORDINATION DATABASE | ACCESS LEVEL: AUTHORIZED</p>
+            </div>
+            <div class="d-flex gap-3">
+                <a href="/dashboard" class="btn btn-outline-info btn-sm px-4"><i class="fas fa-arrow-left me-2"></i>Back to Command</a>
+                <button class="btn btn-primary btn-sm px-4 pulse-animation" data-bs-toggle="modal" data-bs-target="#addCriminalModal">
+                    <i class="fas fa-plus-circle me-2"></i>REGISTER TARGET
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="glass-card p-3 d-flex align-items-center gap-3">
+                    <div class="rounded bg-info bg-opacity-10 p-3"><i class="fas fa-users-viewfinder text-info stat-icon"></i></div>
+                    <div>
+                        <div class="text-police-muted small text-uppercase">Total Targets</div>
+                        <div class="h4 fw-bold mb-0 text-white">{{ stats.total }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card p-3 d-flex align-items-center gap-3 border-danger-subtle">
+                    <div class="rounded bg-danger bg-opacity-10 p-3"><i class="fas fa-biohazard text-danger stat-icon"></i></div>
+                    <div>
+                        <div class="text-police-muted small text-uppercase">Active Threats</div>
+                        <div class="h4 fw-bold mb-0 text-danger">{{ stats.active }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card p-3 d-flex align-items-center gap-3">
+                    <div class="rounded bg-warning bg-opacity-10 p-3"><i class="fas fa-radiation text-warning stat-icon"></i></div>
+                    <div>
+                        <div class="text-police-muted small text-uppercase">High Priority</div>
+                        <div class="h4 fw-bold mb-0 text-warning">{{ stats.high_priority }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card p-3 d-flex align-items-center gap-3 border-success-subtle">
+                    <div class="rounded bg-success bg-opacity-10 p-3"><i class="fas fa-handcuffs text-success stat-icon"></i></div>
+                    <div>
+                        <div class="text-police-muted small text-uppercase">Apprehended</div>
+                        <div class="h4 fw-bold mb-0 text-success">{{ stats.caught }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Sidebar Filter -->
+            <div class="col-lg-3">
+                <div class="glass-card p-4 sidebar-filter">
+                    <h5 class="fw-bold mb-4">CRITERIA FILTER</h5>
+                    <form action="{{ url_for('analysis.criminals_list') }}" method="GET">
+                        <div class="mb-3">
+                            <label class="small text-police-muted mb-2 text-uppercase font-monospace" style="font-size: 0.65rem;">Identity/Name Tracking</label>
+                            <input type="text" name="search" class="form-control form-control-police" placeholder="Search targets..." value="{{ search_query }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="small text-police-muted mb-2 text-uppercase font-monospace" style="font-size: 0.65rem;">Operational Status</label>
+                            <select name="status" class="form-select form-control-police">
+                                <option value="">ALL STATUSES</option>
+                                <option value="Active" {% if status_filter == 'Active' %}selected{% endif %}>ACTIVE</option>
+                                <option value="Caught" {% if status_filter == 'Caught' %}selected{% endif %}>CAUGHT</option>
+                                <option value="Under Investigation" {% if status_filter == 'Under Investigation' %}selected{% endif %}>INVESTIGATING</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="small text-police-muted mb-2 text-uppercase font-monospace" style="font-size: 0.65rem;">Risk Priority</label>
+                            <select name="priority" class="form-select form-control-police">
+                                <option value="">ALL LEVELS</option>
+                                <option value="High" {% if priority_filter == 'High' %}selected{% endif %}>HIGH RISK</option>
+                                <option value="Medium" {% if priority_filter == 'Medium' %}selected{% endif %}>MEDIUM RISK</option>
+                                <option value="Low" {% if priority_filter == 'Low' %}selected{% endif %}>LOW RISK</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-info w-100 fw-bold">APPLY FILTERS</button>
+                        <a href="{{ url_for('analysis.criminals_list') }}" class="btn btn-outline-light w-100 mt-2 btn-sm">RESET</a>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Main Listing -->
+            <div class="col-lg-9">
+                <div class="row g-4">
+                    {% for criminal in criminals %}
+                    <div class="col-md-4">
+                        <div class="glass-card criminal-card" onclick="openProfile('{{ criminal.id }}')">
+                            <div class="status-badge 
+                                {{ 'bg-danger text-white' if criminal.status == 'Active' else 
+                                   'bg-success text-white' if criminal.status == 'Caught' else 
+                                   'bg-info text-white' }}">
+                                {{ criminal.status }}
+                            </div>
+                            <div class="profile-img">
+                                {% if criminal.photo %}
+                                <img src="{{ criminal.photo }}" class="w-100 h-100 object-fit-cover" alt="Profile">
+                                {% else %}
+                                <i class="fas fa-user-ninja fa-4x text-muted opacity-25"></i>
+                                {% endif %}
+                            </div>
+                            <div class="p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="fw-bold mb-0">{{ criminal.name }}</h5>
+                                    <span class="small text-muted font-monospace">#{{ criminal.id|string|truncate(6, True, '') }}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-light bg-opacity-10 text-white extra-small">
+                                        <span class="priority-dot 
+                                            {{ 'bg-danger' if criminal.priority == 'High' else 
+                                               'bg-warning' if criminal.priority == 'Medium' else 
+                                               'bg-success' }}"></span>
+                                        {{ criminal.priority }} PRIORITY
+                                    </span>
+                                </div>
+                                <div class="small text-police-muted mb-1 text-uppercase extra-small fw-bold font-monospace">Primary Crime Type</div>
+                                <div class="small text-info mb-3 fw-bold">{{ criminal.crime_type }}</div>
+                                
+                                <div class="small text-police-muted mb-1 text-uppercase extra-small fw-bold font-monospace">Last Known Operational Location</div>
+                                <div class="small font-monospace text-white"><i class="fas fa-location-dot me-1 text-danger"></i>{{ criminal.last_known_location or 'UNKNOWN' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if not criminals %}
+                <div class="text-center p-5 glass-card mt-4">
+                    <i class="fas fa-ghost fa-4x text-muted mb-3 opacity-25"></i>
+                    <h4>No Intelligence Matches Found</h4>
+                    <p class="text-muted">Adjust filters or refine search criteria to locate targets.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals (Placeholder for now) -->
+    <div class="modal fade" id="addCriminalModal" tabindex="-1">
+        <!-- Add target form here -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function openProfile(id) {
+            // Future: Open detailed profile modal/view
+            console.log('Opening profile for ID:', id);
+        }
+    </script>
+</body>
+</html>

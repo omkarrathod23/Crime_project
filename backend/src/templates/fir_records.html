@@ -3,194 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View FIR Records</title>
+    <title>Case Investigations Hub | CMS</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --police-blue: #0a192f;
+            --police-accent: #00f2ff;
+            --police-danger: #ff0055;
+            --glass-bg: rgba(10, 25, 47, 0.7);
+            --glass-border: rgba(0, 242, 255, 0.2);
+        }
+
+        body {
+            background-color: #020617;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 242, 255, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(255, 0, 85, 0.05) 0px, transparent 50%);
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar-police {
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 2rem;
+        }
+
+        .hub-title {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #fff, var(--police-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .case-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .case-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--police-accent);
+            background: rgba(0, 242, 255, 0.03);
+            box-shadow: 0 12px 40px rgba(0, 242, 255, 0.1);
+        }
+
+        .status-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-pending { background: rgba(255, 193, 7, 0.1); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3); }
+        .status-assigned { background: rgba(0, 242, 255, 0.1); color: var(--police-accent); border: 1px solid rgba(0, 242, 255, 0.3); }
+        .status-closed { background: rgba(0, 255, 136, 0.1); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.3); }
+        .status-rejected { background: rgba(255, 0, 85, 0.1); color: var(--police-danger); border: 1px solid rgba(255, 0, 85, 0.3); }
+
+        .form-control-police {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-radius: 0.5rem;
+        }
+
+        .form-control-police:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--police-accent);
+            box-shadow: 0 0 0 0.25rem rgba(0, 242, 255, 0.1);
+            color: #fff;
+        }
+
+        .text-police-muted {
+            color: rgba(248, 250, 252, 0.5) !important;
+            font-weight: 600;
+        }
+
+        .case-id-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--police-accent);
+            opacity: 0.7;
+        }
+
+        .stat-widget {
+            border-left: 3px solid var(--police-accent);
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 0.5rem;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--police-blue); }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 242, 255, 0.4); }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-police sticky-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/dashboard">Crime Dashboard</a>
-            <div class="d-flex">
-                <a href="/logout" class="btn btn-outline-light">Logout</a>
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('main.police_dashboard' if current_user.is_police() else 'main.admin_dashboard') }}">
+                <i class="fas fa-shield-halved text-info"></i>
+                <span class="fw-bold text-white font-monospace">CMS COMMAND</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <a href="{{ url_for('main.police_dashboard' if current_user.is_police() else 'main.admin_dashboard') }}" class="btn btn-outline-light btn-sm border-opacity-25">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Command
+                </a>
             </div>
         </div>
     </nav>
-    <div class="container mt-5">
-        <h2>View FIR Records</h2>
-        {% if firs and firs|length > 0 %}
-        <div class="row mb-3">
-            <div class="col-md-3">
-                <label for="areaFilter" class="form-label">Filter by Area (Locality):</label>
-                <select id="areaFilter" class="form-select">
-                    <option value="">All Areas</option>
-                    {% if 'Locality' in headers %}
-                        {% set localities = firs | map(attribute='Locality') | unique | list %}
-                        {% for loc in localities %}
-                            <option value="{{ loc }}">{{ loc }}</option>
-                        {% endfor %}
-                    {% endif %}
-                </select>
+
+    <div class="container-fluid px-4 py-5">
+        <div class="row mb-5">
+            <div class="col-lg-8">
+                <h1 class="hub-title mb-2">INVESTIGATIONS HUB</h1>
+                <p class="text-police-muted text-uppercase small font-monospace">Centralized Case Management & Forensic Records</p>
             </div>
-            <div class="col-md-3">
-                <label for="crimeTypeFilter" class="form-label">Filter by Crime Type:</label>
-                <select id="crimeTypeFilter" class="form-select">
-                    <option value="">All Types</option>
-                    {% if 'Crime Description' in headers %}
-                        {% set crime_types = firs | map(attribute='Crime Description') | unique | list %}
-                        {% for ct in crime_types %}
-                            <option value="{{ ct }}">{{ ct }}</option>
-                        {% endfor %}
-                    {% endif %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label for="genderFilter" class="form-label">Filter by Victim Gender:</label>
-                <select id="genderFilter" class="form-select">
-                    <option value="">All Genders</option>
-                    {% if 'Victim Gender' in headers %}
-                        {% set genders = firs | map(attribute='Victim Gender') | unique | list %}
-                        {% for g in genders %}
-                            <option value="{{ g }}">{{ g }}</option>
-                        {% endfor %}
-                    {% endif %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label for="dateRange" class="form-label">Filter by Date Range:</label>
-                <input type="text" id="dateRange" class="form-control" autocomplete="off" placeholder="Select date range">
+            <div class="col-lg-4 d-flex justify-content-lg-end align-items-center gap-4">
+                <div class="stat-widget">
+                    <div class="text-police-muted extra-small text-uppercase">Total Cases</div>
+                    <div class="h4 mb-0 fw-bold">{{ firs|length }}</div>
+                </div>
+                <div class="stat-widget" style="border-left-color: var(--police-danger);">
+                    <div class="text-police-muted extra-small text-uppercase">Active Leads</div>
+                    <div class="h4 mb-0 fw-bold">{{ firs|selectattr('Status', 'equalto', 'assigned')|list|length }}</div>
+                </div>
             </div>
         </div>
-        <div class="table-responsive">
-            <table id="firsTable" class="table table-striped table-bordered">
-                <thead class="table-dark">
-                    <tr>
-                        {% for h in headers %}
-                        <th>{{ h }}</th>
+
+        <div class="row g-4">
+            <!-- Sidebar Filters -->
+            <div class="col-xl-3">
+                <div class="glass-card p-4 sticky-top" style="top: 100px; z-index: 10;">
+                    <h5 class="fw-bold mb-4 font-monospace"><i class="fas fa-filter me-2 text-info"></i>DATA FILTERS</h5>
+                    
+                    <div class="mb-3">
+                        <label class="small text-police-muted mb-2 text-uppercase font-monospace" style="font-size: 0.65rem;">Forensic ID / Search</label>
+                        <input type="text" id="universalSearch" class="form-control form-control-police" placeholder="Enter keywords...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small text-police-muted mb-2 text-uppercase font-monospace" style="font-size: 0.65rem;">Incident Category</label>
+                        <select id="typeFilter" class="form-select form-control-police">
+                            <option value="">ALL CATEGORIES</option>
+                            {% set crime_types = firs | map(attribute='Crime Type') | unique | list %}
+                            {% for ct in crime_types %}
+                            <option value="{{ ct }}">{{ ct|upper }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small text-police-muted mb-2 text-uppercase font-monospace" style="font-size: 0.65rem;">Operational Status</label>
+                        <select id="statusFilter" class="form-select form-control-police">
+                            <option value="">ALL STATUSES</option>
+                            <option value="pending">PENDING VERIFICATION</option>
+                            <option value="assigned">ACTIVE INVESTIGATION</option>
+                            <option value="closed">RESOLVELD/CLOSED</option>
+                            <option value="rejected">REJECTED/INVALID</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-info w-100 py-2 fw-bold text-uppercase mt-4" id="resetFilters">
+                        <i class="fas fa-sync-alt me-2"></i>Reset Grid
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="col-xl-9">
+                <div id="caseGrid" class="row g-4">
+                    {% if firs %}
+                        {% for fir in firs %}
+                        <div class="col-md-6 col-xxl-4 case-item" 
+                             data-type="{{ fir['Crime Type'] }}" 
+                             data-status="{{ fir['Status'] }}"
+                             data-all="{{ fir|string|lower }}">
+                            <div class="glass-card case-card p-4 h-100">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <span class="case-id-tag">#{{ fir['ID']|truncate(8, True, '') }}</span>
+                                    <span class="status-badge status-{{ fir['Status'] }}">{{ fir['Status'].replace('_', ' ') }}</span>
+                                </div>
+
+                                <h5 class="fw-bold text-white mb-2">{{ fir['Crime Type'] }}</h5>
+                                <div class="p-3 bg-white bg-opacity-5 rounded mb-3" style="min-height: 80px;">
+                                    <p class="small text-light mb-0">{{ fir['Description']|truncate(120) }}</p>
+                                </div>
+
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="text-police-muted extra-small text-uppercase d-block mb-1">Operational Area</label>
+                                        <div class="small text-white-50"><i class="fas fa-location-arrow me-1 text-info"></i>{{ fir['Location'] }}</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="text-police-muted extra-small text-uppercase d-block mb-1">Timestamp</label>
+                                        <div class="small text-white-50"><i class="fas fa-clock me-1 text-info"></i>{{ fir['Submitted'] }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="border-top border-white border-opacity-10 pt-3 mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="text-police-muted extra-small text-uppercase">Assignee</div>
+                                            <div class="small fw-bold text-info">{{ fir['Department'] }}</div>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-info border-opacity-25 px-3 view-case-btn" 
+                                                data-case-id="{{ fir['ID'] }}"
+                                                data-case-type="{{ fir['Crime Type'] }}"
+                                                data-case-desc="{{ fir['Description'] }}"
+                                                data-case-notes="{{ fir['Notes'] }}"
+                                                data-case-user="{{ fir['User'] }}"
+                                                data-case-dept="{{ fir['Department'] }}"
+                                                data-case-loc="{{ fir['Location'] }}">
+                                            <i class="fas fa-folder-open"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         {% endfor %}
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        {% for h in headers %}
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search {{ h }}" /></th>
-                        {% endfor %}
-                    </tr>
-                </tfoot>
-                <tbody>
-                    {% for row in firs %}
-                    <tr>
-                        {% for h in headers %}
-                        <td>{{ row[h] }}</td>
-                        {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    {% else %}
+                        <div class="col-12 text-center py-5">
+                            <div class="display-1 text-police-muted opacity-10 mb-4"><i class="fas fa-folder-closed"></i></div>
+                            <h3 class="text-police-muted">NO ACTIVE INVESTIGATIONS FOUND</h3>
+                            <p class="text-police-muted small">All systems clear. Check back for new intelligence reports.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-        {% else %}
-            <div class="alert alert-info">No FIR records found.</div>
-        {% endif %}
     </div>
-    <!-- jQuery and DataTables JS -->
+
+    <!-- Case Detail Modal -->
+    <div class="modal fade" id="caseModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content glass-card border-0">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title hub-title" id="modalTitle">CASE DOSSIER</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-7">
+                            <div class="mb-4">
+                                <label class="text-police-muted small text-uppercase fw-bold d-block mb-2 font-monospace">Full Intelligence Narrative</label>
+                                <div class="p-3 bg-white bg-opacity-5 rounded text-light" id="modalDesc" style="white-space: pre-wrap; font-size: 0.9rem;"></div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="text-police-muted small text-uppercase fw-bold d-block mb-2 font-monospace">Official Observations / Notes</label>
+                                <div class="p-3 bg-info bg-opacity-5 border border-info border-opacity-10 rounded text-info italic" id="modalNotes" style="font-style: italic;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="stat-widget mb-3">
+                                <label class="text-police-muted extra-small text-uppercase">Reporting Personnel</label>
+                                <div class="fw-bold" id="modalUser"></div>
+                            </div>
+                            <div class="stat-widget mb-3" style="border-left-color: var(--police-accent);">
+                                <label class="text-police-muted extra-small text-uppercase">Assigned Unit</label>
+                                <div class="fw-bold" id="modalDept"></div>
+                            </div>
+                            <div class="stat-widget mb-4" style="border-left-color: #f1f5f9;">
+                                <label class="text-police-muted extra-small text-uppercase">GPS Coordinates</label>
+                                <div class="fw-bold font-monospace" id="modalLoc"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <script>
         $(document).ready(function() {
-            var table = $('#firsTable').DataTable({
-                dom: 'Bfrtip',
-                buttons: [
-                    'csv', 'excel', 'pdf', 'print'
-                ],
-                pageLength: 10,
-                lengthMenu: [5, 10, 25, 50, 100],
-                order: [],
-                initComplete: function() {
-                    // Move footer search boxes to thead for better UX
-                    this.api().columns().every(function() {
-                        var column = this;
-                        $('input', column.footer()).appendTo($(column.header())).on('keyup change clear', function() {
-                            if (column.search() !== this.value) {
-                                column.search(this.value).draw();
-                            }
-                        });
-                    });
-                }
+            $('.view-case-btn').click(function() {
+                const btn = $(this);
+                const caseId = btn.data('case-id');
+                const caseType = btn.data('case-type');
+                const caseDesc = btn.data('case-desc');
+                const caseNotes = btn.data('case-notes');
+                const caseUser = btn.data('case-user');
+                const caseDept = btn.data('case-dept');
+                const caseLoc = btn.data('case-loc');
+
+                $('#modalTitle').text('CASE DOSSIER #' + caseId.substring(0, 8).toUpperCase());
+                $('#modalDesc').text(caseDesc);
+                $('#modalNotes').text(caseNotes || 'NO OFFICIAL FIELD NOTES RECORDED');
+                $('#modalUser').text(caseUser);
+                $('#modalDept').text(caseDept);
+                $('#modalLoc').text(caseLoc);
+                
+                new bootstrap.Modal(document.getElementById('caseModal')).show();
             });
-            // Area filter
-            $('#areaFilter').on('change', function() {
-                var val = $(this).val();
-                {% if 'Locality' in headers %}
-                var colIdx = {{ headers.index('Locality') }};
-                table.column(colIdx).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
-                {% endif %}
-            });
-            // Crime Type filter
-            $('#crimeTypeFilter').on('change', function() {
-                var val = $(this).val();
-                {% if 'Crime Description' in headers %}
-                var colIdx = {{ headers.index('Crime Description') }};
-                table.column(colIdx).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
-                {% endif %}
-            });
-            // Gender filter
-            $('#genderFilter').on('change', function() {
-                var val = $(this).val();
-                {% if 'Victim Gender' in headers %}
-                var colIdx = {{ headers.index('Victim Gender') }};
-                table.column(colIdx).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
-                {% endif %}
-            });
-            // Date range filter
-            var minDate, maxDate;
-            $('#dateRange').daterangepicker({
-                autoUpdateInput: false,
-                locale: { cancelLabel: 'Clear' }
-            });
-            $('#dateRange').on('apply.daterangepicker', function(ev, picker) {
-                $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
-                minDate = picker.startDate;
-                maxDate = picker.endDate;
-                table.draw();
-            });
-            $('#dateRange').on('cancel.daterangepicker', function(ev, picker) {
-                $(this).val('');
-                minDate = maxDate = null;
-                table.draw();
-            });
-            // Custom filter for date range
-            $.fn.dataTable.ext.search.push(
-                function(settings, data, dataIndex) {
-                    if(typeof minDate === 'undefined' || typeof maxDate === 'undefined' || !minDate || !maxDate) {
-                        return true;
+
+            function filterGrid() {
+                const search = $('#universalSearch').val().toLowerCase();
+                const type = $('#typeFilter').val();
+                const status = $('#statusFilter').val();
+
+                $('.case-item').each(function() {
+                    const itemType = $(this).data('type');
+                    const itemStatus = $(this).data('status');
+                    const allText = $(this).data('all');
+                    
+                    const matchSearch = allText.includes(search);
+                    const matchType = !type || itemType === type;
+                    const matchStatus = !status || itemStatus === status;
+
+                    if (matchSearch && matchType && matchStatus) {
+                        $(this).fadeIn(300);
+                    } else {
+                        $(this).fadeOut(200);
                     }
-                    // Check if Date column exists, otherwise disable date filtering
-                    {% if 'Date' in headers %}
-                    var dateIdx = {{ headers.index('Date') }};
-                    var dateStr = data[dateIdx];
-                    if(!dateStr) return false;
-                    var date = moment(dateStr, 'YYYY-MM-DD');
-                    return date.isBetween(minDate, maxDate, null, '[]');
-                    {% else %}
-                    // No date column available, return true for all records
-                    return true;
-                    {% endif %}
-                }
-            );
+                });
+            }
+
+            $('#universalSearch, #typeFilter, #statusFilter').on('change keyup', filterGrid);
+
+            $('#resetFilters').click(function() {
+                $('#universalSearch').val('');
+                $('#typeFilter').val('');
+                $('#statusFilter').val('');
+                $('.case-item').fadeIn(300);
+            });
         });
     </script>
 </body>
-</html> 
+</html>
+ 
