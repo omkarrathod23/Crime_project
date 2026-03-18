@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
-from models.database import FIRReport, Department, User, get_department_for_location
+from models.database import FIRReport, Department, User, get_department_for_location, Alert
 from src.auth import admin_required, police_required, citizen_required
+from extensions import socketio
 from src.utils import save_uploaded_file
 from datetime import datetime
 
@@ -16,6 +17,8 @@ def add_fir():
         crime_type = request.form.get('crime_type', '').strip()
         lat_str = request.form.get('latitude', '0')
         lon_str = request.form.get('longitude', '0')
+        priority = request.form.get('priority', 'Medium')
+        location_name = request.form.get('location_name', '').strip()
         
         try:
             lat = float(lat_str)
@@ -49,10 +52,32 @@ def add_fir():
             lon=lon,
             evidence_file=evidence_file,
             status=status,
-            department=department
+            department=department,
+            priority=priority,
+            location_name=location_name
         )
         
         new_fir.save()
+        
+        # Create Alert
+        alert_msg = f"New {crime_type} reported at {location_name or 'unknown location'}."
+        if priority == 'High':
+            alert_msg = f"URGENT: {alert_msg}"
+            
+        new_alert = Alert(
+            message=alert_msg,
+            crime_id=new_fir.id,
+            priority=priority
+        )
+        new_alert.save()
+        
+        # Emit real-time alert via SocketIO
+        socketio.emit('new_alert', {
+            'message': alert_msg,
+            'priority': priority,
+            'crime_id': str(new_fir.id),
+            'timestamp': new_alert.timestamp.isoformat()
+        }, namespace='/')
         
         flash('FIR submitted successfully!', 'success')
         return redirect(url_for('main.police_dashboard' if current_user.is_police() else 'main.citizen_dashboard'))

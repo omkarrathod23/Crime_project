@@ -19,6 +19,7 @@ if not hasattr(flask, 'json_encoder'):
 
 from flask import Flask, render_template
 from flask_login import LoginManager
+from extensions import socketio, jwt
 from models.database import User, init_db
 from config import config
 
@@ -38,6 +39,9 @@ def create_app(config_name='default'):
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
     
+    jwt.init_app(app)
+    socketio.init_app(app, cors_allowed_origins="*")
+    
     @login_manager.user_loader
     def load_user(user_id):
         return User.objects(id=user_id).first()
@@ -50,11 +54,13 @@ def create_app(config_name='default'):
     from src.blueprints.main import main_bp
     from src.blueprints.fir import fir_bp
     from src.blueprints.analysis import analysis_bp
+    from src.blueprints.coordination import coordination_bp
     
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(main_bp)
     app.register_blueprint(fir_bp, url_prefix='/fir')
     app.register_blueprint(analysis_bp, url_prefix='/analysis')
+    app.register_blueprint(coordination_bp, url_prefix='/api')
     
     return app
 

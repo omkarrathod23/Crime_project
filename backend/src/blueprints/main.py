@@ -74,21 +74,32 @@ def police_stats():
     closed_count = len([fir for fir in fir_reports if fir.status == 'closed'])
     total_count = len(fir_reports)
     
-    # Top 5 new reports for the list
-    fir_new_filtered = [f for f in fir_reports if f.status in ['pending', 'assigned']][:5]
-    fir_new_data = [{
-        "id": str(f.id)[:8],
-        "user_name": f.user.name if f.user else "Anonymous",
+    # Filter other lists for the dashboard
+    fir_active_filtered = [f for f in fir_reports if f.status == 'in_progress']
+    fir_closed_filtered = [f for f in fir_reports if f.status in ['closed', 'rejected']]
+
+    fir_active_data = [{
+        "id": str(f.id),
+        "display_id": str(f.id)[:8],
+        "notes": f.police_notes or "NO INTEL PROVIDED",
+        "updated_at": f.updated_at.strftime('%H:%M | %d %b') if f.updated_at else "-"
+    } for f in fir_active_filtered]
+
+    fir_closed_data = [{
+        "id": str(f.id),
+        "display_id": str(f.id)[:8],
         "crime_type": f.crime_type,
-        "timestamp": f.timestamp.strftime('%H:%M | %d %b')
-    } for f in fir_new_filtered]
+        "updated_at": f.updated_at.strftime('%d %b %Y') if f.updated_at else "-"
+    } for f in fir_closed_filtered]
 
     return {
         "pending_count": pending_count,
         "in_progress_count": in_progress_count,
         "closed_count": closed_count,
         "total_count": total_count,
-        "fir_new": fir_new_data
+        "fir_new": fir_new_data,
+        "fir_active": fir_active_data,
+        "fir_closed": fir_closed_data
     }
 
 @main_bp.route('/api/citizen/stats')
@@ -137,14 +148,24 @@ def police_dashboard():
             longitude__lte=department.max_lon
         )
         
-        # Map CrimeData for the template "Target Database"
-        # Since CrimeData doesn't have names, we'll use crime type + locality
-        for crime in crimes.limit(10):
+        # Map new Criminal model for the template "Target Database"
+        from models.database import Criminal
+        new_criminals = Criminal.objects.limit(5)
+        for c in new_criminals:
             criminals_data.append({
-                "name": f"Suspect - {crime.crime_description[:15]}",
-                "crimes": f"{crime.crime_description} at {crime.locality}",
-                "risk_level": "Medium" if crime.victim_age and crime.victim_age > 18 else "High"
+                "name": c.name,
+                "crimes": f"{c.crime_type} - {c.last_known_location}",
+                "risk_level": c.priority
             })
+            
+        # If still empty, fall back to historical data
+        if not criminals_data:
+            for crime in crimes.limit(5):
+                criminals_data.append({
+                    "name": f"Suspect - {crime.crime_description[:15]}",
+                    "crimes": f"{crime.crime_description} at {crime.locality}",
+                    "risk_level": "Medium" if crime.victim_age and crime.victim_age > 18 else "High"
+                })
             
         # Get all coords for heatmap
         heatmap_coords = [[c.latitude, c.longitude] for c in crimes.only('latitude', 'longitude')]

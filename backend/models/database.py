@@ -55,6 +55,7 @@ class FIRReport(db.Document):
     meta = {'collection': 'fir_reports'}
     user = db.ReferenceField(User, required=True)
     department = db.ReferenceField(Department, reverse_delete_rule=db.NULLIFY)
+    assigned_station_id = db.ReferenceField(Department, reverse_delete_rule=db.NULLIFY)
     description = db.StringField(required=True)
     crime_type = db.StringField(max_length=100, required=True)
     lat = db.FloatField(required=True)
@@ -63,8 +64,42 @@ class FIRReport(db.Document):
     evidence_file = db.StringField(max_length=255)
     admin_notes = db.StringField()
     police_notes = db.StringField()
+    priority = db.StringField(max_length=20, choices=['High', 'Medium', 'Low'], default='Medium')
+    location_name = db.StringField(max_length=255)
     timestamp = db.DateTimeField(default=datetime.utcnow)
     updated_at = db.DateTimeField(default=datetime.utcnow)
+
+class Criminal(db.Document):
+    meta = {'collection': 'criminals'}
+    name = db.StringField(max_length=100, required=True)
+    photo = db.StringField(max_length=255)
+    crime_type = db.StringField(max_length=100)
+    fir_id = db.ReferenceField(FIRReport, reverse_delete_rule=db.NULLIFY)
+    last_known_location = db.StringField(max_length=255)
+    status = db.StringField(max_length=50, default='Active')  # Active/Caught/Under Investigation
+    priority = db.StringField(max_length=20, default='Medium')  # High/Medium/Low
+    created_at = db.DateTimeField(default=datetime.utcnow)
+
+class Alert(db.Document):
+    meta = {'collection': 'alerts'}
+    message = db.StringField(required=True)
+    crime_id = db.ReferenceField(FIRReport, reverse_delete_rule=db.CASCADE)
+    priority = db.StringField(max_length=20, default='Medium')  # High/Medium/Low
+    timestamp = db.DateTimeField(default=datetime.utcnow)
+
+class CaseUpdate(db.Document):
+    meta = {'collection': 'case_updates'}
+    crime_id = db.ReferenceField(FIRReport, required=True, reverse_delete_rule=db.CASCADE)
+    message = db.StringField(required=True)
+    updated_by = db.ReferenceField(User, required=True)
+    timestamp = db.DateTimeField(default=datetime.utcnow)
+
+class Evidence(db.Document):
+    meta = {'collection': 'evidence'}
+    crime_id = db.ReferenceField(FIRReport, required=True, reverse_delete_rule=db.CASCADE)
+    file_url = db.StringField(required=True)
+    file_type = db.StringField(max_length=50)
+    uploaded_at = db.DateTimeField(default=datetime.utcnow)
 
 class OTPCode(db.Document):
     meta = {'collection': 'otp_codes'}

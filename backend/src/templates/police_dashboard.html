@@ -323,7 +323,7 @@
                                                     <th class="text-end">Command</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
+                                            <tbody id="fir-active-table">
                                                 {% for f in fir_active %}
                                                 <tr>
                                                     <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
@@ -351,7 +351,7 @@
                                                     <th>Resolution Date</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
+                                            <tbody id="fir-closed-table">
                                                 {% for f in fir_closed %}
                                                 <tr>
                                                     <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
@@ -385,12 +385,14 @@
                                             <span class="small fw-bold text-info">IN FIELD</span>
                                             <span class="badge bg-info rounded-pill">{{ in_progress_count }}</span>
                                         </div>
-                                        {% for f in fir_active %}
-                                        <div class="police-card p-3 mb-2 small bg-opacity-50">
-                                            <div class="fw-bold text-info mb-1">ID: #{{ f.id|string|truncate(6, True, '') }}</div>
-                                            <div class="extra-small opacity-75">{{ f.crime_type }}</div>
+                                        <div id="kanban-active">
+                                            {% for f in fir_active %}
+                                            <div class="police-card p-3 mb-2 small bg-opacity-50">
+                                                <div class="fw-bold text-info mb-1">ID: #{{ f.id|string|truncate(6, True, '') }}</div>
+                                                <div class="extra-small opacity-75">{{ f.crime_type }}</div>
+                                            </div>
+                                            {% endfor %}
                                         </div>
-                                        {% endfor %}
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -553,12 +555,12 @@
                         data.fir_new.forEach(f => {
                             html += `
                                 <tr>
-                                    <td class="small fw-bold text-info">#${f.id}</td>
+                                    <td class="small fw-bold text-info">#${f.display_id}</td>
                                     <td class="small">${f.user_name}</td>
                                     <td><span class="badge bg-danger bg-opacity-10 text-danger extra-small">${f.crime_type}</span></td>
                                     <td class="extra-small text-muted">${f.timestamp}</td>
                                     <td class="text-end">
-                                        <form method="POST" action="/fir/update/${f.id}" class="d-inline">
+                                        <form method="POST" action="/fir/police/fir/${f.id}/update" class="d-inline">
                                             <input type="hidden" name="status" value="in_progress">
                                             <button class="btn btn-info btn-sm extra-small fw-bold">INITIATE CASE</button>
                                         </form>
@@ -567,6 +569,61 @@
                             `;
                         });
                         tableBody.innerHTML = html;
+                    } else {
+                        tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No new reports</td></tr>';
+                    }
+
+                    // Update Active Reports table
+                    const activeTable = document.getElementById('fir-active-table');
+                    if (data.fir_active) {
+                        let html = '';
+                        data.fir_active.forEach(f => {
+                            html += `
+                                <tr>
+                                    <td class="small fw-bold text-info">#${f.display_id}</td>
+                                    <td class="small font-monospace text-truncate" style="max-width: 200px;">${f.notes}</td>
+                                    <td class="extra-small text-muted">${f.updated_at}</td>
+                                    <td class="text-end">
+                                        <form method="POST" action="/fir/police/fir/${f.id}/update" class="d-inline">
+                                            <input type="hidden" name="status" value="closed">
+                                            <button class="btn btn-success btn-sm extra-small fw-bold">RESOLVE CASE</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        activeTable.innerHTML = html;
+                    }
+
+                    // Update Closed Reports table
+                    const closedTable = document.getElementById('fir-closed-table');
+                    if (data.fir_closed) {
+                        let html = '';
+                        data.fir_closed.forEach(f => {
+                            html += `
+                                <tr>
+                                    <td class="small fw-bold text-info">#${f.display_id}</td>
+                                    <td><span class="badge bg-light bg-opacity-10 text-muted extra-small">${f.crime_type}</span></td>
+                                    <td class="extra-small text-muted">${f.updated_at}</td>
+                                </tr>
+                            `;
+                        });
+                        closedTable.innerHTML = html;
+                    }
+
+                    // Update Kanban Active
+                    const kanbanActive = document.getElementById('kanban-active');
+                    if (data.fir_active && kanbanActive) {
+                        let html = '';
+                        data.fir_active.forEach(f => {
+                            html += `
+                                <div class="police-card p-3 mb-2 small bg-opacity-50">
+                                    <div class="fw-bold text-info mb-1">ID: #${f.display_id.substring(0,6)}</div>
+                                    <div class="extra-small opacity-75">POLICE UPDATE REQ</div>
+                                </div>
+                            `;
+                        });
+                        kanbanActive.innerHTML = html;
                     }
                 })
                 .catch(err => console.error('Error fetching stats:', err));
