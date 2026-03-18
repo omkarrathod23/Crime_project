@@ -75,8 +75,17 @@ def police_stats():
     total_count = len(fir_reports)
     
     # Filter other lists for the dashboard
+    fir_new_filtered = [f for f in fir_reports if f.status in ['pending', 'assigned']]
     fir_active_filtered = [f for f in fir_reports if f.status == 'in_progress']
     fir_closed_filtered = [f for f in fir_reports if f.status in ['closed', 'rejected']]
+
+    fir_new_data = [{
+        "id": str(f.id),
+        "display_id": str(f.id)[:8],
+        "user_name": f.user.name if f.user else "Anonymous",
+        "crime_type": f.crime_type,
+        "timestamp": f.timestamp.strftime('%H:%M | %d %b')
+    } for f in fir_new_filtered]
 
     fir_active_data = [{
         "id": str(f.id),

@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STRATEGIC INTELLIGENCE CENTER | CMS</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -22,7 +25,7 @@
 
         body {
             background-color: var(--cms-bg);
-            background-image: 
+            background-image:
                 radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.05) 0%, transparent 50%),
                 radial-gradient(circle at 100% 100%, rgba(188, 19, 254, 0.05) 0%, transparent 50%);
             color: #e2e8f0;
@@ -61,7 +64,8 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .sidebar-link:hover, .sidebar-link.active {
+        .sidebar-link:hover,
+        .sidebar-link.active {
             background: var(--cms-accent-glow);
             color: var(--cms-accent);
             box-shadow: 0 0 15px var(--cms-accent-glow);
@@ -104,9 +108,20 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.5; }
-            100% { transform: scale(1); opacity: 1; }
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         /* Advanced Cards */
@@ -214,18 +229,30 @@
             height: 300px;
         }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--cms-bg); }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--cms-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
         <a href="/dashboard" class="sidebar-link" title="Dashboard"><i class="fas fa-th-large"></i></a>
-        <a href="/analysis/analytics" class="sidebar-link active" title="Strategic Intel"><i class="fas fa-satellite-dish"></i></a>
+        <a href="/analysis/analytics" class="sidebar-link active" title="Strategic Intel"><i
+                class="fas fa-satellite-dish"></i></a>
         <a href="/analysis/hotspot" class="sidebar-link" title="Geo-Fencing"><i class="fas fa-map-location-dot"></i></a>
         <a href="/fir/records" class="sidebar-link" title="Case Files"><i class="fas fa-folder-open"></i></a>
-        <a href="/logout" class="sidebar-link" title="Disconnect" style="margin-top: auto;"><i class="fas fa-power-off"></i></a>
+        <a href="/logout" class="sidebar-link" title="Disconnect" style="margin-top: auto;"><i
+                class="fas fa-power-off"></i></a>
     </div>
 
     <div class="main-container">
@@ -238,7 +265,8 @@
                 </div>
             </div>
             <div class="d-flex gap-3">
-                <button class="btn btn-outline-secondary btn-sm rounded-pill px-4 border-opacity-25" onclick="window.print()">
+                <button class="btn btn-outline-secondary btn-sm rounded-pill px-4 border-opacity-25"
+                    onclick="window.print()">
                     <i class="fas fa-print me-2"></i>GENERATE PDF
                 </button>
                 <div class="text-end font-monospace">
@@ -251,12 +279,16 @@
         <!-- Executive Summary -->
         <div class="summary-box">
             <span class="summary-badge">Strategic Executive Summary</span>
-            <h2 class="h4 text-white mb-3">Intelligence Assessment: Volume Tracking {{ total_crimes }} Reported Incidents</h2>
+            <h2 class="h4 text-white mb-3">Intelligence Assessment: Volume Tracking {{ total_crimes }} Reported
+                Incidents</h2>
             <p class="text-secondary lead mb-0" style="font-size: 1rem; line-height: 1.8;">
-                The current operational cycle indicates a focus on <span class="text-info fw-bold">{{ top_types_labels[0] if top_types_labels else 'General' }}</span> 
-                activity, predominantly manifesting in the <span class="text-info fw-bold">{{ area_labels[0] if area_labels else 'Primary' }}</span> sectors. 
-                Spatial analysis identifies significant hotspots requiring immediate tactical reallocation. 
-                Vulnerability markers suggest a peak frequency during the <span class="text-info fw-bold">{{ hourly_labels[0] if hourly_labels else 'Evening' }}:00</span> window.
+                The current operational cycle indicates a focus on <span class="text-info fw-bold">{{
+                    top_types_labels[0] if top_types_labels else 'General' }}</span>
+                activity, predominantly manifesting in the <span class="text-info fw-bold">{{ area_labels[0] if
+                    area_labels else 'Primary' }}</span> sectors.
+                Spatial analysis identifies significant hotspots requiring immediate tactical reallocation.
+                Vulnerability markers suggest a peak frequency during the <span class="text-info fw-bold">{{
+                    hourly_labels[0] if hourly_labels else 'Evening' }}:00</span> window.
             </p>
         </div>
 
@@ -269,7 +301,8 @@
                         <i class="fas fa-file-shield text-info"></i>
                     </div>
                     <div class="metric-value">{{ total_crimes }}</div>
-                    <div class="metric-trend text-success"><i class="fas fa-arrow-trend-up"></i> +12.4% vs prev period</div>
+                    <div class="metric-trend text-success"><i class="fas fa-arrow-trend-up"></i> +12.4% vs prev period
+                    </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
@@ -279,7 +312,8 @@
                         <i class="fas fa-fire-flame-curved text-danger"></i>
                     </div>
                     <div class="metric-value">{{ heatmap_coords|length }}</div>
-                    <div class="metric-trend text-danger"><i class="fas fa-arrow-trend-up"></i> High Saturation Detected</div>
+                    <div class="metric-trend text-danger"><i class="fas fa-arrow-trend-up"></i> High Saturation Detected
+                    </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
@@ -288,14 +322,16 @@
                         <span class="card-title-intel">Primary Threat</span>
                         <i class="fas fa-biohazard text-warning"></i>
                     </div>
-                    <div class="metric-value" style="font-size: 1.2rem; min-height: 3.75rem; display: flex; align-items: center;">
+                    <div class="metric-value"
+                        style="font-size: 1.2rem; min-height: 3.75rem; display: flex; align-items: center;">
                         {{ top_types_labels[0]|upper if top_types_labels else 'SCANNING...' }}
                     </div>
                     <div class="extra-small text-secondary">Categorical Lead Intelligence</div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
-                <div class="intel-card" style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), transparent);">
+                <div class="intel-card"
+                    style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), transparent);">
                     <div class="card-header-intel">
                         <span class="card-title-intel">System Health</span>
                         <i class="fas fa-microchip text-success"></i>
@@ -378,9 +414,13 @@
                             <span class="card-title-intel">Geo-Spacial Threat Heatmap</span>
                             <div class="extra-small text-secondary mt-1">Satellite Visualization Layer Active</div>
                         </div>
-                        <div class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3">CRITICAL HOTSPOTS</div>
+                        <div
+                            class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3">
+                            CRITICAL HOTSPOTS</div>
                     </div>
-                    <div id="heatmap" style="height: 500px; border-top: 1px solid var(--cms-border); border-radius: 0 0 1.5rem 1.5rem;"></div>
+                    <div id="heatmap"
+                        style="height: 500px; border-top: 1px solid var(--cms-border); border-radius: 0 0 1.5rem 1.5rem;">
+                    </div>
                 </div>
             </div>
         </div>
@@ -413,7 +453,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-    
+
     <script>
         // Global Chart Defaults
         Chart.defaults.color = '#64748b';
@@ -430,36 +470,36 @@
         new Chart(ctx_bar, {
             type: 'bar',
             data: {
-                labels: {{ top_types_labels|tojson }},
-                datasets: [{
-                    label: 'FREQUENCY',
-                    data: {{ top_types_values|tojson }},
-                    backgroundColor: gradient,
-                    borderColor: '#38bdf8',
-                    borderWidth: 1,
-                    borderRadius: 8
+                labels: {{ top_types_labels| tojson }},
+            datasets: [{
+                label: 'FREQUENCY',
+                data: {{ top_types_values| tojson }},
+            backgroundColor: gradient,
+            borderColor: '#38bdf8',
+            borderWidth: 1,
+            borderRadius: 8
                 }]
             },
-            options: { 
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } }, 
-                scales: { 
-                    y: { grid: { color: 'rgba(255,255,255,0.03)' }, beginAtZero: true },
-                    x: { grid: { display: false } }
-                } 
+            options: {
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: 'rgba(255,255,255,0.03)' }, beginAtZero: true },
+                x: { grid: { display: false } }
             }
+        }
         });
 
         // Area-wise Crime Breakdown
         new Chart(document.getElementById('areaChart'), {
             type: 'bar',
             data: {
-                labels: {{ area_labels|tojson }},
-                datasets: [{
-                    label: 'METRIC',
-                    data: {{ area_values|tojson }},
-                    backgroundColor: 'rgba(188, 19, 254, 0.5)',
-                    borderRadius: 4
+                labels: {{ area_labels| tojson }},
+            datasets: [{
+                label: 'METRIC',
+                data: {{ area_values| tojson }},
+            backgroundColor: 'rgba(188, 19, 254, 0.5)',
+            borderRadius: 4
                 }]
             },
             options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.03)' } }, y: { grid: { display: false } } } }
@@ -469,35 +509,35 @@
         new Chart(document.getElementById('genderChart'), {
             type: 'doughnut',
             data: {
-                labels: {{ gender_labels|tojson }},
-                datasets: [{
-                    data: {{ gender_values|tojson }},
-                    backgroundColor: ['#38bdf8', '#bc13fe', '#f472b6'],
-                    borderWidth: 0,
-                    hoverOffset: 20
+                labels: {{ gender_labels| tojson }},
+            datasets: [{
+                data: {{ gender_values| tojson }},
+            backgroundColor: ['#38bdf8', '#bc13fe', '#f472b6'],
+            borderWidth: 0,
+            hoverOffset: 20
                 }]
             },
-            options: { 
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: { legend: { position: 'bottom' } } 
-            }
+            options: {
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: { legend: { position: 'bottom' } }
+        }
         });
 
         // Hourly Crime Distribution
         new Chart(document.getElementById('hourlyChart'), {
             type: 'line',
             data: {
-                labels: {{ hourly_labels|tojson }},
-                datasets: [{
-                    label: 'VOLUME',
-                    data: {{ hourly_values|tojson }},
-                    borderColor: '#fbbf24',
-                    backgroundColor: 'rgba(251, 191, 36, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#fbbf24'
+                labels: {{ hourly_labels| tojson }},
+            datasets: [{
+                label: 'VOLUME',
+                data: {{ hourly_values| tojson }},
+            borderColor: '#fbbf24',
+            backgroundColor: 'rgba(251, 191, 36, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#fbbf24'
                 }]
             },
             options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.03)' } }, x: { grid: { display: false } } } }
@@ -507,12 +547,12 @@
         new Chart(document.getElementById('ageGroupChart'), {
             type: 'pie',
             data: {
-                labels: {{ agegroup_labels|tojson }},
-                datasets: [{
-                    data: {{ agegroup_values|tojson }},
-                    backgroundColor: ['#ef4444', '#f97316', '#84cc16', '#06b6d4'],
-                    borderWidth: 2,
-                    borderColor: '#0f172a'
+                labels: {{ agegroup_labels| tojson }},
+            datasets: [{
+                data: {{ agegroup_values| tojson }},
+            backgroundColor: ['#ef4444', '#f97316', '#84cc16', '#06b6d4'],
+            borderWidth: 2,
+            borderColor: '#0f172a'
                 }]
             },
             options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
@@ -522,60 +562,60 @@
         new Chart(document.getElementById('domainChart'), {
             type: 'radar',
             data: {
-                labels: {{ domain_labels|tojson }},
-                datasets: [{
-                    label: 'DOMAIN FOCUS',
-                    data: {{ domain_values|tojson }},
-                    backgroundColor: 'rgba(56, 189, 248, 0.2)',
-                    borderColor: '#38bdf8',
-                    pointBackgroundColor: '#38bdf8'
+                labels: {{ domain_labels| tojson }},
+            datasets: [{
+                label: 'DOMAIN FOCUS',
+                data: {{ domain_values| tojson }},
+            backgroundColor: 'rgba(56, 189, 248, 0.2)',
+            borderColor: '#38bdf8',
+            pointBackgroundColor: '#38bdf8'
                 }]
             },
-            options: { 
-                maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        angleLines: { color: 'rgba(255,255,255,0.05)' },
-                        grid: { color: 'rgba(255,255,255,0.05)' },
-                        pointLabels: { color: '#64748b' },
-                        ticks: { display: false }
-                    }
+            options: {
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: 'rgba(255,255,255,0.05)' },
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    pointLabels: { color: '#64748b' },
+                    ticks: { display: false }
                 }
             }
+        }
         });
 
         // High-Value Suspect Correlation
         new Chart(document.getElementById('suspectChart'), {
             type: 'bar',
             data: {
-                labels: {{ suspect_labels|tojson }},
-                datasets: [{
-                    label: 'FIR COUNT',
-                    data: {{ suspect_values|tojson }},
-                    backgroundColor: 'rgba(239, 68, 68, 0.5)',
-                    borderRadius: 4
+                labels: {{ suspect_labels| tojson }},
+            datasets: [{
+                label: 'FIR COUNT',
+                data: {{ suspect_values| tojson }},
+            backgroundColor: 'rgba(239, 68, 68, 0.5)',
+            borderRadius: 4
                 }]
             },
             options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.03)' } } } }
         });
 
         // Heatmap (Leaflet Dark Mode)
-        var heatmapCoords = {{ heatmap_coords|tojson }};
+        var heatmapCoords = {{ heatmap_coords| tojson }};
         if (heatmapCoords.length > 0) {
             var map = L.map('heatmap', {
                 zoomControl: false,
                 attributionControl: false
             }).setView([heatmapCoords[0][0], heatmapCoords[0][1]], 12);
-            
+
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 maxZoom: 18
             }).addTo(map);
 
             var heat = L.heatLayer(heatmapCoords, {
-                radius: 35, 
-                blur: 25, 
+                radius: 35,
+                blur: 25,
                 maxZoom: 17,
-                gradient: {0.4: '#1e3a8a', 0.65: '#3b82f6', 1: '#ef4444'}
+                gradient: { 0.4: '#1e3a8a', 0.65: '#3b82f6', 1: '#ef4444' }
             }).addTo(map);
 
             L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -584,5 +624,5 @@
         }
     </script>
 </body>
+
 </html>
- 

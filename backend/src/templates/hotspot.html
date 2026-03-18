@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GEO-SPACIAL HOTSPOT TRACKING | CMS</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --cms-bg: #030712;
@@ -18,13 +21,14 @@
 
         body {
             background-color: var(--cms-bg);
-            background-image: 
+            background-image:
                 radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.08) 0%, transparent 50%),
                 radial-gradient(circle at 0% 100%, rgba(239, 68, 68, 0.05) 0%, transparent 50%);
             color: #e2e8f0;
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            overflow: hidden; /* Fixed structure for the viewport map */
+            overflow: hidden;
+            /* Fixed structure for the viewport map */
         }
 
         /* Glassmorphism Sidebar */
@@ -57,7 +61,8 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .sidebar-link:hover, .sidebar-link.active {
+        .sidebar-link:hover,
+        .sidebar-link.active {
             background: var(--cms-accent-glow);
             color: var(--cms-accent);
             box-shadow: 0 0 15px var(--cms-accent-glow);
@@ -123,9 +128,20 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.5; }
-            100% { transform: scale(1); opacity: 1; }
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         /* Filter HUD */
@@ -197,16 +213,19 @@
             color: #000;
             box-shadow: 0 0 20px var(--cms-accent-glow);
         }
-
     </style>
 </head>
+
 <body>
     <div class="sidebar">
         <a href="/dashboard" class="sidebar-link" title="Dashboard"><i class="fas fa-th-large"></i></a>
-        <a href="/analysis/analytics" class="sidebar-link" title="Strategic Intel"><i class="fas fa-satellite-dish"></i></a>
-        <a href="/analysis/hotspot" class="sidebar-link active" title="Geo-Fencing"><i class="fas fa-map-location-dot"></i></a>
+        <a href="/analysis/analytics" class="sidebar-link" title="Strategic Intel"><i
+                class="fas fa-satellite-dish"></i></a>
+        <a href="/analysis/hotspot" class="sidebar-link active" title="Geo-Fencing"><i
+                class="fas fa-map-location-dot"></i></a>
         <a href="/fir/records" class="sidebar-link" title="Case Files"><i class="fas fa-folder-open"></i></a>
-        <a href="/logout" class="sidebar-link" title="Disconnect" style="margin-top: auto;"><i class="fas fa-power-off"></i></a>
+        <a href="/logout" class="sidebar-link" title="Disconnect" style="margin-top: auto;"><i
+                class="fas fa-power-off"></i></a>
     </div>
 
     <div class="main-viewport">
@@ -215,7 +234,8 @@
             <div class="glass-hud">
                 <div>
                     <h1 class="map-title">Predictive Geo-Fence</h1>
-                    <div class="extra-small text-secondary mt-1 font-monospace">SCANNING ACTIVE SECTOR: {{ selected_locality or 'GLOBAL' }}</div>
+                    <div class="extra-small text-secondary mt-1 font-monospace">SCANNING ACTIVE SECTOR: {{
+                        selected_locality or 'GLOBAL' }}</div>
                 </div>
                 <div class="live-status">
                     <span class="pulse-dot"></span>
@@ -228,9 +248,11 @@
         <div class="filter-hud">
             <form method="post" id="localityForm">
                 <select class="form-select-hud" name="locality" onchange="this.form.submit()">
-                    <option value="All" {% if not selected_locality or selected_locality == 'All' %}selected{% endif %}>GLOBAL COVERAGE</option>
+                    <option value="All" {% if not selected_locality or selected_locality=='All' %}selected{% endif %}>
+                        GLOBAL COVERAGE</option>
                     {% for loc in localities %}
-                    <option value="{{ loc }}" {% if selected_locality == loc %}selected{% endif %}>{{ loc|upper }} SECTOR</option>
+                    <option value="{{ loc }}" {% if selected_locality==loc %}selected{% endif %}>{{ loc|upper }} SECTOR
+                    </option>
                     {% endfor %}
                 </select>
             </form>
@@ -239,16 +261,16 @@
         <!-- Map Frame -->
         <div class="map-frame">
             {% if error %}
-                <div class="h-100 d-flex flex-column align-items-center justify-content-center bg-black">
-                    <i class="fas fa-triangle-exclamation text-danger mb-3 fa-3x"></i>
-                    <p class="text-secondary font-monospace">TELEMETRY FAILURE: {{ error }}</p>
-                </div>
+            <div class="h-100 d-flex flex-column align-items-center justify-content-center bg-black">
+                <i class="fas fa-triangle-exclamation text-danger mb-3 fa-3x"></i>
+                <p class="text-secondary font-monospace">TELEMETRY FAILURE: {{ error }}</p>
+            </div>
             {% elif map_path %}
-                <iframe src="/{{ map_path }}"></iframe>
+            <iframe src="/{{ map_path }}"></iframe>
             {% else %}
-                <div class="h-100 d-flex align-items-center justify-content-center bg-black">
-                    <p class="text-secondary font-monospace">AWAITING SIGNAL LOCK...</p>
-                </div>
+            <div class="h-100 d-flex align-items-center justify-content-center bg-black">
+                <p class="text-secondary font-monospace">AWAITING SIGNAL LOCK...</p>
+            </div>
             {% endif %}
         </div>
 
@@ -261,5 +283,5 @@
         </div>
     </div>
 </body>
+
 </html>
- 

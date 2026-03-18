@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crime Management System | Secure Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --cms-primary: #38bdf8;
+            --cms-accent: #818cf8;
+            --cms-bg: #030712;
             --glass-bg: rgba(255, 255, 255, 0.03);
             --glass-border: rgba(255, 255, 255, 0.08);
             --text-main: #f8fafc;
@@ -21,66 +22,97 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
         }
 
         body {
-            background: var(--bg-gradient);
+            background-color: var(--cms-bg);
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(129, 140, 248, 0.15) 0%, transparent 50%);
             min-height: 100vh;
             color: var(--text-main);
+            font-family: 'Inter', sans-serif;
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        /* Animated Mesh Gradient Background */
-        .mesh-bg {
+        /* High-Definition Mesh Particles */
+        .mesh-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: -1;
-            filter: blur(100px);
-            opacity: 0.5;
+            overflow: hidden;
         }
 
-        .mesh-bg div {
+        .mesh-blob {
             position: absolute;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .blob-1 {
+            background: radial-gradient(circle, #38bdf8 0%, transparent 70%);
+            top: -200px;
+            left: -200px;
+            animation: drift 25s infinite alternate ease-in-out;
+        }
+
+        .blob-2 {
+            background: radial-gradient(circle, #818cf8 0%, transparent 70%);
+            bottom: -300px;
+            right: -200px;
+            animation: drift 30s infinite alternate-reverse ease-in-out;
+        }
+
+        .blob-3 {
+            background: radial-gradient(circle, #c084fc 0%, transparent 70%);
+            top: 40%;
+            left: 30%;
             width: 600px;
             height: 600px;
-            border-radius: 50%;
+            animation: drift 20s infinite alternate linear;
         }
 
-        .blob-1 { background: #3b82f6; top: -100px; left: -100px; animation: move 25s infinite alternate; }
-        .blob-2 { background: #1d4ed8; bottom: -150px; right: -100px; animation: move 30s infinite alternate-reverse; }
-        .blob-3 { background: #6366f1; top: 30%; right: 20%; animation: move 20s infinite alternate; }
-
-        @keyframes move {
-            from { transform: translate(0, 0) scale(1); }
-            to { transform: translate(150px, 100px) scale(1.2); }
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(15% , 15%) scale(1.2); }
         }
 
         nav {
-            padding: 2rem;
+            padding: 2.5rem 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 10;
+            z-index: 100;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            gap: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .logo i {
-            color: var(--primary);
-            font-size: 2rem;
+            color: var(--cms-primary);
+            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1.5rem;
         }
 
         .hero {
@@ -90,185 +122,249 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 2rem;
+            padding: 2rem 5%;
             z-index: 10;
         }
 
+        .hud-badge {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 0.5rem 1.5rem;
+            border-radius: 99px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: var(--cms-primary);
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            backdrop-filter: blur(5px);
+        }
+
         .hero h1 {
-            font-size: clamp(2.5rem, 8vw, 4.5rem);
-            font-weight: 800;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 900;
             margin-bottom: 1.5rem;
-            line-height: 1.1;
-            background: linear-gradient(to bottom right, #fff 30%, #94a3b8);
+            line-height: 1;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
         }
 
         .hero p {
-            font-size: clamp(1rem, 2vw, 1.25rem);
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
             color: var(--text-muted);
-            max-width: 600px;
-            margin-bottom: 3rem;
+            max-width: 800px;
+            margin-bottom: 3.5rem;
             line-height: 1.6;
+            font-weight: 300;
         }
 
-        .cta-container {
+        .cta-group {
             display: flex;
-            gap: 1.5rem;
+            gap: 2rem;
             flex-wrap: wrap;
             justify-content: center;
         }
 
-        .btn {
-            padding: 1rem 2.5rem;
-            border-radius: 99px;
-            font-size: 1.1rem;
-            font-weight: 600;
+        .btn-premium {
+            padding: 1.25rem 3rem;
+            border-radius: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
             text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            overflow: hidden;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
 
         .btn-primary {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.3);
+            background: var(--cms-primary);
+            color: #030712;
+            box-shadow: 0 10px 30px -5px rgba(56, 189, 248, 0.4);
         }
 
         .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-4px);
-            box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.5);
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 20px 40px -10px rgba(56, 189, 248, 0.6);
+            background: #fff;
         }
 
-        .btn-secondary {
+        .btn-outline {
             background: var(--glass-bg);
             color: white;
             border: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
         }
 
-        .btn-secondary:hover {
+        .btn-outline:hover {
             background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-4px);
+            border-color: #fff;
+            transform: translateY(-5px);
         }
 
-        .features-grid {
+        .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            max-width: 1100px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            max-width: 1400px;
             width: 100%;
-            margin: 4rem auto;
-            padding: 0 2rem;
+            margin: 6rem auto;
+            padding: 0 5%;
         }
 
         .feature-card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            backdrop-filter: blur(12px);
-            padding: 2.5rem;
-            border-radius: 24px;
-            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+            padding: 3.5rem 2.5rem;
+            border-radius: 32px;
+            text-align: left;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 32px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent, rgba(56, 180, 248, 0.1));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
         }
 
         .feature-card:hover {
-            border-color: rgba(37, 99, 235, 0.4);
-            transform: translateY(-8px);
+            transform: translateY(-15px);
+            border-color: var(--cms-primary);
             background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 30px 60px -15px rgba(0,0,0,0.5);
         }
 
-        .feature-card i {
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(56, 189, 248, 0.1);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
             font-size: 2rem;
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            display: block;
+            color: var(--cms-primary);
+            transition: all 0.4s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            background: var(--cms-primary);
+            color: #030712;
+            transform: rotateY(180deg);
         }
 
         .feature-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+            color: #fff;
         }
 
         .feature-card p {
             color: var(--text-muted);
-            font-size: 0.95rem;
-            line-height: 1.5;
+            line-height: 1.8;
+            font-weight: 300;
         }
 
         footer {
-            padding: 3rem;
+            padding: 4rem 5%;
             text-align: center;
-            color: var(--text-muted);
             border-top: 1px solid var(--glass-border);
-            font-size: 0.9rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            text-transform: uppercase;
         }
 
-        /* Responsive adjustments */
         @media (max-width: 768px) {
-            nav { padding: 1.5rem; }
-            .hero { padding: 4rem 1.5rem; }
-            .features-grid { margin: 2rem auto; }
+            .hero h1 { font-size: 3.5rem; }
+            .cta-group { flex-direction: column; }
+            .btn-premium { width: 100%; justify-content: center; }
         }
     </style>
 </head>
+
 <body>
-    <div class="mesh-bg">
-        <div class="blob-1"></div>
-        <div class="blob-2"></div>
-        <div class="blob-3"></div>
+    <div class="mesh-container">
+        <div class="mesh-blob blob-1"></div>
+        <div class="mesh-blob blob-2"></div>
+        <div class="mesh-blob blob-3"></div>
     </div>
 
     <nav>
         <div class="logo">
-            <i class="fas fa-shield-halved"></i>
-            <span>CMS</span>
+            <i class="fas fa-microchip"></i>
+            <span>CMS v4.0</span>
         </div>
-        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">
-            <i class="fas fa-right-to-bracket"></i>
-            <span>Staff Portal</span>
-        </a>
+        <div class="nav-actions">
+            <a href="{{ url_for('auth.login') }}" class="btn-premium btn-outline">
+                <i class="fas fa-lock"></i>
+                <span>Staff Login</span>
+            </a>
+        </div>
     </nav>
 
     <main>
         <section class="hero">
-            <h1>Unified Crime Management</h1>
-            <p>A next-generation platform for reporting, analyzing, and managing public safety. Securely access the system to proceed.</p>
-            
-            <div class="cta-container">
-                <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
-                    <span>Enter Portal</span>
+            <div class="hud-badge pulse">Secure Operational Access</div>
+            <h1>Unified Crime Intelligence</h1>
+            <p>A next-generation tactical platform for reporting, analyzing, and managing public safety with state-of-the-art predictive analytics.</p>
+
+            <div class="cta-group">
+                <a href="{{ url_for('auth.login') }}" class="btn-premium btn-primary">
+                    <span>Initiate Session</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>
-                <a href="{{ url_for('auth.register_citizen') }}" class="btn btn-secondary">
-                    <span>Citizen Registration</span>
+                <a href="{{ url_for('auth.register_citizen') }}" class="btn-premium btn-outline">
+                    <span>Citizen Enrollment</span>
                 </a>
             </div>
         </section>
 
-        <section class="features-grid">
+        <section class="features">
             <div class="feature-card">
-                <i class="fas fa-file-shield"></i>
-                <h3>Secure Reporting</h3>
-                <p>Advanced FIR management with cryptographic verification and real-time tracking.</p>
+                <div class="feature-icon"><i class="fas fa-shield-halved"></i></div>
+                <h3>Cryptographic Reporting</h3>
+                <p>Advanced FIR management with immutable verification trails and real-time field tracking.</p>
             </div>
             <div class="feature-card">
-                <i class="fas fa-microchip"></i>
-                <h3>AI Insights</h3>
-                <p>Predictive analytics and hotspot mapping using state-of-the-art machine learning models.</p>
+                <div class="feature-icon"><i class="fas fa-satellite-dish"></i></div>
+                <h3>Neural Hotspots</h3>
+                <p>Predictive spatial analysis and hotspot mapping powered by modern telemetry processing.</p>
             </div>
             <div class="feature-card">
-                <i class="fas fa-users-viewfinder"></i>
-                <h3>Smart Assignment</h3>
-                <p>Automated case distribution and multi-department coordination for rapid response.</p>
+                <div class="feature-icon"><i class="fas fa-network-wired"></i></div>
+                <h3>Tactical Dispatch</h3>
+                <p>Automated case delegation and multi-unit coordination for rapid emergency response.</p>
             </div>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2024 Crime Management System. Engineered for public safety.</p>
+        <p>&copy; 2024 CMS GLOBAL DEFENSE. ALL RIGHTS RESERVED. // ENCRYPTED CONNECTION ACTIVE</p>
     </footer>
 </body>
+
 </html>

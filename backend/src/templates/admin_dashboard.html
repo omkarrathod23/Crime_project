@@ -4,209 +4,388 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Command Center - CMS</title>
+    <title>Admin Command Center | CMS SECURE</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --admin-primary: #ef233c;
-            --admin-secondary: #d90429;
-            --admin-dark: #2b2d42;
+            --admin-bg: #060000;
+            --admin-sidebar: rgba(15, 5, 5, 0.95);
+            --admin-accent: #ef233c;
+            --admin-accent-glow: rgba(239, 35, 60, 0.4);
+            --admin-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --glass-card: rgba(255, 255, 255, 0.03);
+            --glass-blur: blur(30px);
         }
 
-        .admin-sidebar {
-            background: var(--admin-dark);
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--admin-bg);
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(239, 35, 60, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(139, 0, 0, 0.1) 0%, transparent 50%);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            color: rgba(255, 255, 255, 0.8);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            overflow-x: hidden;
+            display: flex;
         }
 
-        .nav-link-custom {
-            color: rgba(255, 255, 255, 0.7);
-            padding: 1rem 1.5rem;
+        /* High-Definition Mesh Particles */
+        .mesh-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .mesh-blob {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.25;
+            pointer-events: none;
+        }
+
+        .blob-1 {
+            background: radial-gradient(circle, #ef233c 0%, transparent 70%);
+            top: -200px;
+            left: -100px;
+            animation: drift 25s infinite alternate ease-in-out;
+        }
+
+        .blob-2 {
+            background: radial-gradient(circle, #8b0000 0%, transparent 70%);
+            bottom: -300px;
+            right: -100px;
+            animation: drift 30s infinite alternate-reverse ease-in-out;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(10% , 10%) scale(1.1); }
+        }
+
+        /* Sidebar HUD */
+        .admin-sidebar {
+            width: 280px;
+            background: var(--admin-sidebar);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-right: 1px solid var(--admin-border);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            padding: 2.5rem 1.5rem;
+        }
+
+        .brand-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            color: #fff;
             display: flex;
             align-items: center;
             gap: 12px;
-            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .brand-logo i {
+            color: var(--admin-accent);
+            filter: drop-shadow(0 0 10px var(--admin-accent-glow));
+        }
+
+        .admin-nav-link {
+            padding: 1rem 1.5rem;
+            color: rgba(255, 255, 255, 0.6);
             text-decoration: none;
-            border-radius: 0.75rem;
-            margin: 0.2rem 1rem;
-        }
-
-        .nav-link-custom:hover, .nav-link-custom.active {
-            background: rgba(239, 35, 60, 0.1);
-            color: var(--admin-primary);
-        }
-
-        .admin-header {
-            background: white;
-            padding: 1.25rem 2rem;
-            border-bottom: 1px solid #edf2f7;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 15px;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 0.5rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
         }
 
-        .stat-card-admin {
-            border-left: 4px solid var(--admin-primary);
+        .admin-nav-link:hover,
+        .admin-nav-link.active {
+            background: rgba(239, 35, 60, 0.1);
+            color: var(--admin-accent);
+            text-shadow: 0 0 10px rgba(239, 35, 60, 0.3);
         }
 
-        .badge-pending { background-color: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
-        .badge-verified { background-color: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
-
-        .btn-admin {
-            background: var(--admin-primary);
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
+        /* Viewport */
+        .admin-viewport {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            padding: 3rem;
+            position: relative;
+            z-index: 10;
         }
 
-        .btn-admin:hover {
-            background: var(--admin-secondary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 35, 60, 0.2);
+        .hud-card {
+            background: var(--glass-card);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--admin-border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hud-card::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 15px;
+            height: 15px;
+            border-top: 2px solid var(--admin-accent);
+            border-right: 2px solid var(--admin-accent);
+            opacity: 0.4;
+        }
+
+        .hud-card:hover {
+            border-color: rgba(239, 35, 60, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 20px rgba(239, 35, 60, 0.1);
+        }
+
+        .hud-header-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #fff, #ef233c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-glow-red { color: #ef233c; text-shadow: 0 0 15px rgba(239, 35, 60, 0.4); }
+
+        .search-command {
+            background: rgba(15, 5, 5, 0.6) !important;
+            border: 1px solid var(--admin-border) !important;
+            color: #fff !important;
+            border-radius: 12px !important;
+            padding: 0.8rem 1.2rem !important;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+        }
+
+        .table-premium {
+            background: transparent !important;
+            color: #fff !important;
+        }
+
+        .table-premium thead th {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: rgba(239, 35, 60, 0.8) !important;
+            border-bottom: 1px solid rgba(239, 35, 60, 0.2) !important;
+            text-transform: uppercase;
+            padding: 1.2rem 1rem !important;
+        }
+
+        .table-premium tbody td {
+            padding: 1.2rem 1rem !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+            font-size: 0.85rem;
+        }
+
+        .extra-small {
+            font-size: 0.7rem;
+            letter-spacing: 0.12rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.7) !important;
         }
     </style>
 </head>
 
 <body>
-    <div class="container-fluid p-0">
-        <div class="row g-0">
-            <!-- Sidebar -->
-            <div class="col-md-2 admin-sidebar d-none d-md-block">
-                <div class="p-4 mb-4">
-                    <h4 class="text-white fw-bold mb-0">
-                        <i class="fas fa-shield-halved text-danger me-2"></i>CMS ADMIN
-                    </h4>
-                </div>
-                <nav>
-                    <a href="#" class="nav-link-custom active"><i class="fas fa-columns"></i> Dashboard</a>
-                    <a href="#" class="nav-link-custom" data-bs-toggle="modal" data-bs-target="#usersModal"><i class="fas fa-users"></i> Users</a>
-                    <a href="#" class="nav-link-custom" data-bs-toggle="modal" data-bs-target="#departmentModal"><i class="fas fa-building"></i> Departments</a>
-                    <a href="{{ url_for('analysis.criminals_list') }}" class="nav-link-custom"><i class="fas fa-users-viewfinder"></i> Criminal Database</a>
-                    <a href="{{ url_for('analysis.analytics') }}" class="nav-link-custom"><i class="fas fa-chart-pie"></i> Analytics</a>
-                    <hr class="mx-3 opacity-10">
-                    <a href="{{ url_for('auth.logout') }}" class="nav-link-custom text-danger mt-auto"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                </nav>
+    <div class="mesh-container">
+        <div class="mesh-blob blob-1"></div>
+        <div class="mesh-blob blob-2"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="brand-logo mb-5">
+            <i class="fas fa-shield-halved text-glow"></i>
+            <span>CMS ADMIN</span>
+        </div>
+
+        <nav class="flex-grow-1">
+            <a href="#" class="admin-nav-link active"><i class="fas fa-columns"></i> Dashboard</a>
+            <a href="#" class="admin-nav-link" data-bs-toggle="modal" data-bs-target="#usersModal"><i class="fas fa-users"></i> Operatives</a>
+            <a href="#" class="admin-nav-link" data-bs-toggle="modal" data-bs-target="#departmentModal"><i class="fas fa-building"></i> Units</a>
+            <a href="{{ url_for('analysis.criminals_list') }}" class="admin-nav-link"><i class="fas fa-user-secret"></i> Intel Database</a>
+            <a href="{{ url_for('analysis.analytics') }}" class="admin-nav-link"><i class="fas fa-satellite-dish"></i> Analytics</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{{ url_for('auth.logout') }}" class="admin-nav-link text-danger">
+                <i class="fas fa-power-off"></i> TERMINATE
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-viewport">
+        <header class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="hud-header-title mb-1">Command Oversight Console</h2>
+                <div class="extra-small text-muted">SECURED CONNECTION [LEVEL-5 CLEARANCE]</div>
             </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end">
+                    <div class="small fw-bold text-white">{{ current_user.name|upper }}</div>
+                    <div class="extra-small text-danger" style="font-size: 0.6rem;">OVERSEER ACCESS</div>
+                </div>
+                <div class="hud-card p-2 rounded-circle border-danger border-opacity-30" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-user-shield text-danger"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Flash Messages -->
+        <div class="flash-messages-container px-4 mb-2">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }} alert-dismissible fade show hud-card py-2 px-4 mb-2" role="alert" style="background: rgba({{ '239, 35, 60' if category == 'error' else '56, 189, 248' }}, 0.1); border: 1px solid rgba({{ '239, 35, 60' if category == 'error' else '56, 189, 248' }}, 0.3);">
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="fas fa-{{ 'triangle-exclamation' if category == 'error' else 'circle-info' }} text-{{ 'danger' if category == 'error' else 'info' }}"></i>
+                                <span class="extra-small letter-spacing-1 fw-bold">{{ message|upper }}</span>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white small" data-bs-dismiss="modal" style="font-size: 0.5rem;"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
 
-            <!-- Main Content -->
-            <div class="col-md-10 bg-light">
-                <header class="admin-header shadow-sm">
-                    <div class="d-flex align-items-center">
-                        <button class="btn d-md-none me-3"><i class="fas fa-bars"></i></button>
-                        <h5 class="mb-0 fw-bold">Command Center Forecast</h5>
-                    </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="text-end d-none d-sm-block">
-                            <p class="mb-0 fw-bold small">{{ current_user.name }}</p>
-                            <p class="mb-0 text-secondary fw-semibold extra-small" style="font-size: 0.7rem;">SYSTEM ADMINISTRATOR</p>
-                        </div>
-                        <div class="bg-danger rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 40px; height: 40px;">
-                            <i class="fas fa-user-shield"></i>
-                        </div>
-                    </div>
-                </header>
+        <div class="p-4 fade-in-up">
+        <!-- Welcome Banner -->
+        <div class="hud-card mb-5" style="background: linear-gradient(135deg, rgba(239, 35, 60, 0.1) 0%, transparent 100%);">
+            <div class="row align-items-center">
+                <div class="col-md-9">
+                    <h2 class="text-white fw-bold mb-2">ACCESS GRANTED: OVERSEER {{ current_user.name.split(' ')[0]|upper }}</h2>
+                    <p class="text-muted mb-0">The system is currently orchestrating {{ total_fir_count }} tactical case files across {{ department_count }} active sectors.</p>
+                </div>
+                <div class="col-md-3 text-end d-none d-md-block">
+                    <i class="fas fa-wifi text-danger fa-2x pulse opacity-40"></i>
+                </div>
+            </div>
+        </div>
 
-                <main class="p-4 fade-in-up">
-                    <!-- Welcome Banner -->
-                    <div class="glass-card p-4 mb-4 border-0" style="background: linear-gradient(135deg, #2b2d42 0%, #1a1c2c 100%);">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h2 class="text-white fw-bold mb-2">Welcome Back, Overseer {{ current_user.name.split(' ')[0] }}</h2>
-                                <p class="text-white-50 mb-0">The system is currently monitoring {{ total_fir_count }} cases across {{ department_count }} active departments.</p>
-                            </div>
-                            <div class="col-md-4 text-end d-none d-md-block">
-                                <i class="fas fa-bolt text-warning fa-3x opacity-50"></i>
-                            </div>
-                        </div>
+        <!-- Stats Grid -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="hud-card">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="extra-small">Verification Queue</span>
+                        <i class="fas fa-clock stat-glow-red"></i>
                     </div>
-
-                    <!-- Stats Grid -->
-                    <div class="row g-4 mb-4">
-                        <div class="col-md-3">
-                            <div class="stat-widget glass-card">
-                                <div class="stat-icon-box bg-warning bg-opacity-10 text-warning">
-                                    <i class="fas fa-clock fa-lg"></i>
-                                </div>
-                                <h3 class="fw-bold mb-1">{{ pending_count }}</h3>
-                                <p class="text-secondary fw-semibold small mb-0">Pending FIRs</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stat-widget glass-card">
-                                <div class="stat-icon-box bg-info bg-opacity-10 text-info">
-                                    <i class="fas fa-building fa-lg"></i>
-                                </div>
-                                <h3 class="fw-bold mb-1">{{ department_count }}</h3>
-                                <p class="text-secondary fw-semibold small mb-0">Active Depts</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stat-widget glass-card">
-                                <div class="stat-icon-box bg-success bg-opacity-10 text-success">
-                                    <i class="fas fa-users fa-lg"></i>
-                                </div>
-                                <h3 class="fw-bold mb-1">{{ user_count }}</h3>
-                                <p class="text-secondary fw-semibold small mb-0">Total Users</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stat-widget glass-card">
-                                <div class="stat-icon-box bg-danger bg-opacity-10 text-danger">
-                                    <i class="fas fa-file-invoice fa-lg"></i>
-                                </div>
-                                <h3 class="fw-bold mb-1">{{ total_fir_count }}</h3>
-                                <p class="text-secondary fw-semibold small mb-0">System-wide FIRs</p>
-                            </div>
-                        </div>
+                    <h2 class="metric-value mb-1" style="font-family: 'Orbitron';">{{ pending_count }}</h2>
+                    <div class="extra-small text-danger opacity-60">PENDING PROTOCOL</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="hud-card">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="extra-small">Active Sectors</span>
+                        <i class="fas fa-building stat-glow-red"></i>
                     </div>
+                    <h2 class="metric-value mb-1" style="font-family: 'Orbitron';">{{ department_count }}</h2>
+                    <div class="extra-small text-muted">GLOBAL DEPLOYMENT</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="hud-card">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="extra-small">Total Personnel</span>
+                        <i class="fas fa-users stat-glow-red"></i>
+                    </div>
+                    <h2 class="metric-value mb-1" style="font-family: 'Orbitron';">{{ user_count }}</h2>
+                    <div class="extra-small text-muted">AUTHORIZED OPERATIVES</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="hud-card">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="extra-small">Total Records</span>
+                        <i class="fas fa-file-invoice stat-glow-red"></i>
+                    </div>
+                    <h2 class="metric-value mb-1" style="font-family: 'Orbitron';">{{ total_fir_count }}</h2>
+                    <div class="extra-small text-muted">ENCRYPTED ENTRIES</div>
+                </div>
+            </div>
+        </div>
 
                     <div class="row">
                         <!-- Left Column: Pending Actions -->
                         <div class="col-lg-8">
                             <!-- FIR Verification Table -->
-                            <div class="glass-card p-4 mb-4 border-0">
+                            <div class="hud-card mb-4">
                                 <div class="d-flex justify-content-between align-items-center mb-4">
-                                    <h5 class="fw-bold mb-0"><i class="fas fa-tasks text-primary me-2"></i>Pending FIR Verification</h5>
-                                    <span class="badge rounded-pill bg-light text-dark px-3 py-2 fw-normal">{{ pending_firs|length }} items</span>
+                                    <h5 class="hud-header-title mb-0"><i class="fas fa-tasks text-danger me-2"></i>VERIFICATION QUEUE</h5>
+                                    <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger px-3 py-2 fw-normal extra-small letter-spacing-1">{{ pending_firs|length }} FILES PENDING</span>
                                 </div>
-                                
+
                                 {% if pending_firs %}
                                 <div class="table-responsive">
-                                    <table class="table table-modern">
+                                    <table class="table table-premium mb-0">
                                         <thead>
-                                            <tr class="text-secondary fw-semibold small">
-                                                <th>INCIDENT DATE</th>
-                                                <th>CITIZEN</th>
-                                                <th>CRIME TYPE</th>
-                                                <th>LOCATION</th>
-                                                <th class="text-end">ACTIONS</th>
+                                            <tr>
+                                                <th>INCIDENT TIMESTAMP</th>
+                                                <th>CITIZEN ID</th>
+                                                <th>VECTOR</th>
+                                                <th>TELEMETRY</th>
+                                                <th class="text-end">PROTOCOLS</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for fir in pending_firs %}
                                             <tr>
-                                                <td class="small">{{ fir.timestamp.strftime('%d %b, %H:%M') }}</td>
-                                                <td class="fw-bold">{{ fir.user.name }}</td>
-                                                <td><span class="badge bg-light text-dark px-2 py-1">{{ fir.crime_type }}</span></td>
+                                                <td><span class="small opacity-70">{{ fir.timestamp.strftime('%d %b, %H:%M') }}</span></td>
+                                                <td class="fw-bold">{{ fir.user.name|upper }}</td>
+                                                <td><span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1 extra-small">{{ fir.crime_type }}</span></td>
                                                 <td>
-                                                    <button class="btn btn-sm btn-link text-info p-0 text-decoration-none small" onclick="showLocationOnMap({{ fir.lat|safe }}, {{ fir.lon|safe }})">
-                                                        <i class="fas fa-map-marker-alt me-1"></i> View Map
+                                                    <button class="btn btn-sm btn-link text-info p-0 text-decoration-none extra-small letter-spacing-1" onclick="showLocationOnMap('{{ fir.lat|safe }}', '{{ fir.lon|safe }}')">
+                                                        <i class="fas fa-location-crosshairs me-1"></i> VIEW GRID
                                                     </button>
                                                 </td>
                                                 <td class="text-end">
                                                     <div class="d-flex justify-content-end gap-2">
-                                                        <button class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#firModal{{ fir.id }}">
+                                                        <button class="btn btn-sm btn-outline-light border-opacity-25" data-bs-toggle="modal" data-bs-target="#firModal{{ fir.id }}">
                                                             <i class="fas fa-eye"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-admin" data-bs-toggle="modal" data-bs-target="#assignModal{{ fir.id }}">
-                                                            Verify
+                                                        <button class="btn btn-sm btn-premium btn-primary px-3" data-bs-toggle="modal" data-bs-target="#assignModal{{ fir.id }}">
+                                                            INITIALIZE
                                                         </button>
                                                     </div>
                                                 </td>
@@ -217,43 +396,48 @@
                                 </div>
                                 {% else %}
                                 <div class="text-center py-5">
-                                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex p-4 mb-3">
-                                        <i class="fas fa-check-double fa-2x"></i>
+                                    <div class="bg-success bg-opacity-5 text-success rounded-circle d-inline-flex p-4 mb-3 border border-success border-opacity-10">
+                                        <i class="fas fa-shield-check fa-2x pulse"></i>
                                     </div>
-                                    <h5>All clear!</h5>
-                                    <p class="text-secondary fw-semibold">No pending FIRs require verification at this time.</p>
+                                    <h5 class="hud-header-title" style="font-size: 1rem;">SECTOR SECURE</h5>
+                                    <p class="extra-small text-muted letter-spacing-1">NO PENDING VERIFICATIONS IN BUFFER</p>
                                 </div>
                                 {% endif %}
                             </div>
 
                             <!-- Citizen Verification Row -->
-                            <div class="glass-card p-4 mb-4 border-0">
-                                <h5 class="fw-bold mb-4"><i class="fas fa-id-card text-success me-2"></i>Citizen Verification</h5>
+                            <div class="hud-card mb-4">
+                                <h5 class="hud-header-title mb-4" style="font-size: 0.9rem;"><i class="fas fa-id-card text-danger me-2"></i>CITIZEN AUTHENTICATION</h5>
                                 {% set pending_citizens = pending_citizens or users|selectattr('role','equalto','citizen')|selectattr('verification_status','equalto','Pending')|list %}
                                 {% if pending_citizens %}
                                 <div class="table-responsive">
-                                    <table class="table table-modern">
+                                    <table class="table table-premium mb-0">
                                         <thead>
-                                            <tr class="text-secondary fw-semibold small">
-                                                <th>NAME</th>
-                                                <th>CONTACT</th>
-                                                <th>REGISTERED</th>
-                                                <th class="text-end">ACTIONS</th>
+                                            <tr>
+                                                <th>IDENTIFIER</th>
+                                                <th>CONTACT VECTOR</th>
+                                                <th>ENROLLMENT</th>
+                                                <th class="text-end">AUTH PROTOCOLS</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for c in pending_citizens %}
                                             <tr>
-                                                <td class="fw-bold">{{ c.name }}</td>
-                                                <td class="small">{{ c.email }}<br><span class="text-secondary fw-semibold">{{ c.phone }}</span></td>
-                                                <td class="small">{{ c.created_at.strftime('%Y-%m-%d') }}</td>
+                                                <td class="fw-bold">{{ c.name|upper }}</td>
+                                                <td>
+                                                    <div class="small">{{ c.email }}</div>
+                                                    <div class="extra-small text-muted">{{ c.phone }}</div>
+                                                </td>
+                                                <td class="extra-small opacity-70">{{ c.created_at.strftime('%Y-%m-%d') }}</td>
                                                 <td class="text-end">
-                                                    <form method="POST" action="{{ url_for('auth.admin_citizen_approve', user_id=c.id) }}" class="d-inline">
-                                                        <button class="btn btn-sm btn-success"><i class="fas fa-check"></i></button>
-                                                    </form>
-                                                    <form method="POST" action="{{ url_for('auth.admin_citizen_deny', user_id=c.id) }}" class="d-inline">
-                                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i></button>
-                                                    </form>
+                                                    <div class="d-flex justify-content-end gap-2">
+                                                        <form method="POST" action="{{ url_for('auth.admin_citizen_approve', user_id=c.id) }}" class="d-inline">
+                                                            <button class="btn btn-sm btn-outline-success border-opacity-25"><i class="fas fa-shield-check"></i></button>
+                                                        </form>
+                                                        <form method="POST" action="{{ url_for('auth.admin_citizen_deny', user_id=c.id) }}" class="d-inline">
+                                                            <button class="btn btn-sm btn-outline-danger border-opacity-25"><i class="fas fa-user-slash"></i></button>
+                                                        </form>
+                                                    </div>
                                                 </td>
                                             </tr>
                                             {% endfor %}
@@ -261,7 +445,9 @@
                                     </table>
                                 </div>
                                 {% else %}
-                                <p class="text-secondary fw-semibold text-center py-3">No pending citizen applications.</p>
+                                <div class="text-center py-3">
+                                    <p class="extra-small text-muted letter-spacing-1">NO PENDING AUTHENTICATION REQUESTS</p>
+                                </div>
                                 {% endif %}
                             </div>
                         </div>
@@ -269,36 +455,39 @@
                         <!-- Right Column: Sidebar Widgets -->
                         <div class="col-lg-4">
                             <!-- Department Workload -->
-                            <div class="glass-card p-4 mb-4 border-0">
-                                <h5 class="fw-bold mb-4"><i class="fas fa-chart-line text-info me-2"></i>Department Load</h5>
+                            <div class="hud-card mb-4" style="border-left: 4px solid var(--admin-accent);">
+                                <h5 class="hud-header-title mb-4" style="font-size: 0.9rem;"><i class="fas fa-satellite-dish text-danger me-2"></i>SECTOR LOAD ANALYSIS</h5>
                                 {% for dept in departments %}
                                 <div class="mb-4">
                                     <div class="d-flex justify-content-between mb-2">
-                                        <span class="small fw-bold">{{ dept.name }}</span>
-                                        <span class="small text-secondary fw-semibold">{{ dept.workload }} Active</span>
+                                        <span class="extra-small fw-bold">{{ dept.name|upper }}</span>
+                                        <span class="extra-small text-danger">{{ dept.workload }} ACTIVE</span>
                                     </div>
-                                    <div class="progress" style="height: 6px; border-radius: 10px;">
-                                        <div class="progress-bar bg-danger rounded-pill transition-all" role="progressbar" style="width: {{ dept.workload_percent|default(0)|int }}%;"></div>
+                                    <div class="progress" style="height: 4px; background: rgba(239, 35, 60, 0.05);">
+                                        <div class="progress-bar bg-danger shadow-glow" role="progressbar" style="width: {{ dept.workload_percent|default(0)|int }}%;"></div>
                                     </div>
                                 </div>
                                 {% endfor %}
                             </div>
 
                             <!-- System Logs -->
-                            <div class="glass-card p-4 border-0">
-                                <h5 class="fw-bold mb-4"><i class="fas fa-list-ul text-dark me-2"></i>Operation Logs</h5>
-                                <div class="timeline-custom" style="max-height: 400px; overflow-y: auto;">
+                            <div class="hud-card">
+                                <h5 class="hud-header-title mb-4" style="font-size: 0.9rem;"><i class="fas fa-list-ul text-danger me-2"></i>OPERATION LOGS</h5>
+                                <div class="timeline-custom px-2" style="max-height: 400px; overflow-y: auto;">
                                     {% for log in system_logs %}
-                                    <div class="d-flex gap-3 mb-4">
+                                    <div class="d-flex gap-3 mb-4 position-relative">
+                                        {% if not loop.last %}
+                                        <div class="position-absolute" style="left: 15px; top: 30px; bottom: -20px; width: 1px; background: rgba(239, 35, 60, 0.1);"></div>
+                                        {% endif %}
                                         <div class="flex-shrink-0">
-                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                                                <i class="fas fa-circle-info text-secondary fw-semibold small"></i>
+                                            <div class="rounded-circle bg-danger bg-opacity-10 border border-danger border-opacity-20 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; z-index: 2; position: relative;">
+                                                <i class="fas fa-bolt text-danger extra-small" style="font-size: 0.6rem;"></i>
                                             </div>
                                         </div>
                                         <div>
-                                            <p class="mb-0 small fw-bold">{{ log.action.replace('_', ' ').upper() }}</p>
-                                            <p class="mb-1 extra-small text-secondary fw-semibold">{{ log.user }} • {{ log.time }}</p>
-                                            <span class="badge rounded-pill {{ 'bg-success' if 'success' in log.status|lower else 'bg-warning' }}" style="font-size: 0.6rem;">{{ log.status }}</span>
+                                            <p class="mb-0 extra-small fw-bold text-white letter-spacing-1">{{ log.action.replace('_', ' ').upper() }}</p>
+                                            <p class="mb-1 extra-small text-muted" style="font-size: 0.55rem;">{{ log.user|upper }} • {{ log.time }}</p>
+                                            <span class="badge rounded-pill {{ 'bg-success' if 'success' in log.status|lower else 'bg-warning' }} bg-opacity-10 {{ 'text-success' if 'success' in log.status|lower else 'text-warning' }} extra-small" style="font-size: 0.5rem; letter-spacing: 1px;">{{ log.status|upper }}</span>
                                         </div>
                                     </div>
                                     {% endfor %}
@@ -311,42 +500,43 @@
         </div>
     </div>
 
-    <!-- Modals (Re-styled version of original modals) -->
+    <!-- Modals -->
     {% if pending_firs %}
     {% for fir in pending_firs %}
     <!-- Assign Modal -->
     <div class="modal fade" id="assignModal{{ fir.id }}" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 glass-card">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold">Verify & Delegate Case</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content border-0 hud-card p-0">
+                <div class="modal-header border-0 pb-0 px-4 pt-4">
+                    <h5 class="hud-header-title mb-0" style="font-size: 1.1rem;">DELEGATION PROTOCOL</h5>
+                    <button type="button" class="btn-close btn-close-white opacity-50" data-bs-dismiss="modal"></button>
                 </div>
                 <form method="POST" action="{{ url_for('verify_and_assign_fir', fir_id=fir.id) }}">
                     <div class="modal-body p-4">
                         <div class="mb-4">
-                            <label class="form-label small fw-bold">INCIDENT SUMMARY</label>
-                            <div class="p-3 bg-light rounded text-secondary fw-semibold small">
-                                {{ fir.crime_type }} report at {{ fir.lat|round(4) }}, {{ fir.lon|round(4) }}
+                            <label class="extra-small text-danger d-block mb-2">INCIDENT TELEMETRY</label>
+                            <div class="hud-card p-3 border-opacity-10 bg-black bg-opacity-20">
+                                <span class="extra-small text-white">{{ fir.crime_type|upper }} REPORT</span>
+                                <div class="extra-small text-muted mt-1">LOCATION: {{ fir.lat|round(4) }}, {{ fir.lon|round(4) }}</div>
                             </div>
                         </div>
                         <div class="mb-4">
-                            <label for="department_id" class="form-label small fw-bold text-uppercase">Assign to Department</label>
-                            <select class="form-select border-0 bg-light" id="department_id" name="department_id" required>
-                                <option value="">Select Target Unit</option>
+                            <label for="department_id" class="extra-small text-danger d-block mb-2">TARGET SECTOR UNIT</label>
+                            <select class="form-select search-command" id="department_id" name="department_id" required>
+                                <option value="" class="bg-dark">SELECT DISPATCH UNIT</option>
                                 {% for dept in departments %}
-                                <option value="{{ dept.id }}">{{ dept.name }}</option>
+                                <option value="{{ dept.id }}" class="bg-dark">{{ dept.name|upper }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="mb-0">
-                            <label for="admin_notes" class="form-label small fw-bold text-uppercase">Directives</label>
-                            <textarea class="form-control border-0 bg-light" id="admin_notes" name="admin_notes" rows="3" placeholder="Enter specific instructions..."></textarea>
+                            <label for="admin_notes" class="extra-small text-danger d-block mb-2">OPERATIONAL DIRECTIVES</label>
+                            <textarea class="form-control search-command" id="admin_notes" name="admin_notes" rows="3" placeholder="ENTER SPECIFIC ORDERS..."></textarea>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="button" class="btn btn-link text-secondary fw-semibold text-decoration-none" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-admin px-4">Initialize Assignment</button>
+                    <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                        <button type="button" class="btn btn-link text-muted extra-small text-decoration-none letter-spacing-1" data-bs-dismiss="modal">ABORT</button>
+                        <button type="submit" class="btn btn-premium btn-primary px-4">INITIALIZE DISPATCH</button>
                     </div>
                 </form>
             </div>
@@ -356,37 +546,40 @@
     <!-- FIR Detail Modal -->
     <div class="modal fade" id="firModal{{ fir.id }}" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 glass-card">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold">Case Brief #{{ fir.id|string|truncate(8, True, '') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content border-0 hud-card p-0">
+                <div class="modal-header border-0 px-4 pt-4">
+                    <h5 class="hud-header-title mb-0" style="font-size: 1.1rem;">CASE DOSSIER #{{ fir.id|string|truncate(8, True, '')|upper }}</h5>
+                    <button type="button" class="btn-close btn-close-white opacity-50" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="text-secondary fw-semibold extra-small d-block text-uppercase fw-bold">Reporter Details</label>
-                                <p class="mb-0 fw-bold">{{ fir.user.name }}</p>
-                                <p class="text-secondary fw-semibold small mb-0">{{ fir.user.email }}</p>
+                        <div class="col-md-6 border-end border-white border-opacity-10">
+                            <div class="mb-4">
+                                <label class="extra-small text-danger d-block mb-1">REPORTER IDENTIFIER</label>
+                                <div class="fw-bold text-white">{{ fir.user.name|upper }}</div>
+                                <div class="extra-small text-muted">{{ fir.user.email }}</div>
                             </div>
-                            <div class="mb-3">
-                                <label class="text-secondary fw-semibold extra-small d-block text-uppercase fw-bold">Crime Intelligence</label>
-                                <p class="mb-0"><span class="badge bg-danger bg-opacity-10 text-danger border-0">{{ fir.crime_type }}</span></p>
+                            <div class="mb-4">
+                                <label class="extra-small text-danger d-block mb-1">THREAT CLASSIFICATION</label>
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20 px-3 py-2 extra-small letter-spacing-1">{{ fir.crime_type|upper }}</span>
                             </div>
                             <div class="mb-0">
-                                <label class="text-secondary fw-semibold extra-small d-block text-uppercase fw-bold">Timestamp</label>
-                                <p class="mb-0 fw-bold">{{ fir.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC') }}</p>
+                                <label class="extra-small text-danger d-block mb-1">DETECTION TIMESTAMP</label>
+                                <div class="small text-white font-monospace">{{ fir.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC') }}</div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="text-secondary fw-semibold extra-small d-block text-uppercase fw-bold">On-field Evidence</label>
-                                <div class="bg-light p-3 rounded" style="min-height: 100px;">
-                                    <p class="small text-dark mb-0 italic" style="font-style: italic;">"{{ fir.description }}"</p>
+                            <div class="mb-4">
+                                <label class="extra-small text-danger d-block mb-1">INCIDENT INTELLIGENCE</label>
+                                <div class="hud-card p-3 bg-black bg-opacity-30 border-opacity-10" style="min-height: 100px;">
+                                    <p class="extra-small text-white-50 mb-0" style="font-style: italic; line-height: 1.6;">"{{ fir.description }}"</p>
                                 </div>
                             </div>
-                            <div id="map{{ fir.id }}" class="rounded bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 120px; border: 1px dashed #cbd5e0;">
-                                <span class="text-secondary fw-semibold small"><i class="fas fa-map-marked-alt me-2"></i>Map Telemetry Unavailable</span>
+                            <div id="map{{ fir.id }}" class="hud-card p-0 d-flex align-items-center justify-content-center bg-black bg-opacity-20 border-opacity-10" style="height: 120px;">
+                                <div class="text-center">
+                                    <i class="fas fa-satellite text-danger mb-2 opacity-40"></i>
+                                    <div class="extra-small text-muted letter-spacing-1">GRID TELEMETRY ACTIVE</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -400,27 +593,27 @@
     <!-- Department Modal -->
     <div class="modal fade" id="departmentModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 glass-card">
-                <div class="modal-header border-0 pt-4 px-4">
-                    <h5 class="modal-title fw-bold">Department Fleet</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content border-0 hud-card p-0">
+                <div class="modal-header border-0 px-4 pt-4">
+                    <h5 class="hud-header-title mb-0" style="font-size: 1.1rem;">SECTOR UNIT REGISTRY</h5>
+                    <button type="button" class="btn-close btn-close-white opacity-50" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="table-responsive">
-                        <table class="table table-modern">
+                        <table class="table table-premium mb-0">
                             <thead>
-                                <tr class="text-secondary fw-semibold small">
-                                    <th>UNIT NAME</th>
-                                    <th>SECTOR/CITY</th>
-                                    <th>C_LOAD</th>
+                                <tr>
+                                    <th>UNIT IDENTIFIER</th>
+                                    <th>OPERATIONAL SECTOR</th>
+                                    <th class="text-end">LOAD STATUS</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for dept in departments %}
                                 <tr>
-                                    <td class="fw-bold">{{ dept.name }}</td>
-                                    <td>{{ dept.city }}</td>
-                                    <td>{{ dept.workload }}</td>
+                                    <td class="fw-bold">{{ dept.name|upper }}</td>
+                                    <td><span class="extra-small opacity-70">{{ dept.city|upper }}</span></td>
+                                    <td class="text-end"><span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 px-2 py-1 extra-small">{{ dept.workload }} ACTIVE CASES</span></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -434,36 +627,36 @@
     <!-- Users Modal -->
     <div class="modal fade" id="usersModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 glass-card">
-                <div class="modal-header border-0 pt-4 px-4">
-                    <h5 class="modal-title fw-bold">Personnel Directory</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content border-0 hud-card p-0">
+                <div class="modal-header border-0 px-4 pt-4">
+                    <h5 class="hud-header-title mb-0" style="font-size: 1.1rem;">AUTHORIZED PERSONNEL</h5>
+                    <button type="button" class="btn-close btn-close-white opacity-50" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="table-responsive">
-                        <table class="table table-modern">
+                        <table class="table table-premium mb-0">
                             <thead>
-                                <tr class="text-secondary fw-semibold small">
+                                <tr>
                                     <th>OPERATIVE</th>
-                                    <th>CLEARANCE ROLE</th>
-                                    <th>STATUS</th>
+                                    <th>CLEARANCE</th>
+                                    <th class="text-end">STATUS</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for user in users %}
                                 <tr>
                                     <td>
-                                        <div class="fw-bold">{{ user.name }}</div>
-                                        <div class="extra-small text-secondary fw-semibold">{{ user.email }}</div>
+                                        <div class="fw-bold text-white">{{ user.name|upper }}</div>
+                                        <div class="extra-small text-muted">{{ user.email }}</div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-{{ 'primary' if user.role == 'citizen' else 'success' if user.role == 'police' else 'danger' }} bg-opacity-10 text-{{ 'primary' if user.role == 'citizen' else 'success' if user.role == 'police' else 'danger' }}">
+                                        <span class="badge bg-{{ 'primary' if user.role == 'citizen' else 'success' if user.role == 'police' else 'danger' }} bg-opacity-10 text-{{ 'primary' if user.role == 'citizen' else 'success' if user.role == 'police' else 'danger' }} border border-{{ 'primary' if user.role == 'citizen' else 'success' if user.role == 'police' else 'danger' }} border-opacity-20 extra-small">
                                             {{ user.role.upper() }}
                                         </span>
                                     </td>
-                                    <td>
-                                        <span class="small {{ 'text-success' if user.is_active else 'text-danger' }}">
-                                            <i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i> {{ 'Active' if user.is_active else 'Terminated' }}
+                                    <td class="text-end">
+                                        <span class="extra-small {{ 'text-success' if user.is_active else 'text-danger' }} letter-spacing-1">
+                                            <i class="fas fa-circle me-1" style="font-size: 0.4rem;"></i> {{ 'ONLINE' if user.is_active else 'OFFLINE' }}
                                         </span>
                                     </td>
                                 </tr>
@@ -484,4 +677,4 @@
     </script>
 </body>
 
-</html>
+</html>

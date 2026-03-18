@@ -1,309 +1,588 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Command Center - Police Department</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <style>
         :root {
-            --police-bg: #0f172a;
-            --police-card: #1e293b;
+            --police-bg: #020617;
+            --police-sidebar: rgba(15, 23, 42, 0.95);
             --police-accent: #38bdf8;
-            --police-border: #334155;
+            --police-accent-glow: rgba(56, 189, 248, 0.5);
+            --police-border: rgba(255, 255, 255, 0.18);
+            --text-main: #ffffff;
+            --text-muted: #cbd5e1;
+            --glass-card: rgba(255, 255, 255, 0.06);
+            --glass-blur: blur(30px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             background-color: var(--police-bg);
-            color: #f8fafc;
-        }
-
-        .police-sidebar {
-            background: var(--police-card);
-            border-right: 1px solid var(--police-border);
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(129, 140, 248, 0.1) 0%, transparent 50%);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
         }
 
-        .police-nav-link {
-            padding: 0.8rem 1.5rem;
-            color: #94a3b8;
+        /* High-Definition Mesh Particles */
+        .mesh-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .mesh-blob {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .blob-1 {
+            background: radial-gradient(circle, #38bdf8 0%, transparent 70%);
+            top: -200px;
+            left: -100px;
+            animation: drift 25s infinite alternate ease-in-out;
+        }
+
+        .blob-2 {
+            background: radial-gradient(circle, #818cf8 0%, transparent 70%);
+            bottom: -300px;
+            right: -100px;
+            animation: drift 30s infinite alternate-reverse ease-in-out;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(10% , 10%) scale(1.1); }
+        }
+
+        /* Sidebar HUD */
+        .police-sidebar {
+            width: 280px;
+            background: var(--police-sidebar);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-right: 1px solid var(--police-border);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            padding: 2.5rem 1.5rem;
+        }
+
+        .sidebar-header {
+            margin-bottom: 3.5rem;
+        }
+
+        .brand-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            color: #fff;
             display: flex;
             align-items: center;
             gap: 12px;
-            transition: all 0.2s;
-            border-radius: 0.5rem;
-            margin: 0.25rem 1rem;
+            text-transform: uppercase;
         }
 
-        .police-nav-link:hover, .police-nav-link.active {
+        .brand-logo i {
+            color: var(--police-accent);
+            filter: drop-shadow(0 0 8px var(--police-accent-glow));
+        }
+
+        .jurisdiction-tag {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            margin-top: 5px;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .police-nav-link {
+            padding: 1rem 1.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 0.5rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .police-nav-link:hover,
+        .police-nav-link.active {
             background: rgba(56, 189, 248, 0.1);
             color: var(--police-accent);
         }
 
-        .police-card {
-            background: var(--police-card);
+        /* Main Viewport */
+        .police-viewport {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            padding: 3rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Glass HUD Components */
+        .hud-card {
+            background: var(--glass-card);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
             border: 1px solid var(--police-border);
-            border-radius: 1rem;
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .kanban-column {
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid var(--police-border);
-            border-radius: 0.75rem;
-            padding: 1rem;
-            min-height: 400px;
+        /* Tactical Corner Accents */
+        .hud-card::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 15px;
+            height: 15px;
+            border-top: 2px solid var(--police-accent);
+            border-right: 2px solid var(--police-accent);
+            opacity: 0.3;
         }
 
-        .nav-tabs-modern {
-            border-bottom: 2px solid var(--police-border);
+        .hud-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(56, 189, 248, 0.05),
+                transparent
+            );
+            transition: 0.5s;
         }
 
-        .nav-tabs-modern .nav-link {
-            color: #94a3b8;
-            border: none;
-            padding: 1rem 2rem;
-            font-weight: 600;
+        .hud-card:hover::before {
+            left: 100%;
         }
 
-        .nav-tabs-modern .nav-link.active {
-            background: none;
-            color: var(--police-accent);
-            border-bottom: 2px solid var(--police-accent);
+        .hud-card:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 20px rgba(56, 189, 248, 0.1);
         }
 
-        .map-glow {
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+        .hud-header-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255,255,255,0.1);
         }
+
+        .stat-glow-red { color: #f43f5e; text-shadow: 0 0 15px rgba(244, 63, 94, 0.4); }
+        .stat-glow-blue { color: #38bdf8; text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+        .stat-glow-green { color: #10b981; text-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
 
         .search-command {
-            background: var(--police-bg);
-            border: 1px solid var(--police-border);
-            color: white;
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid var(--police-border) !important;
+            color: #fff !important;
+            border-radius: 12px !important;
+            padding: 0.8rem 1.2rem !important;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .search-command::placeholder {
+            color: rgba(255, 255, 255, 0.65) !important;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
         }
 
         .search-command:focus {
-            background: var(--police-bg);
-            border-color: var(--police-accent);
-            color: white;
-            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.1);
-        }
-
-        /* Tactical Modal Styling */
-        .modal-tactical .modal-content {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--police-accent);
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.15);
-        }
-
-        .modal-tactical .modal-header {
-            border-bottom: 1px solid rgba(56, 189, 248, 0.2);
-            background: rgba(56, 189, 248, 0.05);
-        }
-
-        .modal-tactical .form-control, .modal-tactical .form-select {
-            background: rgba(30, 41, 59, 0.8) !important;
-            border: 1px solid var(--police-border) !important;
-            color: #f8fafc !important;
-            transition: all 0.3s;
-        }
-
-        .modal-tactical .form-control:focus, .modal-tactical .form-select:focus {
-            background: rgba(30, 41, 59, 1) !important;
             border-color: var(--police-accent) !important;
-            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.1) !important;
-            color: white !important;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3) !important;
+            background: rgba(15, 23, 42, 0.8) !important;
         }
 
-        .modal-tactical .form-select option {
-            background-color: #1e293b;
-            color: white;
+        /* Tab Visibility Fix */
+        .nav-tabs-modern .nav-link {
+            color: rgba(255, 255, 255, 0.7) !important;
+            border: none !important;
+            transition: all 0.3s;
+            position: relative;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
 
-        .modal-tactical .btn-primary {
-            background: var(--police-accent);
-            border: none;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        .nav-tabs-modern .nav-link.active {
+            color: var(--police-accent) !important;
+            background: rgba(56, 189, 248, 0.1) !important;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
         }
 
-        .modal-tactical .btn-outline-primary {
-            border-style: dashed;
-            color: var(--police-accent);
-            border-color: var(--police-accent);
+        .nav-tabs-modern .nav-link:hover:not(.active) {
+            color: #fff !important;
+            background: rgba(255, 255, 255, 0.08);
         }
 
-        .text-police-muted {
-            color: #cbd5e1 !important;
+        /* Sidebar Layout Fix */
+        .police-sidebar {
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 2rem;
+        }
+
+        .sidebar-nav {
+            flex-grow: 1;
+        }
+
+        /* Logout Visibility */
+        .logout-link {
+            color: #f43f5e !important;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+            transition: all 0.3s;
+            opacity: 1;
+        }
+
+        .logout-link:hover {
+            text-shadow: 0 0 25px rgba(244, 63, 94, 0.6);
+            transform: translateX(8px);
+        }
+
+        /* Tactical Visibility Overrides */
+        .text-muted {
+            color: rgba(255, 255, 255, 0.7) !important;
         }
 
         .extra-small {
-            font-size: 0.75rem;
-            letter-spacing: 0.05rem;
+            font-size: 0.7rem;
+            letter-spacing: 0.12rem;
             text-transform: uppercase;
-            font-weight: 600;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.85) !important;
+            text-shadow: 0 0 5px rgba(255,255,255,0.1);
+        }
+
+        .jurisdiction-tag {
+            color: var(--police-accent) !important;
+            opacity: 0.9;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+        }
+
+        .modal-tactical .modal-content {
+            background: rgba(7, 10, 15, 0.95);
+            backdrop-filter: blur(40px);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            border-radius: 30px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8), 0 0 30px rgba(56, 189, 248, 0.1);
+        }
+
+        .btn-premium {
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+            border-radius: 10px;
+            text-transform: uppercase;
+            font-family: 'Orbitron';
+            letter-spacing: 1px;
+        }
+
+        .btn-premium::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: 0.5s;
+        }
+
+        .btn-premium:hover::after {
+            left: 100%;
+        }
+
+        .text-glow {
+            text-shadow: 0 0 15px var(--police-accent);
+        }
+
+        .brand-logo i {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--police-accent), #fff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 5px var(--police-accent));
+        }
+
+        .brand-logo span {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            letter-spacing: 3px;
+            background: linear-gradient(to right, #fff, var(--police-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Enhanced Table Style */
+        .table thead th {
+            font-family: 'Orbitron', sans-serif !important;
+            font-size: 0.6rem !important;
+            letter-spacing: 2px !important;
+            color: rgba(56, 189, 248, 0.6) !important;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.1) !important;
+            padding-bottom: 1rem !important;
+            background: transparent !important;
+        }
+
+        .table tbody td {
+            padding: 1rem 0.75rem !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
         }
     </style>
 
 </head>
+
 <body>
-    <div class="container-fluid p-0">
-        <div class="row g-0">
-            <!-- Sidebar -->
-            <div class="col-lg-2 d-none d-lg-block police-sidebar position-fixed">
-                <div class="p-4 mb-4">
-                    <h5 class="fw-bold text-white mb-0"><i class="fas fa-shield-halved text-info me-2"></i>{{ department.name if department else 'POLICE HUB' }}</h5>
-                    <small class="text-police-muted">JURISDICTION: {{ department.city if department else 'ACTIVE' }}</small>
-                </div>
-                
-                <nav class="mt-2">
-                    <a href="{{ url_for('main.police_dashboard') }}" class="police-nav-link active"><i class="fas fa-desktop"></i> Dashboard</a>
+    <div class="mesh-container">
+        <div class="mesh-blob blob-1"></div>
+        <div class="mesh-blob blob-2"></div>
+    </div>
+    <!-- Sidebar -->
+    <aside class="police-sidebar">
+        <div class="sidebar-header mb-4">
+            <div class="brand-logo mb-2">
+                <i class="fas fa-shield-virus text-glow"></i>
+                <span>CMS HUB</span>
+            </div>
+            <div class="extra-small text-info brightness-150" style="font-size: 0.65rem; letter-spacing: 3px; color: #7dd3fc !important;">TACTICAL COMMAND v4.0</div>
+            <div class="jurisdiction-tag mt-2">{{ department.city|upper if department else 'GLOBAL NET' }}</div>
+        </div>
 
-                    <a href="{{ url_for('analysis.criminals_list') }}" class="police-nav-link"><i class="fas fa-users-viewfinder"></i> Criminal Database</a>
+        <nav class="flex-grow-1">
+            <a href="{{ url_for('main.police_dashboard') }}" class="police-nav-link active">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+            <a href="{{ url_for('analysis.criminals_list') }}" class="police-nav-link">
+                <i class="fas fa-user-secret"></i> Intelligence
+            </a>
+            <a href="{{ url_for('fir.fir_records') }}" class="police-nav-link">
+                <i class="fas fa-folder-open"></i> Investigations
+            </a>
+            <a href="{{ url_for('analysis.analytics') }}" class="police-nav-link">
+                <i class="fas fa-satellite-dish"></i> Intel Report
+            </a>
 
-                    <a href="{{ url_for('fir.fir_records') }}" class="police-nav-link"><i class="fas fa-folder-tree"></i> Investigations</a>
+            {% if current_user.is_admin() %}
+            <a href="{{ url_for('main.admin_dashboard') }}" class="police-nav-link">
+                <i class="fas fa-gear"></i> Systems
+            </a>
+            {% endif %}
+        </nav>
 
-                    <a href="{{ url_for('analysis.analytics') }}" class="police-nav-link"><i class="fas fa-satellite-dish"></i> Intel Report</a>
-
-                    <a href="{{ url_for('main.admin_dashboard') if current_user.is_admin() else '#' }}" class="police-nav-link"><i class="fas fa-gear"></i> Systems</a>
-
-                </nav>
-
-                <div class="position-absolute bottom-0 w-100 p-4">
-                    <div class="police-card p-3 d-flex align-items-center gap-3">
-                        <div class="rounded-circle bg-info bg-opacity-10 p-2">
-                            <i class="fas fa-user-shield text-info"></i>
-                        </div>
-                        <div class="overflow-hidden">
-                            <div class="small fw-bold text-truncate text-white">{{ current_user.name }}</div>
-                            <div class="extra-small text-police-muted">{{ current_user.shift|default('On Duty') }}</div>
-                        </div>
+        <div class="sidebar-footer">
+            <div class="hud-card p-3 mb-3" style="background: rgba(56, 189, 248, 0.03); border-radius: 15px;">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-info bg-opacity-10 p-2 rounded" style="border: 1px solid rgba(56,189,248,0.2);">
+                        <i class="fas fa-id-badge text-info"></i>
+                    </div>
+                    <div>
+                        <div class="extra-small text-muted" style="font-size: 0.6rem;">OPERATIVE ID</div>
+                        <div class="small fw-bold text-white">{{ current_user.name|truncate(12)|upper }}</div>
                     </div>
                 </div>
             </div>
+            <a href="{{ url_for('auth.logout') }}" class="police-nav-link logout-link">
+                <i class="fas fa-power-off"></i> ABORT SESSION
+            </a>
+        </div>
+    </aside>
 
-            <!-- Main Content -->
-            <div class="col-lg-10 offset-lg-2 min-vh-100 p-4">
-                <!-- Header -->
-                <header class="d-flex justify-content-between align-items-center mb-5">
-                    <div>
-                        <h2 class="fw-bold mb-1">{{ department.name if department else 'Operational Overview' }}</h2>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb extra-small m-0">
-                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-police-muted">Command</a></li>
-                                <li class="breadcrumb-item active text-info" aria-current="page">Operational Dashboard</li>
-                            </ol>
-                        </nav>
-                    </div>
-                    <div class="d-flex gap-3">
-                        <a href="{{ url_for('main.daily_report') }}" target="_blank" class="btn btn-outline-info btn-sm px-3"><i class="fas fa-print me-2"></i>Daily Report</a>
-                        <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#fileCaseModal">
-                            <i class="fas fa-plus-circle me-2"></i>FILE NEW CASE
-                        </button>
-                        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-sm px-3"><i class="fas fa-power-off me-2"></i>Logout</a>
-
-                    </div>
-                </header>
-
-                <!-- Stats Grid -->
-                <div class="row g-4 mb-5">
-                    <div class="col-md-3">
-                        <div class="police-card p-4">
-                            <div class="d-flex justify-content-between mb-3">
-                                <span class="extra-small text-uppercase fw-bold text-police-muted">Pending Dispatch</span>
-                                <i class="fas fa-hourglass-half text-warning"></i>
+    <!-- Main Content -->
+    <main class="police-viewport">
+        <header class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="hud-header-title mb-1">{{ department.name if department else 'Operational Intelligence' }}</h2>
+                <div class="jurisdiction-tag" style="margin-top: 0;">Command Level: Alpha-1</div>
+            </div>
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('main.daily_report') }}" target="_blank" class="btn-premium btn-outline py-2 px-4 shadow-sm">
+                    <i class="fas fa-print"></i>
+                </a>
+                <button class="btn-premium btn-primary py-2 px-4 shadow-lg" data-bs-toggle="modal" data-bs-target="#fileCaseModal">
+                    <i class="fas fa-plus-circle me-2"></i> NEW CASE
+                </button>
+            </div>
+        </header>
+        
+        <!-- Flash Messages -->
+        <div class="flash-messages-container mb-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }} alert-dismissible fade show hud-card py-2 px-4 mb-2" role="alert" style="background: rgba(var(--{{ 'danger' if category == 'error' else 'info' }}-rgb), 0.1); border: 1px solid rgba(var(--{{ 'danger' if category == 'error' else 'info' }}-rgb), 0.3);">
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="fas fa-{{ 'triangle-exclamation' if category == 'error' else 'circle-info' }} text-{{ 'danger' if category == 'error' else 'info' }}"></i>
+                                <span class="extra-small letter-spacing-1 fw-bold">{{ message|upper }}</span>
                             </div>
-                            <h3 class="fw-bold mb-0" id="pending-count">{{ pending_count }}</h3>
-
-                            <div class="progress mt-3" style="height: 4px; background: rgba(255,193,7,0.1);">
-                                <div class="progress-bar bg-warning" style="width: 45%;"></div>
-                            </div>
+                            <button type="button" class="btn-close btn-close-white small" data-bs-dismiss="modal" style="font-size: 0.5rem;"></button>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="police-card p-4 border-info-subtle">
-                            <div class="d-flex justify-content-between mb-3">
-                                <span class="extra-small text-uppercase fw-bold text-police-muted">Active Cases</span>
-                                <i class="fas fa-wave-square text-info"></i>
-                            </div>
-                            <h3 class="fw-bold mb-0 text-info" id="active-count">{{ in_progress_count }}</h3>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
 
-                            <div class="progress mt-3" style="height: 4px; background: rgba(56,189,248,0.1);">
-                                <div class="progress-bar bg-info" style="width: 70%;"></div>
-                            </div>
-                        </div>
+        <!-- Dynamic Tactical Stats -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="hud-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="text-muted extra-small text-uppercase letter-spacing-1">Pending</div>
+                        <i class="fas fa-hourglass-half stat-glow-blue"></i>
                     </div>
-                    <div class="col-md-3">
-                        <div class="police-card p-4">
-                            <div class="d-flex justify-content-between mb-3">
-                                <span class="extra-small text-uppercase fw-bold text-police-muted">Resolved Units</span>
-                                <i class="fas fa-check-double text-success"></i>
-                            </div>
-                            <h3 class="fw-bold mb-0 text-success" id="resolved-count">{{ closed_count }}</h3>
-
-                            <div class="progress mt-3" style="height: 4px; background: rgba(74,222,128,0.1);">
-                                <div class="progress-bar bg-success" style="width: 90%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="police-card p-4">
-                            <div class="d-flex justify-content-between mb-3">
-                                <span class="extra-small text-uppercase fw-bold text-police-muted">System Total</span>
-                                <i class="fas fa-database text-police-muted"></i>
-                            </div>
-                            <h3 class="fw-bold mb-0" id="total-count">{{ total_count }}</h3>
-
-                            <div class="extra-small text-police-muted mt-3"><i class="fas fa-arrow-up text-success me-1"></i> 12% from last cycle</div>
-                        </div>
+                    <h2 class="metric-value mb-0" id="stat-pending">{{ pending_count }}</h2>
+                    <div class="progress mt-3" style="height: 4px; background: rgba(56, 189, 248, 0.1);">
+                        <div class="progress-bar bg-info" style="width: 35%"></div>
                     </div>
                 </div>
+            </div>
+            <div class="col-md-3">
+                <div class="hud-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="text-muted extra-small text-uppercase letter-spacing-1">Active Cases</div>
+                        <i class="fas fa-bolt stat-glow-blue"></i>
+                    </div>
+                    <h2 class="metric-value mb-0" id="stat-investigation">{{ in_progress_count }}</h2>
+                    <div class="progress mt-3" style="height: 4px; background: rgba(56, 189, 248, 0.1);">
+                        <div class="progress-bar bg-primary" style="width: 65%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="hud-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="text-muted extra-small text-uppercase letter-spacing-1">Resolved</div>
+                        <i class="fas fa-circle-check stat-glow-green"></i>
+                    </div>
+                    <h2 class="metric-value mb-0" id="stat-resolved">{{ closed_count }}</h2>
+                    <div class="progress mt-3" style="height: 4px; background: rgba(16, 185, 129, 0.1);">
+                        <div class="progress-bar bg-success" style="width: 85%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="hud-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="text-muted extra-small text-uppercase letter-spacing-1">Intelligence Score</div>
+                        <i class="fas fa-database stat-glow-blue"></i>
+                    </div>
+                    <h2 class="metric-value mb-0" id="stat-total">{{ total_count }}</h2>
+                    <div class="extra-small mt-2 text-info"><i class="fas fa-arrow-up me-1"></i> 12% FROM LAST CYCLE</div>
+                </div>
+            </div>
+        </div>
 
                 <div class="row g-4">
                     <!-- Investigations -->
                     <div class="col-lg-8">
-                        <div class="police-card mb-4 overflow-hidden">
-                            <div class="p-4 border-bottom border-light border-opacity-10 d-flex justify-content-between align-items-center">
-                                <h5 class="fw-bold mb-0">FIR Management Console</h5>
-                                <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-light opacity-50"><i class="fas fa-filter"></i></button>
-                                    <button class="btn btn-outline-light opacity-50"><i class="fas fa-download"></i></button>
+                        <div class="hud-card mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="hud-header-title mb-0">Operational Management Console</h5>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-info opacity-50"><i class="fas fa-filter"></i></button>
+                                    <button class="btn btn-sm btn-outline-info opacity-50"><i class="fas fa-download"></i></button>
                                 </div>
                             </div>
-                            
-                            <ul class="nav nav-tabs nav-tabs-modern px-4" role="tablist">
-                                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#new" type="button">NEW REPORTS</button></li>
-                                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#active" type="button">UNDER INVESTIGATION</button></li>
-                                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#closed" type="button">ARCHIVED</button></li>
+
+                            <ul class="nav nav-tabs nav-tabs-modern mb-4" role="tablist" style="border-bottom: 1px solid var(--police-border);">
+                                <li class="nav-item">
+                                    <button class="nav-link active py-3 px-4 fw-bold text-uppercase letter-spacing-1" data-bs-toggle="tab" data-bs-target="#new" type="button" style="font-family: 'Orbitron', sans-serif; font-size: 0.75rem;">New Intel</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link py-3 px-4 fw-bold text-uppercase letter-spacing-1" data-bs-toggle="tab" data-bs-target="#active" type="button" style="font-family: 'Orbitron', sans-serif; font-size: 0.75rem;">In Progress</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link py-3 px-4 fw-bold text-uppercase letter-spacing-1" data-bs-toggle="tab" data-bs-target="#closed" type="button" style="font-family: 'Orbitron', sans-serif; font-size: 0.75rem;">Archive</button>
+                                </li>
                             </ul>
 
-                            <div class="tab-content p-4">
+                            <div class="tab-content">
                                 <div class="tab-pane fade show active" id="new">
                                     <div class="table-responsive">
-                                        <table class="table table-dark table-hover align-middle mb-0">
+                                        <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
                                             <thead>
-                                                <tr class="extra-small text-police-muted text-uppercase">
-                                                    <th>ID</th>
-                                                    <th>Citizen Source</th>
-                                                    <th>Category</th>
-                                                    <th>Timestamp</th>
-                                                    <th class="text-end">Command</th>
+                                                <tr class="text-muted extra-small text-uppercase letter-spacing-1" style="font-family: 'Orbitron', sans-serif;">
+                                                    <th class="border-0">ID-REF</th>
+                                                    <th class="border-0">Origin</th>
+                                                    <th class="border-0">Category</th>
+                                                    <th class="border-0">Timestamp</th>
+                                                    <th class="border-0 text-end">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="fir-new-table">
-
                                                 {% for f in fir_new %}
-                                                <tr>
+                                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
                                                     <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
                                                     <td class="small">{{ f.user.name }}</td>
-                                                    <td><span class="badge bg-danger bg-opacity-10 text-danger extra-small">{{ f.crime_type }}</span></td>
-                                                    <td class="extra-small text-police-muted">{{ f.timestamp.strftime('%H:%M | %d %b') }}</td>
+                                                    <td><span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1" style="font-size: 0.65rem;">{{ f.crime_type }}</span></td>
+                                                    <td class="extra-small text-muted">{{ f.timestamp.strftime('%H:%M | %d %b') }}</td>
                                                     <td class="text-end">
-                                                        <form method="POST" action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}" class="d-inline">
+                                                        <form method="POST" action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}">
                                                             <input type="hidden" name="status" value="in_progress">
-                                                            <button class="btn btn-info btn-sm extra-small fw-bold">INITIATE CASE</button>
+                                                            <button class="btn btn-premium btn-primary py-1 px-3 border-0" style="font-size: 0.65rem;">INITIATE</button>
                                                         </form>
                                                     </td>
                                                 </tr>
@@ -314,25 +593,25 @@
                                 </div>
                                 <div class="tab-pane fade" id="active">
                                     <div class="table-responsive">
-                                        <table class="table table-dark table-hover align-middle mb-0">
+                                        <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
                                             <thead>
-                                                <tr class="extra-small text-police-muted text-uppercase">
-                                                    <th>ID</th>
-                                                    <th>Operational Intel</th>
-                                                    <th>Last Sync</th>
-                                                    <th class="text-end">Command</th>
+                                                <tr class="text-muted extra-small text-uppercase letter-spacing-1" style="font-family: 'Orbitron', sans-serif;">
+                                                    <th class="border-0">ID-REF</th>
+                                                    <th class="border-0">Operational Brief</th>
+                                                    <th class="border-0">Sync</th>
+                                                    <th class="border-0 text-end">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="fir-active-table">
                                                 {% for f in fir_active %}
-                                                <tr>
+                                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
                                                     <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
-                                                    <td class="small font-monospace text-truncate" style="max-width: 200px;">{{ f.police_notes or 'NO INTEL PROVIDED' }}</td>
-                                                    <td class="extra-small text-police-muted">{{ f.updated_at.strftime('%H:%M | %d %b') if f.updated_at else '-' }}</td>
+                                                    <td class="small text-truncate" style="max-width: 200px;">{{ f.police_notes or 'PENDING INTEL' }}</td>
+                                                    <td class="extra-small text-muted">{{ f.updated_at.strftime('%H:%M | %d %b') if f.updated_at else '-' }}</td>
                                                     <td class="text-end">
-                                                        <form method="POST" action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}" class="d-inline">
+                                                        <form method="POST" action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}">
                                                             <input type="hidden" name="status" value="closed">
-                                                            <button class="btn btn-success btn-sm extra-small fw-bold">RESOLVE CASE</button>
+                                                            <button class="btn btn-premium btn-primary py-1 px-3 border-0 bg-success" style="font-size: 0.65rem; background: var(--police-accent) !important; color: #000;">RESOLVE</button>
                                                         </form>
                                                     </td>
                                                 </tr>
@@ -343,20 +622,20 @@
                                 </div>
                                 <div class="tab-pane fade" id="closed">
                                     <div class="table-responsive">
-                                        <table class="table table-dark table-hover align-middle mb-0">
+                                        <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
                                             <thead>
-                                                <tr class="extra-small text-police-muted text-uppercase">
-                                                    <th>ID</th>
-                                                    <th>Category</th>
-                                                    <th>Resolution Date</th>
+                                                <tr class="text-muted extra-small text-uppercase letter-spacing-1" style="font-family: 'Orbitron', sans-serif;">
+                                                    <th class="border-0">ID-REF</th>
+                                                    <th class="border-0">Category</th>
+                                                    <th class="border-0">Closed</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="fir-closed-table">
                                                 {% for f in fir_closed %}
-                                                <tr>
+                                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
                                                     <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
-                                                    <td><span class="badge bg-light bg-opacity-10 text-police-muted extra-small">{{ f.crime_type }}</span></td>
-                                                    <td class="extra-small text-police-muted">{{ f.updated_at.strftime('%d %b %Y') if f.updated_at else '-' }}</td>
+                                                    <td><span class="badge bg-light bg-opacity-10 text-muted px-2 py-1" style="font-size: 0.65rem;">{{ f.crime_type }}</span></td>
+                                                    <td class="extra-small text-muted">{{ f.updated_at.strftime('%d %b %Y') if f.updated_at else '-' }}</td>
                                                 </tr>
                                                 {% endfor %}
                                             </tbody>
@@ -366,41 +645,42 @@
                             </div>
                         </div>
 
-                        <!-- Kanban Board -->
-                        <div class="police-card p-4">
-                            <h5 class="fw-bold mb-4">Tactical Board</h5>
+                        <!-- Tactical Board -->
+                        <div class="hud-card mb-4">
+                            <h5 class="hud-header-title mb-4">Field Operations Grid</h5>
                             <div class="row g-3">
                                 <div class="col-md-4">
-                                    <div class="kanban-column">
+                                    <div class="hud-card p-3" style="background: rgba(15, 23, 42, 0.3); border-style: dashed;">
                                         <div class="d-flex justify-content-between mb-3">
-                                            <span class="small fw-bold text-police-muted">OFF-QUEUE</span>
-                                            <span class="badge bg-secondary rounded-pill">0</span>
+                                            <span class="extra-small fw-bold text-muted text-uppercase">Pre-Dispatch</span>
+                                            <span class="badge bg-secondary bg-opacity-10 rounded-pill text-muted">0</span>
                                         </div>
-                                        <div class="extra-small text-center text-police-muted mt-5">No items pending assignment</div>
+                                        <div class="extra-small text-center text-muted mt-4 opacity-50">NO PENDING ASSIGNMENTS</div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <div class="kanban-column border-info">
+                                    <div class="hud-card p-3" style="background: rgba(56, 189, 248, 0.05); border-color: var(--police-accent);">
                                         <div class="d-flex justify-content-between mb-3">
-                                            <span class="small fw-bold text-info">IN FIELD</span>
-                                            <span class="badge bg-info rounded-pill">{{ in_progress_count }}</span>
+                                            <span class="extra-small fw-bold text-info text-uppercase">Field Intel</span>
+                                            <span class="badge bg-info bg-opacity-20 rounded-pill text-info">{{ in_progress_count }}</span>
                                         </div>
                                         <div id="kanban-active">
                                             {% for f in fir_active %}
-                                            <div class="police-card p-3 mb-2 small bg-opacity-50">
-                                                <div class="fw-bold text-info mb-1">ID: #{{ f.id|string|truncate(6, True, '') }}</div>
-                                                <div class="extra-small opacity-75">{{ f.crime_type }}</div>
+                                            <div class="hud-card p-2 mb-2" style="background: rgba(255,255,255,0.02); border-radius: 8px;">
+                                                <div class="extra-small fw-bold text-info mb-1">#{{ f.id|string|truncate(6, True, '') }}</div>
+                                                <div class="extra-small opacity-60 text-uppercase" style="font-size: 0.6rem;">{{ f.crime_type }}</div>
                                             </div>
                                             {% endfor %}
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <div class="kanban-column border-success">
+                                    <div class="hud-card p-3" style="background: rgba(16, 185, 129, 0.05); border-color: #10b981;">
                                         <div class="d-flex justify-content-between mb-3">
-                                            <span class="small fw-bold text-success">SECURED</span>
-                                            <span class="badge bg-success rounded-pill">{{ closed_count }}</span>
+                                            <span class="extra-small fw-bold text-success text-uppercase">Secured</span>
+                                            <span class="badge bg-success bg-opacity-20 rounded-pill text-success">{{ closed_count }}</span>
                                         </div>
+                                        <div class="extra-small text-center text-success mt-4 opacity-50">STATION SECURE</div>
                                     </div>
                                 </div>
                             </div>
@@ -410,50 +690,61 @@
                     <!-- Side Panels -->
                     <div class="col-lg-4">
                         <!-- Criminal Database -->
-                        <div class="police-card p-4 mb-4">
-                            <h5 class="fw-bold mb-3">Target Database</h5>
+                        <div class="hud-card mb-4">
+                            <h5 class="hud-header-title mb-3">High-Value Target Database</h5>
                             <div class="input-group mb-3">
-                                <span class="input-group-text bg-transparent border-end-0 border-light border-opacity-10"><i class="fas fa-search text-police-muted"></i></span>
-                                <input type="text" class="form-control search-command border-start-0" placeholder="Identity lookup...">
+                                <span class="input-group-text bg-transparent border-end-0 border-light border-opacity-10">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control search-command border-start-0" placeholder="IDENTITY LOOKUP...">
                             </div>
-                            <div class="list-group list-group-flush">
+                            <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
                                 {% for criminal in criminals %}
-                                <div class="list-group-item bg-transparent border-light border-opacity-10 px-0 d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <div class="small fw-bold text-white">{{ criminal.name }}</div>
-                                        <div class="extra-small text-police-muted">{{ criminal.crimes|truncate(30) }}</div>
+                                <div class="list-group-item bg-transparent border-0 px-0 d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="bg-danger bg-opacity-10 p-2 rounded-circle" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-user-secret text-danger" style="font-size: 0.8rem;"></i>
+                                        </div>
+                                        <div>
+                                            <div class="small fw-bold text-white letter-spacing-1">{{ criminal.name|upper }}</div>
+                                            <div class="extra-small text-muted">{{ criminal.crimes|truncate(25) }}</div>
+                                        </div>
                                     </div>
-                                    <span class="badge {{ 'bg-danger' if criminal.risk_level == 'High' else 'bg-warning' }} bg-opacity-10 {{ 'text-danger' if criminal.risk_level == 'High' else 'text-warning' }} extra-small">{{ criminal.risk_level }}</span>
+                                    <span class="badge {{ 'bg-danger' if criminal.risk_level == 'High' else 'bg-warning' }} bg-opacity-10 {{ 'text-danger' if criminal.risk_level == 'High' else 'text-warning' }} extra-small letter-spacing-1">{{ criminal.risk_level|upper }}</span>
                                 </div>
                                 {% endfor %}
                             </div>
                         </div>
 
                         <!-- AI Prediction -->
-                        <div class="police-card p-4 mb-4 border-info">
-                            <h5 class="fw-bold mb-3 text-info"><i class="fas fa-microchip me-2"></i>Predictive Analysis</h5>
-                            <div class="p-3 bg-info bg-opacity-10 rounded border border-info border-opacity-25 mb-3">
-                                <div class="extra-small text-info fw-bold mb-1"><i class="fas fa-bolt me-1"></i> HIGH PROBABILITY ALERT</div>
-                                <div class="small">Elevated risk of vehicle theft detected in Zone 4 between 22:00 - 02:00.</div>
+                        <div class="hud-card mb-4" style="border-left: 4px solid var(--police-accent);">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="hud-header-title mb-0" style="font-size: 0.9rem;"><i class="fas fa-brain me-2"></i>PREDICTIVE INTEL</h5>
+                                <span class="badge bg-info bg-opacity-20 text-info extra-small pulse">LIVE</span>
+                            </div>
+                            <div class="p-3 bg-info bg-opacity-5 rounded border border-info border-opacity-10 mb-3">
+                                <div class="extra-small text-info fw-bold mb-1 letter-spacing-1"><i class="fas fa-bolt me-1"></i> HIGH-PROBABILITY ANOMALY</div>
+                                <div class="small opacity-80" style="font-size: 0.75rem;">Elevated risk of vehicle theft detected in Sector 4 [22:00 - 02:00]. Tactical deployment recommended.</div>
                             </div>
                             <div class="d-flex align-items-center gap-3">
                                 <div class="flex-grow-1">
-                                    <div class="extra-small text-police-muted mb-1">Confidence Score</div>
-                                    <div class="progress" style="height: 6px;">
-                                        <div class="progress-bar bg-info" style="width: 88%;"></div>
+                                    <div class="extra-small text-muted mb-1 letter-spacing-1">CONFIDENCE COEFFICIENT</div>
+                                    <div class="progress" style="height: 4px; background: rgba(56, 189, 248, 0.1);">
+                                        <div class="progress-bar bg-info shadow-glow" style="width: 88%;"></div>
                                     </div>
                                 </div>
-                                <span class="small fw-bold text-info">88%</span>
+                                <span class="small fw-bold text-info" style="font-family: 'Orbitron', sans-serif;">88%</span>
                             </div>
                         </div>
 
-                        <div class="police-card p-4">
-                            <h5 class="fw-bold mb-3">Jurisdictional Heatmap</h5>
-                            <div id="police-map" class="map-glow rounded overflow-hidden" style="height: 250px;">
+                        <!-- Heatmap -->
+                        <div class="hud-card">
+                            <h5 class="hud-header-title mb-3" style="font-size: 0.9rem;"><i class="fas fa-satellite me-2"></i>JURISDICTIONAL HEATMAP</h5>
+                            <div id="police-map" class="rounded overflow-hidden" style="height: 250px; border: 1px solid var(--police-border); position: relative;">
                                 <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50">
                                     <div class="text-center">
-                                        <i class="fas fa-satellite-dish text-info mb-2 fs-2"></i>
-                                        <div class="extra-small text-white">INITIALIZING LIVE FEED...</div>
+                                        <i class="fas fa-satellite-dish text-info mb-2 fs-2 pulse"></i>
+                                        <div class="extra-small text-white letter-spacing-1">SYNCHRONIZING GLOBAL FEEDS...</div>
                                     </div>
                                 </div>
                             </div>
@@ -462,67 +753,74 @@
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- File Case Modal -->
-    <div class="modal fade modal-tactical" id="fileCaseModal" tabindex="-1" aria-labelledby="fileCaseModalLabel" aria-hidden="true">
+    <!-- Tactical Modal -->
+    <div class="modal fade modal-tactical" id="fileCaseModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content text-white shadow-lg">
-                <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold" id="fileCaseModalLabel">
-                        <i class="fas fa-satellite-dish text-primary me-2 pulse"></i>TACTICAL INCIDENT LOG
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="hud-header-title mb-0">
+                        <i class="fas fa-shield-halved me-2"></i>TACTICAL INCIDENT LOG
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <form action="{{ url_for('fir.add_fir') }}" method="POST" enctype="multipart/form-data">
                     <div class="modal-body p-4">
                         <div class="row g-4">
-                            <div class="col-md-12">
-                                <label class="small fw-bold text-police-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Incident Category</label>
-                                <select name="crime_type" class="form-select text-uppercase fw-bold" required>
-                                    <option value="" selected disabled>Select Operational Status</option>
+                            <div class="col-md-6">
+                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Incident Category</label>
+                                <select name="crime_type" class="form-select search-command" required>
+                                    <option value="" selected disabled>SELECT VECTOR</option>
                                     <option value="THEFT">THEFT / LARCENY</option>
                                     <option value="ROBBERY">ROBBERY / HEIST</option>
-                                    <option value="ASSAULT">ASSAULT / BATTERY</option>
+                                    <option value="ASSAULT">PHYSICAL ASSAULT</option>
                                     <option value="CYBER CRIME">CYBER OPERATIONS</option>
                                     <option value="FRAUD">FINANCIAL FRAUD</option>
-                                    <option value="HARASSMENT">CIVIL HARASSMENT</option>
-                                    <option value="TRAFFIC VIOLATION">TRAFFIC INFRACTION</option>
-                                    <option value="VANDALISM">PROPERTY DAMAGE</option>
+                                    <option value="TRAFFIC">TRAFFIC INFRACTION</option>
                                     <option value="OTHER">UNCLASSIFIED EVENT</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="small fw-bold text-police-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Latitude Coordinate</label>
-                                <input type="number" step="any" name="latitude" id="modal-lat" class="form-control font-monospace" placeholder="0.000000" required>
+                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Priority Level</label>
+                                <select name="priority" class="form-select search-command" required>
+                                    <option value="Low">LOW / ROUTINE</option>
+                                    <option value="Medium" selected>MEDIUM / STANDARD</option>
+                                    <option value="High">HIGH / CRITICAL</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Tactical Location Name</label>
+                                <input type="text" name="location_name" class="form-control search-command" placeholder="ENTER SECTOR / STREET ADDRESS..." required>
                             </div>
                             <div class="col-md-6">
-                                <label class="small fw-bold text-police-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Longitude Coordinate</label>
-                                <input type="number" step="any" name="longitude" id="modal-lon" class="form-control font-monospace" placeholder="0.000000" required>
+                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Latitude [X]</label>
+                                <input type="number" step="any" name="latitude" id="modal-lat" class="form-control search-command" placeholder="0.000000" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Longitude [Y]</label>
+                                <input type="number" step="any" name="longitude" id="modal-lon" class="form-control search-command" placeholder="0.000000" required>
                             </div>
                             <div class="col-12">
-                                <button type="button" id="modal-getLocationBtn" class="btn btn-outline-primary btn-sm w-100 py-2 fw-bold">
-                                    <i class="fas fa-crosshairs me-2"></i>INITIALIZE GPS DATA SYNC
+                                <button type="button" id="modal-getLocationBtn" class="btn-premium btn-outline w-100 py-2">
+                                    <i class="fas fa-crosshairs me-2"></i>INITIALIZE GEOLOCATION SYNC
                                 </button>
-                                <div id="modal-locationStatus" class="extra-small text-info mt-2 text-center text-uppercase fw-bold" style="letter-spacing: 1px;">Ready for sync...</div>
+                                <div id="modal-locationStatus" class="extra-small text-info mt-2 text-center letter-spacing-1">READY FOR SCAN...</div>
                             </div>
                             <div class="col-12">
-                                <label class="small fw-bold text-police-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Operational Brief</label>
-                                <textarea name="description" class="form-control" style="height: 120px;" placeholder="Provide detailed tactical summary..." required></textarea>
+                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Operational Briefing</label>
+                                <textarea name="description" class="form-control search-command" style="height: 120px;" placeholder="ENTER TACTICAL DATA..." required></textarea>
                             </div>
                             <div class="col-12">
-                                <label class="small fw-bold text-police-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Intel / Evidence Attachment</label>
-                                <div class="input-group">
-                                    <input type="file" name="evidence_file" class="form-control" id="inputGroupFile02">
-                                    <label class="input-group-text bg-secondary bg-opacity-50 border-secondary text-white" for="inputGroupFile02">UPLOAD</label>
-                                </div>
+                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Evidence Attachment [ENCRYPTED]</label>
+                                <input type="file" name="evidence_file" class="form-control search-command" id="evidenceFile">
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer border-top-0 pt-0">
-                        <button type="button" class="btn btn-link btn-sm text-police-muted text-decoration-none" data-bs-dismiss="modal">ABORT MISSION</button>
-                        <button type="submit" class="btn btn-primary px-5 py-2 fw-bold text-uppercase" style="letter-spacing: 1px;">
-                            <i class="fas fa-upload me-2"></i>Submit Case
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-link text-muted text-decoration-none extra-small letter-spacing-1" data-bs-dismiss="modal">ABORT COMMAND</button>
+                        <button type="submit" class="btn-premium btn-primary px-5 py-2">
+                            <i class="fas fa-upload me-2"></i>TRANSMIT DATA
                         </button>
                     </div>
                 </form>
@@ -530,23 +828,20 @@
         </div>
     </div>
 
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
     <script>
-
-        // Real-time polling
         function updateStats() {
             fetch('/api/police/stats')
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('pending-count').innerText = data.pending_count;
-                    document.getElementById('active-count').innerText = data.in_progress_count;
-                    document.getElementById('resolved-count').innerText = data.closed_count;
-                    document.getElementById('total-count').innerText = data.total_count;
+                    // Update main metrics
+                    document.getElementById('stat-pending').innerText = data.pending_count;
+                    document.getElementById('stat-investigation').innerText = data.in_progress_count;
+                    document.getElementById('stat-resolved').innerText = data.closed_count;
+                    document.getElementById('stat-total').innerText = data.total_count;
 
                     // Update New Reports table
                     const tableBody = document.getElementById('fir-new-table');
@@ -554,61 +849,41 @@
                         let html = '';
                         data.fir_new.forEach(f => {
                             html += `
-                                <tr>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
                                     <td class="small fw-bold text-info">#${f.display_id}</td>
                                     <td class="small">${f.user_name}</td>
-                                    <td><span class="badge bg-danger bg-opacity-10 text-danger extra-small">${f.crime_type}</span></td>
-                                    <td class="extra-small text-police-muted">${f.timestamp}</td>
+                                    <td><span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1" style="font-size: 0.65rem;">${f.crime_type}</span></td>
+                                    <td class="extra-small text-muted">${f.timestamp}</td>
                                     <td class="text-end">
-                                        <form method="POST" action="/fir/police/fir/${f.id}/update" class="d-inline">
+                                        <form method="POST" action="/fir/police/fir/${f.id}/update">
                                             <input type="hidden" name="status" value="in_progress">
-                                            <button class="btn btn-info btn-sm extra-small fw-bold">INITIATE CASE</button>
+                                            <button class="btn btn-premium btn-primary py-1 px-3 border-0" style="font-size: 0.65rem;">INITIATE</button>
                                         </form>
                                     </td>
-                                </tr>
-                            `;
+                                </tr>`;
                         });
                         tableBody.innerHTML = html;
-                    } else {
-                        tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-police-muted">No new reports</td></tr>';
                     }
 
                     // Update Active Reports table
                     const activeTable = document.getElementById('fir-active-table');
-                    if (data.fir_active) {
+                    if (data.fir_active && activeTable) {
                         let html = '';
                         data.fir_active.forEach(f => {
                             html += `
-                                <tr>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
                                     <td class="small fw-bold text-info">#${f.display_id}</td>
-                                    <td class="small font-monospace text-truncate" style="max-width: 200px;">${f.notes}</td>
-                                    <td class="extra-small text-police-muted">${f.updated_at}</td>
+                                    <td class="small text-truncate" style="max-width: 200px;">${f.notes || 'PENDING INTEL'}</td>
+                                    <td class="extra-small text-muted">${f.updated_at}</td>
                                     <td class="text-end">
-                                        <form method="POST" action="/fir/police/fir/${f.id}/update" class="d-inline">
+                                        <form method="POST" action="/fir/police/fir/${f.id}/update">
                                             <input type="hidden" name="status" value="closed">
-                                            <button class="btn btn-success btn-sm extra-small fw-bold">RESOLVE CASE</button>
+                                            <button class="btn btn-premium btn-primary py-1 px-3 border-0 bg-success" style="font-size: 0.65rem; background: var(--police-accent) !important; color: #000;">RESOLVE</button>
                                         </form>
                                     </td>
-                                </tr>
-                            `;
+                                </tr>`;
                         });
                         activeTable.innerHTML = html;
-                    }
-
-                    // Update Closed Reports table
-                    const closedTable = document.getElementById('fir-closed-table');
-                    if (data.fir_closed) {
-                        let html = '';
-                        data.fir_closed.forEach(f => {
-                            html += `
-                                <tr>
-                                    <td class="small fw-bold text-info">#${f.display_id}</td>
-                                    <td><span class="badge bg-light bg-opacity-10 text-police-muted extra-small">${f.crime_type}</span></td>
-                                    <td class="extra-small text-police-muted">${f.updated_at}</td>
-                                </tr>
-                            `;
-                        });
-                        closedTable.innerHTML = html;
                     }
 
                     // Update Kanban Active
@@ -617,54 +892,51 @@
                         let html = '';
                         data.fir_active.forEach(f => {
                             html += `
-                                <div class="police-card p-3 mb-2 small bg-opacity-50">
-                                    <div class="fw-bold text-info mb-1">ID: #${f.display_id.substring(0,6)}</div>
-                                    <div class="extra-small opacity-75">POLICE UPDATE REQ</div>
-                                </div>
-                            `;
+                                <div class="hud-card p-2 mb-2" style="background: rgba(255,255,255,0.02); border-radius: 8px;">
+                                    <div class="extra-small fw-bold text-info mb-1">#${f.display_id.substring(0, 6)}</div>
+                                    <div class="extra-small opacity-60 text-uppercase" style="font-size: 0.6rem;">${f.crime_type}</div>
+                                </div>`;
                         });
                         kanbanActive.innerHTML = html;
                     }
                 })
-                .catch(err => console.error('Error fetching stats:', err));
+                .catch(err => console.error('Tactical sync error:', err));
         }
 
-        // Set interval for real-time updates (every 5 seconds)
         setInterval(updateStats, 5000);
+        console.log("Tactical Sync Initialized.");
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Geolocation for Modal
+        document.addEventListener('DOMContentLoaded', function () {
             const btn = document.getElementById('modal-getLocationBtn');
             const latInput = document.getElementById('modal-lat');
             const lonInput = document.getElementById('modal-lon');
             const statusBox = document.getElementById('modal-locationStatus');
-            
-            if(btn) {
-                btn.addEventListener('click', function(){
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>DETECTING...';
-                    if(navigator.geolocation){
-                        navigator.geolocation.getCurrentPosition(function(pos){
+
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>SCANNING...';
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function (pos) {
                             latInput.value = pos.coords.latitude.toFixed(6);
                             lonInput.value = pos.coords.longitude.toFixed(6);
-                            statusBox.textContent = 'GPS SYNC: SUCCESS';
-                            btn.innerHTML = '<i class="fas fa-check me-2"></i>CAPTURED';
-                            btn.className = 'btn btn-success btn-sm w-100 py-2';
-                        }, function(err){
-                            statusBox.textContent = 'GPS ERROR: SERVICE UNAVAILABLE';
-                            btn.innerHTML = '<i class="fas fa-location-crosshairs me-2"></i>RETRY DETECTION';
+                            statusBox.textContent = 'SYNC SUCCESSFUL';
+                            btn.innerHTML = '<i class="fas fa-check me-2"></i>SECURED';
+                        }, function (err) {
+                            console.error('GPS AUTH ERROR:', err);
+                            statusBox.textContent = 'SYNC FAILED: ' + err.message.toUpperCase();
+                            btn.innerHTML = '<i class="fas fa-redo me-2"></i>RETRY SCAN';
                         });
                     }
                 });
             }
 
-
-            const coords = {{ heatmap_coords|tojson|safe if heatmap_coords else '[]' }};
+            const coords = {{ heatmap_coords | tojson | safe if heatmap_coords else '[]' }};
             if (coords.length > 0) {
                 const map = L.map('police-map', { zoomControl: false }).setView(coords[0], 13);
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; OpenStreetMap &copy; CARTO'
+                    attribution: '&copy; CARTO'
                 }).addTo(map);
-                
+
                 L.heatLayer(coords, {
                     radius: 20,
                     blur: 15,
@@ -675,6 +947,4 @@
         });
     </script>
 </body>
-</html>
-
-
+</html>
