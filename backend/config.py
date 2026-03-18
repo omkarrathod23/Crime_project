@@ -7,7 +7,8 @@ load_dotenv(os.path.join(basedir, '.env'))
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard-to-guess-string'
     UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max upload size
+    MAX_CONTENT_LENGTH = 64 * 1024 * 1024  # 64MB max upload size
+
     MONGODB_SETTINGS = {
         'host': os.environ.get('MONGODB_URI') or 'mongodb://localhost:27017/crime_management_v2'
     }

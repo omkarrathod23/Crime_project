@@ -112,7 +112,8 @@
                         </a>
                         <a href="#" class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center">
                             <span><i class="fas fa-bell text-warning me-2"></i> Notifications</span>
-                            <span class="badge rounded-pill bg-danger">{{ notifications|length }}</span>
+                            <span class="badge rounded-pill bg-danger" id="notifications-count">{{ notifications|length }}</span>
+
                         </a>
                     </div>
                 </div>
@@ -140,10 +141,12 @@
                     <div class="mb-4">
                         <div class="d-flex justify-content-between mb-2 small fw-bold text-uppercase">
                             <span>Progress</span>
-                            <span class="text-primary">{{ fir_status_text }}</span>
+                            <span class="text-primary" id="case-status-text">{{ fir_status_text }}</span>
+
                         </div>
                         <div class="progress" style="height: 10px; border-radius: 1rem;">
-                            <div class="progress-bar bg-primary rounded-pill progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ fir_status_percent }}%;"></div>
+                            <div class="progress-bar bg-primary rounded-pill progress-bar-striped progress-bar-animated" role="progressbar" id="case-progress" style="width: {{ fir_status_percent }}%;"></div>
+
                         </div>
                     </div>
 
@@ -165,11 +168,23 @@
                     <form method="POST" action="{{ url_for('fir.add_fir') }}" enctype="multipart/form-data">
                         <div class="row g-3">
                             <div class="col-md-12">
-                                <div class="form-floating mb-3">
-                                    <input type="text" class="form-control border-0 bg-light" id="crime_type" name="crime_type" placeholder="Type of incident" required>
-                                    <label for="crime_type">Incident Type (e.g., Theft, Harassment)</label>
+                                <div class="mb-3">
+                                    <label class="small fw-bold text-muted mb-2 text-uppercase">Incident Category</label>
+                                    <select name="crime_type" class="form-select border-0 bg-light py-3" required>
+                                        <option value="" selected disabled>Select Type of Incident</option>
+                                        <option value="THEFT">THEFT / LARCENY</option>
+                                        <option value="ROBBERY">ROBBERY / HEIST</option>
+                                        <option value="ASSAULT">ASSAULT / BATTERY</option>
+                                        <option value="CYBER CRIME">CYBER OPERATIONS</option>
+                                        <option value="FRAUD">FINANCIAL FRAUD</option>
+                                        <option value="HARASSMENT">CIVIL HARASSMENT</option>
+                                        <option value="TRAFFIC VIOLATION">TRAFFIC INFRACTION</option>
+                                        <option value="VANDALISM">PROPERTY DAMAGE</option>
+                                        <option value="OTHER">UNCLASSIFIED EVENT</option>
+                                    </select>
                                 </div>
                             </div>
+
                             <div class="col-md-6">
                                 <div class="form-floating mb-3">
                                     <input type="number" step="any" class="form-control border-0 bg-light" id="latitude" name="latitude" placeholder="Lat" required>
@@ -220,7 +235,8 @@
                                     <th>OFFICIAL STATUS</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="incident-log-table">
+
                                 {% if fir_reports %}
                                 {% for fir in fir_reports %}
                                 <tr>
@@ -251,7 +267,42 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+
+        // Real-time polling for Citizen
+        function updateCitizenStats() {
+            fetch('/api/citizen/stats')
+                .then(response => response.json())
+                .then(data => {
+                    // Update notifications
+                    const notifyBadge = document.getElementById('notifications-count');
+                    if (notifyBadge) notifyBadge.innerText = data.notifications_count || 0;
+
+                    // Update latest case status (if exists)
+                    const statusText = document.getElementById('case-status-text');
+                    const progressBar = document.getElementById('case-progress');
+                    
+                    if (statusText && data.latest_status) {
+                        const status_map = {
+                            'pending': { p: 25, t: 'Submitted' },
+                            'verified': { p: 40, t: 'Verified' },
+                            'assigned': { p: 55, t: 'Assigned' },
+                            'in_progress': { p: 75, t: 'In Progress' },
+                            'closed': { p: 100, t: 'Resolved' },
+                            'rejected': { p: 100, t: 'Closed (Rejected)' }
+                        };
+                        const info = status_map[data.latest_status] || { p: 0, t: 'Unknown' };
+                        statusText.innerText = info.t;
+                        if (progressBar) progressBar.style.width = info.p + '%';
+                    }
+                })
+                .catch(err => console.error('Error fetching citizen stats:', err));
+        }
+
+        // Poll every 10 seconds for citizens
+        setInterval(updateCitizenStats, 10000);
+
         (function(){
+
             const btn = document.getElementById('getLocationBtn');
             const latInput = document.getElementById('latitude');
             const lonInput = document.getElementById('longitude');

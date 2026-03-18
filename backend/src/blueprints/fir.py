@@ -7,9 +7,9 @@ from datetime import datetime
 
 fir_bp = Blueprint('fir', __name__)
 
-@fir_bp.route('/fir/add', methods=['GET', 'POST'])
+@fir_bp.route('/add', methods=['GET', 'POST'])
+
 @login_required
-@citizen_required
 def add_fir():
     if request.method == 'POST':
         description = request.form.get('description', '').strip()
@@ -21,35 +21,44 @@ def add_fir():
             lat = float(lat_str)
             lon = float(lon_str)
         except ValueError:
-            flash('Invalid coordinates provided.', 'error')
-            return render_template('add_fir.html')
+            lat, lon = 0.0, 0.0
         
-        if not description or not crime_type or lat == 0 or lon == 0:
+        if not description or not crime_type:
             flash('Please fill all required fields!', 'error')
-            return render_template('add_fir.html')
-        
+            return redirect(url_for('main.police_dashboard' if current_user.is_police() else 'main.citizen_dashboard'))
+
         evidence_file = None
         if 'evidence_file' in request.files:
             file = request.files['evidence_file']
             if file.filename:
                 evidence_file = save_uploaded_file(file, current_app.config['UPLOAD_FOLDER'])
         
-        fir = FIRReport(
+        # FIR creation logic
+        status = 'pending'
+        department = None
+        
+        if current_user.is_police():
+            status = 'assigned'  # Auto-assigned for police filings
+            department = current_user.department
+        
+        new_fir = FIRReport(
             user=current_user.id,
             description=description,
             crime_type=crime_type,
             lat=lat,
             lon=lon,
             evidence_file=evidence_file,
-            status='pending'
+            status=status,
+            department=department
         )
         
-        fir.save()
+        new_fir.save()
         
-        flash('FIR submitted successfully! It will be reviewed by an admin.', 'success')
-        return redirect(url_for('main.citizen_dashboard'))
+        flash('FIR submitted successfully!', 'success')
+        return redirect(url_for('main.police_dashboard' if current_user.is_police() else 'main.citizen_dashboard'))
     
     return render_template('add_fir.html')
+
 
 @fir_bp.route('/admin/fir/<fir_id>/verify', methods=['POST'])
 @login_required

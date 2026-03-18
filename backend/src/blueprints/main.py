@@ -62,7 +62,53 @@ def citizen_dashboard():
         complaint_timeline=complaint_timeline
     )
 
+@main_bp.route('/api/police/stats')
+@login_required
+@police_required
+def police_stats():
+    fir_reports = FIRReport.objects(department=current_user.department).order_by('-timestamp')
+    
+    # Statistics for this department
+    pending_count = len([fir for fir in fir_reports if fir.status == 'pending'])
+    in_progress_count = len([fir for fir in fir_reports if fir.status == 'in_progress'])
+    closed_count = len([fir for fir in fir_reports if fir.status == 'closed'])
+    total_count = len(fir_reports)
+    
+    # Top 5 new reports for the list
+    fir_new_filtered = [f for f in fir_reports if f.status in ['pending', 'assigned']][:5]
+    fir_new_data = [{
+        "id": str(f.id)[:8],
+        "user_name": f.user.name if f.user else "Anonymous",
+        "crime_type": f.crime_type,
+        "timestamp": f.timestamp.strftime('%H:%M | %d %b')
+    } for f in fir_new_filtered]
+
+    return {
+        "pending_count": pending_count,
+        "in_progress_count": in_progress_count,
+        "closed_count": closed_count,
+        "total_count": total_count,
+        "fir_new": fir_new_data
+    }
+
+@main_bp.route('/api/citizen/stats')
+@login_required
+@citizen_required
+def citizen_stats():
+    fir_reports = FIRReport.objects(user=current_user.id).order_by('-timestamp')
+    if fir_reports:
+        latest_fir = fir_reports[0]
+        status = latest_fir.status
+    else:
+        status = 'no_reports'
+    
+    return {
+        "total_reports": len(fir_reports),
+        "latest_status": status
+    }
+
 @main_bp.route('/police/dashboard')
+
 @login_required
 @police_required
 def police_dashboard():
@@ -116,7 +162,35 @@ def police_dashboard():
                          fir_active=fir_active,
                          fir_closed=fir_closed)
 
+@main_bp.route('/daily-report')
+@login_required
+@police_required
+def daily_report():
+    from datetime import datetime, timedelta
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    # Get FIR reports for this department filed today
+    fir_today = FIRReport.objects(
+        department=current_user.department,
+        timestamp__gte=today
+    ).order_by('-timestamp')
+    
+    # Calculate stats for the report
+    stats = {
+        'total': len(fir_today),
+        'pending': len([f for f in fir_today if f.status == 'pending']),
+        'active': len([f for f in fir_today if f.status == 'in_progress']),
+        'closed': len([f for f in fir_today if f.status == 'closed']),
+        'date': today.strftime('%d %B %Y')
+    }
+    
+    return render_template('daily_report.html', 
+                         firs=fir_today, 
+                         stats=stats, 
+                         department=current_user.department)
+
 @main_bp.route('/admin/dashboard')
+
 @login_required
 @admin_required
 def admin_dashboard():
