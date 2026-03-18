@@ -11,10 +11,14 @@ class Department(db.Document):
     meta = {'collection': 'departments'}
     name = db.StringField(max_length=100, required=True)
     city = db.StringField(max_length=100, required=True)
-    min_lat = db.FloatField(required=True)
-    max_lat = db.FloatField(required=True)
-    min_lon = db.FloatField(required=True)
-    max_lon = db.FloatField(required=True)
+    district = db.StringField(max_length=100)
+    type = db.StringField(max_length=50)
+    status = db.StringField(max_length=20, default='Active')
+    load = db.IntField(default=0)
+    min_lat = db.FloatField()
+    max_lat = db.FloatField()
+    min_lon = db.FloatField()
+    max_lon = db.FloatField()
     created_at = db.DateTimeField(default=datetime.utcnow)
 
 class User(UserMixin, db.Document):

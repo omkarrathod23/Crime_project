@@ -2,250 +2,389 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Police Dashboard - Crime Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Center - Police Department</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <style>
-        .sidebar { min-height: 100vh; }
-        .kanban-board { display: flex; gap: 1rem; }
-        .kanban-column { flex: 1; background: #f8f9fa; border-radius: 1rem; padding: 1rem; }
-        .stat-card { border: 0; border-radius: 1rem; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
-        .stat-icon { font-size: 1.6rem; }
-        .map-holder { height: 320px; background: #e9ecef; border-radius: 1rem; border: 1px dashed #ced4da; }
+        :root {
+            --police-bg: #0f172a;
+            --police-card: #1e293b;
+            --police-accent: #38bdf8;
+            --police-border: #334155;
+        }
+
+        body {
+            background-color: var(--police-bg);
+            color: #f8fafc;
+        }
+
+        .police-sidebar {
+            background: var(--police-card);
+            border-right: 1px solid var(--police-border);
+            min-height: 100vh;
+        }
+
+        .police-nav-link {
+            padding: 0.8rem 1.5rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            border-radius: 0.5rem;
+            margin: 0.25rem 1rem;
+        }
+
+        .police-nav-link:hover, .police-nav-link.active {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--police-accent);
+        }
+
+        .police-card {
+            background: var(--police-card);
+            border: 1px solid var(--police-border);
+            border-radius: 1rem;
+        }
+
+        .kanban-column {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--police-border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            min-height: 400px;
+        }
+
+        .nav-tabs-modern {
+            border-bottom: 2px solid var(--police-border);
+        }
+
+        .nav-tabs-modern .nav-link {
+            color: #94a3b8;
+            border: none;
+            padding: 1rem 2rem;
+            font-weight: 600;
+        }
+
+        .nav-tabs-modern .nav-link.active {
+            background: none;
+            color: var(--police-accent);
+            border-bottom: 2px solid var(--police-accent);
+        }
+
+        .map-glow {
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+        }
+
+        .search-command {
+            background: var(--police-bg);
+            border: 1px solid var(--police-border);
+            color: white;
+        }
+
+        .search-command:focus {
+            background: var(--police-bg);
+            border-color: var(--police-accent);
+            color: white;
+            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.1);
+        }
     </style>
 </head>
-<body class="bg-light">
-    <!-- Top Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-primary bg-primary shadow-sm">
-        <div class="container-fluid">
-            <a class="navbar-brand text-white" href="#"><i class="fas fa-user-tie"></i> Police Operational Hub</a>
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link text-white" href="#"><i class="fas fa-user"></i> {{ current_user.name }}</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="#"><i class="fas fa-calendar-alt"></i> Shift: {{ current_user.shift }}</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
-        </div>
-    </nav>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Left Sidebar -->
-            <div class="col-md-2 sidebar bg-white pt-4 shadow-sm">
-                <ul class="nav flex-column">
-                    <li class="nav-item mb-2"><a class="nav-link" href="#"><i class="fas fa-users"></i> Criminal Database</a></li>
-                    <li class="nav-item mb-2"><a class="nav-link" href="#"><i class="fas fa-file-alt"></i> FIR Management</a></li>
-                    <li class="nav-item mb-2"><a class="nav-link" href="#"><i class="fas fa-tasks"></i> Case Assignments</a></li>
-                    <li class="nav-item mb-2"><a class="nav-link" href="#"><i class="fas fa-chart-line"></i> Crime Prediction</a></li>
-                    <li class="nav-item mb-2"><a class="nav-link" href="#"><i class="fas fa-map-marked-alt"></i> Map View</a></li>
-                </ul>
+<body>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- Sidebar -->
+            <div class="col-lg-2 d-none d-lg-block police-sidebar position-fixed">
+                <div class="p-4 mb-4">
+                    <h5 class="fw-bold text-white mb-0"><i class="fas fa-shield-halved text-info me-2"></i>POLICE HUB</h5>
+                    <small class="text-muted">OPS COMMAND v2.0</small>
+                </div>
+                
+                <nav class="mt-2">
+                    <a href="#" class="police-nav-link active"><i class="fas fa-desktop"></i> Dashboard</a>
+                    <a href="#" class="police-nav-link"><i class="fas fa-users-viewfinder"></i> Criminal Database</a>
+                    <a href="#" class="police-nav-link"><i class="fas fa-folder-tree"></i> Investigations</a>
+                    <a href="#" class="police-nav-link"><i class="fas fa-satellite-dish"></i> Intel Report</a>
+                    <a href="#" class="police-nav-link"><i class="fas fa-gear"></i> Systems</a>
+                </nav>
+
+                <div class="position-absolute bottom-0 w-100 p-4">
+                    <div class="police-card p-3 d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-info bg-opacity-10 p-2">
+                            <i class="fas fa-user-shield text-info"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="small fw-bold text-truncate text-white">{{ current_user.name }}</div>
+                            <div class="extra-small text-muted">{{ current_user.shift|default('On Duty') }}</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <!-- Main Panels -->
-            <div class="col-md-10 pt-4">
-                <!-- Top Stats -->
-                <div class="row g-3 mb-4">
-                    <div class="col-sm-6 col-lg-3">
-                        <div class="card stat-card">
-                            <div class="card-body d-flex align-items-center justify-content-between">
-                                <div>
-                                    <div class="text-muted small">Pending</div>
-                                    <div class="h4 mb-0">{{ pending_count }}</div>
-                                </div>
-                                <i class="fas fa-hourglass-half text-warning stat-icon"></i>
+
+            <!-- Main Content -->
+            <div class="col-lg-10 offset-lg-2 min-vh-100 p-4">
+                <!-- Header -->
+                <header class="d-flex justify-content-between align-items-center mb-5">
+                    <div>
+                        <h2 class="fw-bold mb-1">Operational Overview</h2>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb extra-small m-0">
+                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Core</a></li>
+                                <li class="breadcrumb-item active text-info" aria-current="page">Dashboard</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="d-flex gap-3">
+                        <button class="btn btn-outline-info btn-sm px-3"><i class="fas fa-print me-2"></i>Daily Report</button>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-sm px-3"><i class="fas fa-power-off me-2"></i>Logout</a>
+                    </div>
+                </header>
+
+                <!-- Stats Grid -->
+                <div class="row g-4 mb-5">
+                    <div class="col-md-3">
+                        <div class="police-card p-4">
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="extra-small text-uppercase fw-bold text-muted">Pending Dispatch</span>
+                                <i class="fas fa-hourglass-half text-warning"></i>
+                            </div>
+                            <h3 class="fw-bold mb-0">{{ pending_count }}</h3>
+                            <div class="progress mt-3" style="height: 4px; background: rgba(255,193,7,0.1);">
+                                <div class="progress-bar bg-warning" style="width: 45%;"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-lg-3">
-                        <div class="card stat-card">
-                            <div class="card-body d-flex align-items-center justify-content-between">
-                                <div>
-                                    <div class="text-muted small">In Progress</div>
-                                    <div class="h4 mb-0">{{ in_progress_count }}</div>
-                                </div>
-                                <i class="fas fa-briefcase text-primary stat-icon"></i>
+                    <div class="col-md-3">
+                        <div class="police-card p-4 border-info-subtle">
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="extra-small text-uppercase fw-bold text-muted">Active Cases</span>
+                                <i class="fas fa-wave-square text-info"></i>
+                            </div>
+                            <h3 class="fw-bold mb-0 text-info">{{ in_progress_count }}</h3>
+                            <div class="progress mt-3" style="height: 4px; background: rgba(56,189,248,0.1);">
+                                <div class="progress-bar bg-info" style="width: 70%;"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-lg-3">
-                        <div class="card stat-card">
-                            <div class="card-body d-flex align-items-center justify-content-between">
-                                <div>
-                                    <div class="text-muted small">Closed</div>
-                                    <div class="h4 mb-0">{{ closed_count }}</div>
-                                </div>
-                                <i class="fas fa-check-circle text-success stat-icon"></i>
+                    <div class="col-md-3">
+                        <div class="police-card p-4">
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="extra-small text-uppercase fw-bold text-muted">Resolved Units</span>
+                                <i class="fas fa-check-double text-success"></i>
+                            </div>
+                            <h3 class="fw-bold mb-0 text-success">{{ closed_count }}</h3>
+                            <div class="progress mt-3" style="height: 4px; background: rgba(74,222,128,0.1);">
+                                <div class="progress-bar bg-success" style="width: 90%;"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-lg-3">
-                        <div class="card stat-card">
-                            <div class="card-body d-flex align-items-center justify-content-between">
-                                <div>
-                                    <div class="text-muted small">Total Cases</div>
-                                    <div class="h4 mb-0">{{ total_count }}</div>
-                                </div>
-                                <i class="fas fa-database text-secondary stat-icon"></i>
+                    <div class="col-md-3">
+                        <div class="police-card p-4">
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="extra-small text-uppercase fw-bold text-muted">System Total</span>
+                                <i class="fas fa-database text-muted"></i>
                             </div>
+                            <h3 class="fw-bold mb-0">{{ total_count }}</h3>
+                            <div class="extra-small text-muted mt-3"><i class="fas fa-arrow-up text-success me-1"></i> 12% from last cycle</div>
                         </div>
                     </div>
                 </div>
-                <!-- Criminal Database Widget -->
-                <div class="mb-4">
-                    <h5><i class="fas fa-users"></i> Criminal Database</h5>
-                    <input type="text" class="form-control mb-2" placeholder="Search criminals...">
-                    <table class="table table-bordered table-hover shadow-sm">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Crimes</th>
-                                <th>Risk Level</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for criminal in criminals %}
-                            <tr>
-                                <td>{{ criminal.name }}</td>
-                                <td>{{ criminal.crimes }}</td>
-                                <td>{{ criminal.risk_level }}</td>
-                                <td>{{ criminal.status }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <!-- FIR Panel with Tabs -->
-                <div class="mb-4">
-                    <h5><i class="fas fa-file-alt"></i> FIR Management</h5>
-                    <ul class="nav nav-tabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-new" type="button" role="tab">New</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-active" type="button" role="tab">Active</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-closed" type="button" role="tab">Closed</button>
-                        </li>
-                    </ul>
-                    <div class="tab-content p-3 bg-white border border-top-0 rounded-bottom shadow-sm">
-                        <div class="tab-pane fade show active" id="tab-new" role="tabpanel">
-                            <div class="table-responsive">
-                                <table class="table table-sm align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Citizen</th>
-                                            <th>Crime</th>
-                                            <th>Submitted</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for f in fir_new %}
-                                        <tr>
-                                            <td>#{{ f.id }}</td>
-                                            <td>{{ f.user.name }}</td>
-                                            <td>{{ f.crime_type }}</td>
-                                            <td>{{ f.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
-                                            <td>
-                                                <form method="POST" action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}" class="d-inline">
-                                                    <input type="hidden" name="status" value="in_progress">
-                                                    <button class="btn btn-sm btn-primary">Start</button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+
+                <div class="row g-4">
+                    <!-- Investigations -->
+                    <div class="col-lg-8">
+                        <div class="police-card mb-4 overflow-hidden">
+                            <div class="p-4 border-bottom border-light border-opacity-10 d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold mb-0">FIR Management Console</h5>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-light opacity-50"><i class="fas fa-filter"></i></button>
+                                    <button class="btn btn-outline-light opacity-50"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div>
+                            
+                            <ul class="nav nav-tabs nav-tabs-modern px-4" role="tablist">
+                                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#new" type="button">NEW REPORTS</button></li>
+                                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#active" type="button">UNDER INVESTIGATION</button></li>
+                                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#closed" type="button">ARCHIVED</button></li>
+                            </ul>
+
+                            <div class="tab-content p-4">
+                                <div class="tab-pane fade show active" id="new">
+                                    <div class="table-responsive">
+                                        <table class="table table-dark table-hover align-middle mb-0">
+                                            <thead>
+                                                <tr class="extra-small text-muted text-uppercase">
+                                                    <th>ID</th>
+                                                    <th>Citizen Source</th>
+                                                    <th>Category</th>
+                                                    <th>Timestamp</th>
+                                                    <th class="text-end">Command</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for f in fir_new %}
+                                                <tr>
+                                                    <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
+                                                    <td class="small">{{ f.user.name }}</td>
+                                                    <td><span class="badge bg-danger bg-opacity-10 text-danger extra-small">{{ f.crime_type }}</span></td>
+                                                    <td class="extra-small text-muted">{{ f.timestamp.strftime('%H:%M | %d %b') }}</td>
+                                                    <td class="text-end">
+                                                        <form method="POST" action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}" class="d-inline">
+                                                            <input type="hidden" name="status" value="in_progress">
+                                                            <button class="btn btn-info btn-sm extra-small fw-bold">INITIATE CASE</button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="active">
+                                    <div class="table-responsive">
+                                        <table class="table table-dark table-hover align-middle mb-0">
+                                            <thead>
+                                                <tr class="extra-small text-muted text-uppercase">
+                                                    <th>ID</th>
+                                                    <th>Operational Intel</th>
+                                                    <th>Last Sync</th>
+                                                    <th class="text-end">Command</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for f in fir_active %}
+                                                <tr>
+                                                    <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
+                                                    <td class="small font-monospace text-truncate" style="max-width: 200px;">{{ f.police_notes or 'NO INTEL PROVIDED' }}</td>
+                                                    <td class="extra-small text-muted">{{ f.updated_at.strftime('%H:%M | %d %b') if f.updated_at else '-' }}</td>
+                                                    <td class="text-end">
+                                                        <form method="POST" action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}" class="d-inline">
+                                                            <input type="hidden" name="status" value="closed">
+                                                            <button class="btn btn-success btn-sm extra-small fw-bold">RESOLVE CASE</button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="closed">
+                                    <div class="table-responsive">
+                                        <table class="table table-dark table-hover align-middle mb-0">
+                                            <thead>
+                                                <tr class="extra-small text-muted text-uppercase">
+                                                    <th>ID</th>
+                                                    <th>Category</th>
+                                                    <th>Resolution Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for f in fir_closed %}
+                                                <tr>
+                                                    <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
+                                                    <td><span class="badge bg-light bg-opacity-10 text-muted extra-small">{{ f.crime_type }}</span></td>
+                                                    <td class="extra-small text-muted">{{ f.updated_at.strftime('%d %b %Y') if f.updated_at else '-' }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="tab-pane fade" id="tab-active" role="tabpanel">
-                            <div class="table-responsive">
-                                <table class="table table-sm align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Officer Notes</th>
-                                            <th>Updated</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+
+                        <!-- Kanban Board -->
+                        <div class="police-card p-4">
+                            <h5 class="fw-bold mb-4">Tactical Board</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="kanban-column">
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <span class="small fw-bold text-muted">OFF-QUEUE</span>
+                                            <span class="badge bg-secondary rounded-pill">0</span>
+                                        </div>
+                                        <div class="extra-small text-center text-muted mt-5">No items pending assignment</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="kanban-column border-info">
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <span class="small fw-bold text-info">IN FIELD</span>
+                                            <span class="badge bg-info rounded-pill">{{ in_progress_count }}</span>
+                                        </div>
                                         {% for f in fir_active %}
-                                        <tr>
-                                            <td>#{{ f.id }}</td>
-                                            <td>{{ f.police_notes or '-' }}</td>
-                                            <td>{{ f.updated_at.strftime('%Y-%m-%d %H:%M') if f.updated_at else '-' }}</td>
-                                            <td>
-                                                <form method="POST" action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}" class="d-inline">
-                                                    <input type="hidden" name="status" value="closed">
-                                                    <button class="btn btn-sm btn-success">Resolve</button>
-                                                </form>
-                                            </td>
-                                        </tr>
+                                        <div class="police-card p-3 mb-2 small bg-opacity-50">
+                                            <div class="fw-bold text-info mb-1">ID: #{{ f.id|string|truncate(6, True, '') }}</div>
+                                            <div class="extra-small opacity-75">{{ f.crime_type }}</div>
+                                        </div>
                                         {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="tab-closed" role="tabpanel">
-                            <div class="table-responsive">
-                                <table class="table table-sm align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Crime</th>
-                                            <th>Closed</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for f in fir_closed %}
-                                        <tr>
-                                            <td>#{{ f.id }}</td>
-                                            <td>{{ f.crime_type }}</td>
-                                            <td>{{ f.updated_at.strftime('%Y-%m-%d %H:%M') if f.updated_at else '-' }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="kanban-column border-success">
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <span class="small fw-bold text-success">SECURED</span>
+                                            <span class="badge bg-success rounded-pill">{{ closed_count }}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- Case Assignment Board (Kanban) -->
-                <div class="mb-4">
-                    <h5><i class="fas fa-tasks"></i> Case Assignment Board</h5>
-                    <div class="kanban-board">
-                        <div class="kanban-column">
-                            <h6>Unassigned</h6>
-                            <!-- List cases -->
+
+                    <!-- Side Panels -->
+                    <div class="col-lg-4">
+                        <!-- Criminal Database -->
+                        <div class="police-card p-4 mb-4">
+                            <h5 class="fw-bold mb-3">Target Database</h5>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text bg-transparent border-end-0 border-light border-opacity-10"><i class="fas fa-search text-muted"></i></span>
+                                <input type="text" class="form-control search-command border-start-0" placeholder="Identity lookup...">
+                            </div>
+                            <div class="list-group list-group-flush">
+                                {% for criminal in criminals %}
+                                <div class="list-group-item bg-transparent border-light border-opacity-10 px-0 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="small fw-bold text-white">{{ criminal.name }}</div>
+                                        <div class="extra-small text-muted">{{ criminal.crimes|truncate(30) }}</div>
+                                    </div>
+                                    <span class="badge {{ 'bg-danger' if criminal.risk_level == 'High' else 'bg-warning' }} bg-opacity-10 {{ 'text-danger' if criminal.risk_level == 'High' else 'text-warning' }} extra-small">{{ criminal.risk_level }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
                         </div>
-                        <div class="kanban-column">
-                            <h6>In Progress</h6>
-                            <!-- List cases -->
+
+                        <!-- AI Prediction -->
+                        <div class="police-card p-4 mb-4 border-info">
+                            <h5 class="fw-bold mb-3 text-info"><i class="fas fa-microchip me-2"></i>Predictive Analysis</h5>
+                            <div class="p-3 bg-info bg-opacity-10 rounded border border-info border-opacity-25 mb-3">
+                                <div class="extra-small text-info fw-bold mb-1"><i class="fas fa-bolt me-1"></i> HIGH PROBABILITY ALERT</div>
+                                <div class="small">Elevated risk of vehicle theft detected in Zone 4 between 22:00 - 02:00.</div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="flex-grow-1">
+                                    <div class="extra-small text-muted mb-1">Confidence Score</div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-info" style="width: 88%;"></div>
+                                    </div>
+                                </div>
+                                <span class="small fw-bold text-info">88%</span>
+                            </div>
                         </div>
-                        <div class="kanban-column">
-                            <h6>Closed</h6>
-                            <!-- List cases -->
-                        </div>
-                    </div>
-                </div>
-                <!-- Crime Prediction Panel -->
-                <div class="mb-4">
-                    <h5><i class="fas fa-chart-line"></i> AI Crime Forecast Panel</h5>
-                    <div class="card shadow-sm mb-3">
-                        <div class="card-body">
-                            <strong>High probability of theft in XYZ area between 8–11 PM.</strong>
-                        </div>
-                    </div>
-                    <!-- Heatmap preview, crime trends chart -->
-                </div>
-                <!-- Map View Panel -->
-                <div class="mb-4">
-                    <h5><i class="fas fa-map-marked-alt"></i> Map View</h5>
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <div class="map-holder d-flex align-items-center justify-content-center text-muted">
-                                Interactive map placeholder (jurisdiction, crimes, heatmap)
+
+                        <!-- Map View -->
+                        <div class="police-card p-4">
+                            <h5 class="fw-bold mb-3">Jurisdictional Heatmap</h5>
+                            <div class="map-glow rounded overflow-hidden" style="height: 250px; background: url('https://w0.peakpx.com/wallpaper/453/178/HD-wallpaper-dark-world-map-business-concepts-digital-world-map-blue-background-world-map-silhouette-world-map-concepts.jpg') center/cover;">
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50">
+                                    <div class="text-center">
+                                        <i class="fas fa-location-dot text-info mb-2 fs-2"></i>
+                                        <div class="extra-small text-white">INTERACTIVE MAP STANDBY</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -253,7 +392,9 @@
             </div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
 

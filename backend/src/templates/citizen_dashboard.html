@@ -2,170 +2,286 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Citizen Dashboard - Crime Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citizen Portal - Crime Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <style>
-        .sidebar { min-height: 100vh; }
-        .timeline { border-left: 3px solid #0d6efd; padding-left: 1rem; }
-        .timeline-step { margin-bottom: 1rem; }
+        :root {
+            --citizen-primary: #4cc9f0;
+            --citizen-secondary: #4895ef;
+            --citizen-success: #4ade80;
+        }
+
+        .citizen-nav {
+            background: white;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .timeline-modern {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 3px solid #e2e8f0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.4rem;
+            top: 0.2rem;
+            width: 1rem;
+            height: 1rem;
+            background: white;
+            border: 3px solid var(--citizen-primary);
+            border-radius: 50%;
+        }
+
+        .status-pill {
+            padding: 0.25rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .form-floating > .form-control:focus {
+            border-color: var(--citizen-primary);
+            box-shadow: 0 0 0 0.25rem rgba(76, 201, 240, 0.1);
+        }
     </style>
 </head>
 <body class="bg-light">
-    <!-- Top Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-success bg-success shadow-sm">
-        <div class="container-fluid">
-            <a class="navbar-brand text-white" href="#"><i class="fas fa-shield-alt"></i> Citizen Portal</a>
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link text-white" href="#"><i class="fas fa-user-circle"></i> {{ current_user.name }}</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="#"><i class="fas fa-check-circle"></i> {{ current_user.verification_status }}</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
-        </div>
-    </nav>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Left Sidebar -->
-            <div class="col-md-2 sidebar bg-white pt-4 shadow-sm">
-                <ul class="nav flex-column">
-                    <li class="nav-item mb-2"><a class="nav-link" href="{{ url_for('fir.add_fir') }}"><i class="fas fa-plus-circle"></i> File Complaint</a></li>
-                    <li class="nav-item mb-2"><a class="nav-link" href="#"><i class="fas fa-file-alt"></i> My FIRs</a></li>
-                    <li class="nav-item mb-2"><a class="nav-link" href="#"><i class="fas fa-bell"></i> Notifications / Messages</a></li>
-                </ul>
-            </div>
-            <!-- Main Panels -->
-            <div class="col-md-10 pt-4">
-                <!-- File Complaint Card -->
-                <div class="mb-4">
-                    <h5><i class="fas fa-plus-circle"></i> File Complaint</h5>
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <form method="POST" action="{{ url_for('fir.add_fir') }}" enctype="multipart/form-data">
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <label for="crime_type" class="form-label">Crime Type</label>
-                                        <input type="text" class="form-control" id="crime_type" name="crime_type" required>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label for="latitude" class="form-label">Latitude</label>
-                                        <input type="number" step="any" class="form-control" id="latitude" name="latitude" required>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label for="longitude" class="form-label">Longitude</label>
-                                        <input type="number" step="any" class="form-control" id="longitude" name="longitude" required>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="description" class="form-label">Description</label>
-                                    <textarea class="form-control" id="description" name="description" rows="2" required></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="evidence_file" class="form-label">Evidence Upload</label>
-                                    <input type="file" class="form-control" id="evidence_file" name="evidence_file">
-                                </div>
-                                <div class="mb-3">
-                                    <button type="button" id="getLocationBtn" class="btn btn-outline-primary btn-sm"><i class="fas fa-map-marker-alt"></i> Use Current Location</button>
-                                    <small id="locationStatus" class="text-muted ms-2"></small>
-                                </div>
-                                <button type="submit" class="btn btn-success">Submit Complaint</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <!-- My FIRs Table -->
-                <div class="mb-4">
-                    <h5><i class="fas fa-file-alt"></i> My FIRs</h5>
-                    <table class="table table-bordered table-hover shadow-sm">
-                        <thead>
-                            <tr>
-                                <th>Complaint ID</th>
-                                <th>Date</th>
-                                <th>Department</th>
-                                <th>Status</th>
-                                <th>Assigned Officer</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for fir in fir_reports %}
-                            <tr>
-                                <td>{{ fir.id }}</td>
-                                <td>{{ fir.timestamp.strftime('%Y-%m-%d') }}</td>
-                                <td>{{ fir.department.name if fir.department else 'Unassigned' }}</td>
-                                <td>{{ fir.status }}</td>
-                                <td>{{ fir.assigned_officer if fir.assigned_officer else 'N/A' }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Status Tracker Widget -->
-                <div class="mb-4">
-                    <h5><i class="fas fa-tasks"></i> Status Tracker</h5>
-                    <div class="progress" style="height: 30px;">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ fir_status_percent }}%;" aria-valuenow="{{ fir_status_percent }}" aria-valuemin="0" aria-valuemax="100">
-                            {{ fir_status_text }}
-                        </div>
-                    </div>
-                </div>
-                <!-- Notifications Panel -->
-                <div class="mb-4">
-                    <h5><i class="fas fa-bell"></i> Notifications</h5>
-                    <ul class="list-group">
-                        {% for note in notifications %}
-                        <li class="list-group-item">{{ note }}</li>
-                        {% endfor %}
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg citizen-nav shadow-sm mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="#">
+                <i class="fas fa-shield-cat me-2"></i>CITIZEN PORTAL
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <span class="d-none d-md-inline small text-muted">
+                    <i class="fas fa-check-circle text-success me-1"></i> {{ current_user.verification_status }}
+                </span>
+                <div class="dropdown">
+                    <a href="#" class="btn btn-light rounded-circle" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-3">
+                        <li class="px-3 py-2 small fw-bold">{{ current_user.name }}</li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                     </ul>
                 </div>
-                <!-- Profile Card -->
-                <div class="mb-4">
-                    <h5><i class="fas fa-user-circle"></i> Profile</h5>
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <p>Name: {{ current_user.name }}</p>
-                            <p>Email: {{ current_user.email }}</p>
-                            <p>Verification Status: <span class="badge bg-{{ 'success' if current_user.verification_status == 'Verified' else 'warning' }}">{{ current_user.verification_status }}</span></p>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        <div class="row g-4">
+            <!-- Left Column: Actions & Profile -->
+            <div class="col-lg-4">
+                <div class="glass-card p-4 mb-4 text-center border-0">
+                    <div class="mb-3">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-4">
+                            <i class="fas fa-user fa-3x"></i>
                         </div>
                     </div>
+                    <h4 class="fw-bold mb-1">{{ current_user.name }}</h4>
+                    <p class="text-muted small mb-3">{{ current_user.email }}</p>
+                    <span class="status-pill {{ 'bg-success bg-opacity-10 text-success' if current_user.verification_status == 'Verified' else 'bg-warning bg-opacity-10 text-warning' }}">
+                        {{ current_user.verification_status }} Account
+                    </span>
                 </div>
-                <!-- Timeline View of Complaint Progress -->
-                <div class="mb-4">
-                    <h5><i class="fas fa-stream"></i> Complaint Progress Timeline</h5>
-                    <div class="timeline">
+
+                <div class="glass-card p-4 border-0">
+                    <h5 class="fw-bold mb-4">Quick Navigation</h5>
+                    <div class="list-group list-group-flush">
+                        <a href="{{ url_for('fir.add_fir') }}" class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-plus-circle text-primary me-2"></i> File New Case</span>
+                            <i class="fas fa-chevron-right small text-muted"></i>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-file-invoice text-info me-2"></i> My Records</span>
+                            <i class="fas fa-chevron-right small text-muted"></i>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-bell text-warning me-2"></i> Notifications</span>
+                            <span class="badge rounded-pill bg-danger">{{ notifications|length }}</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Dashboard Content -->
+            <div class="col-lg-8 fade-in-up">
+                <!-- Welcome & Summary -->
+                <div class="card border-0 glass-card p-4 mb-4 overflow-hidden" style="background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);">
+                    <div class="position-relative z-1">
+                        <h2 class="text-white fw-bold mb-2">Hello, {{ current_user.name.split(' ')[0] }}</h2>
+                        <p class="text-white opacity-75 mb-0">Stay updated on your reported incidents and safety alerts.</p>
+                    </div>
+                    <i class="fas fa-cloud-sun text-white position-absolute opacity-10" style="bottom: -20px; right: 20px; font-size: 8rem;"></i>
+                </div>
+
+                <!-- Latest Case Status -->
+                {% if fir_reports %}
+                <div class="glass-card p-4 mb-4 border-0">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold mb-0">Latest Case Tracker</h5>
+                        <code class="small fw-bold">ID: {{ fir_reports[0].id|string|truncate(6, True, '') }}</code>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2 small fw-bold text-uppercase">
+                            <span>Progress</span>
+                            <span class="text-primary">{{ fir_status_text }}</span>
+                        </div>
+                        <div class="progress" style="height: 10px; border-radius: 1rem;">
+                            <div class="progress-bar bg-primary rounded-pill progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ fir_status_percent }}%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-modern mt-5">
                         {% for step in complaint_timeline %}
-                        <div class="timeline-step">
-                            <strong>{{ step.status }}</strong> <small class="text-muted">{{ step.date }}</small>
-                            <div>{{ step.note }}</div>
+                        <div class="timeline-item">
+                            <div class="fw-bold mb-0">{{ step.status }}</div>
+                            <div class="text-muted extra-small mb-2">{{ step.date }}</div>
+                            <div class="small p-3 bg-light rounded">{{ step.note }}</div>
                         </div>
                         {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Report Filing Form -->
+                <div class="glass-card p-4 mb-4 border-0" id="report-section">
+                    <h5 class="fw-bold mb-4"><i class="fas fa-pencil-alt text-danger me-2"></i>Lodge a Report</h5>
+                    <form method="POST" action="{{ url_for('fir.add_fir') }}" enctype="multipart/form-data">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control border-0 bg-light" id="crime_type" name="crime_type" placeholder="Type of incident" required>
+                                    <label for="crime_type">Incident Type (e.g., Theft, Harassment)</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="number" step="any" class="form-control border-0 bg-light" id="latitude" name="latitude" placeholder="Lat" required>
+                                    <label for="latitude">Latitude</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="number" step="any" class="form-control border-0 bg-light" id="longitude" name="longitude" placeholder="Lon" required>
+                                    <label for="longitude">Longitude</label>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <button type="button" id="getLocationBtn" class="btn btn-outline-primary btn-sm w-100 py-2 border-dashed">
+                                    <i class="fas fa-location-crosshairs me-2"></i>Auto-detect Coordinates
+                                </button>
+                                <div id="locationStatus" class="extra-small text-muted mt-1 text-center"></div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating mb-3">
+                                    <textarea class="form-control border-0 bg-light" id="description" name="description" style="height: 120px" placeholder="Details" required></textarea>
+                                    <label for="description">Provide a detailed description of the incident...</label>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-4">
+                                <label class="small fw-bold mb-2 d-block text-uppercase text-muted">Upload Supporting Evidence (Images/Docs)</label>
+                                <input type="file" class="form-control border-0 bg-light py-3" id="evidence_file" name="evidence_file">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-premium btn-premium-primary w-100 py-3 shadow">
+                                    <i class="fas fa-paper-plane me-2"></i>SUBMIT OFFICIAL REPORT
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- My Records Table -->
+                <div class="glass-card p-4 border-0">
+                    <h5 class="fw-bold mb-4">Incident Log History</h5>
+                    <div class="table-responsive">
+                        <table class="table table-modern">
+                            <thead>
+                                <tr class="text-muted extra-small">
+                                    <th>CASE ID</th>
+                                    <th>DATE FILED</th>
+                                    <th>ASSIGNED UNIT</th>
+                                    <th>OFFICIAL STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if fir_reports %}
+                                {% for fir in fir_reports %}
+                                <tr>
+                                    <td class="small fw-bold text-primary">#{{ fir.id|string|truncate(8, True, '') }}</td>
+                                    <td class="small">{{ fir.timestamp.strftime('%d %b %Y') }}</td>
+                                    <td class="small">{{ fir.department.name if fir.department else 'PROCESSING...' }}</td>
+                                    <td>
+                                        <span class="status-pill 
+                                            {{ 'bg-warning' if fir.status == 'pending' else 'bg-primary' if fir.status == 'assigned' else 'bg-success' if fir.status == 'closed' else 'bg-info' }} bg-opacity-10 
+                                            {{ 'text-warning' if fir.status == 'pending' else 'text-primary' if fir.status == 'assigned' else 'text-success' if fir.status == 'closed' else 'text-info' }}">
+                                            {{ fir.status.upper() }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted small">No incidents filed by your account yet.</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         (function(){
             const btn = document.getElementById('getLocationBtn');
+            const latInput = document.getElementById('latitude');
+            const lonInput = document.getElementById('longitude');
+            const statusBox = document.getElementById('locationStatus');
+            
             if(!btn) return;
-            const lat = document.getElementById('latitude');
-            const lon = document.getElementById('longitude');
-            const status = document.getElementById('locationStatus');
+            
             btn.addEventListener('click', function(){
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Detecting...';
                 if(navigator.geolocation){
                     navigator.geolocation.getCurrentPosition(function(pos){
-                        lat.value = pos.coords.latitude;
-                        lon.value = pos.coords.longitude;
-                        status.textContent = 'Location captured';
+                        latInput.value = pos.coords.latitude.toFixed(6);
+                        lonInput.value = pos.coords.longitude.toFixed(6);
+                        statusBox.textContent = 'Location GPS Sync: SUCCESS';
+                        statusBox.className = 'extra-small text-success mt-1 text-center';
+                        btn.innerHTML = '<i class="fas fa-check me-2"></i>Coordinates Captured';
+                        btn.className = 'btn btn-success btn-sm w-100 py-2';
                     }, function(err){
-                        status.textContent = 'Unable to fetch location';
+                        statusBox.textContent = 'GPS Error: Service Unavailable';
+                        statusBox.className = 'extra-small text-danger mt-1 text-center';
+                        btn.innerHTML = '<i class="fas fa-location-crosshairs me-2"></i>Retry Detection';
                     });
                 } else {
-                    status.textContent = 'Geolocation not supported';
+                    statusBox.textContent = 'GPS Error: Not supported by browser';
                 }
             });
         })();
     </script>
 </body>
 </html>
+
 
 
