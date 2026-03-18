@@ -69,6 +69,7 @@ def police_dashboard():
     fir_reports = FIRReport.objects(department=current_user.department).order_by('-timestamp')
     department = current_user.department
     
+    # Statistics for this department
     pending_count = len([fir for fir in fir_reports if fir.status == 'pending'])
     in_progress_count = len([fir for fir in fir_reports if fir.status == 'in_progress'])
     closed_count = len([fir for fir in fir_reports if fir.status == 'closed'])
@@ -78,6 +79,30 @@ def police_dashboard():
     fir_active = [f for f in fir_reports if f.status == 'in_progress']
     fir_closed = [f for f in fir_reports if f.status in ['closed', 'rejected']]
 
+    # Filter CrimeData (Criminal Database) by department boundaries
+    # If no coordinates, fall back to empty list
+    criminals_data = []
+    heatmap_coords = []
+    if department and department.min_lat is not None:
+        crimes = CrimeData.objects(
+            latitude__gte=department.min_lat,
+            latitude__lte=department.max_lat,
+            longitude__gte=department.min_lon,
+            longitude__lte=department.max_lon
+        )
+        
+        # Map CrimeData for the template "Target Database"
+        # Since CrimeData doesn't have names, we'll use crime type + locality
+        for crime in crimes.limit(10):
+            criminals_data.append({
+                "name": f"Suspect - {crime.crime_description[:15]}",
+                "crimes": f"{crime.crime_description} at {crime.locality}",
+                "risk_level": "Medium" if crime.victim_age and crime.victim_age > 18 else "High"
+            })
+            
+        # Get all coords for heatmap
+        heatmap_coords = [[c.latitude, c.longitude] for c in crimes.only('latitude', 'longitude')]
+
     return render_template('police_dashboard.html', 
                          fir_reports=fir_reports, 
                          department=department,
@@ -85,7 +110,8 @@ def police_dashboard():
                          in_progress_count=in_progress_count,
                          closed_count=closed_count,
                          total_count=total_count,
-                         criminals=[],
+                         criminals=criminals_data,
+                         heatmap_coords=heatmap_coords,
                          fir_new=fir_new,
                          fir_active=fir_active,
                          fir_closed=fir_closed)

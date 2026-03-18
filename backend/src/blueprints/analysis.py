@@ -152,16 +152,104 @@ def hotspot():
 @analysis_bp.route('/analytics')
 @login_required
 def analytics():
-    # Simple analytics placeholder based on the original logic
     df = load_data()
-    if df is None:
-        return render_template('analytics.html', error='Could not load data.')
+    if df is None or df.empty:
+        # Pass empty lists to avoid template errors
+        return render_template(
+            'analytics.html',
+            top_types_labels=[], top_types_values=[],
+            area_labels=[], area_values=[],
+            gender_labels=[], gender_values=[],
+            weapon_labels=[], weapon_values=[],
+            hourly_labels=[], hourly_values=[],
+            agegroup_labels=[], agegroup_values=[],
+            domain_labels=[], domain_values=[],
+            heatmap_coords=[],
+            suspect_labels=[], suspect_values=[],
+            total_crimes=0,
+            error='Could not load data or dataset is empty.'
+        )
     
+    # Total Crimes
     total_crimes = len(df)
-    crime_types = df['crime_description'].value_counts().head(5).to_dict()
-    areas = df['locality'].value_counts().head(5).to_dict()
     
+    # Top crime types
+    top_types = df['crime_description'].value_counts().head(10)
+    top_types_labels = list(top_types.index)
+    top_types_values = [int(x) for x in top_types.values]
+    
+    # Area-wise breakdown
+    area_counts = df['locality'].value_counts().head(10)
+    area_labels = list(area_counts.index)
+    area_values = [int(x) for x in area_counts.values]
+    
+    # Victim gender
+    gender_counts = df['victim_gender'].value_counts()
+    gender_labels = list(gender_counts.index)
+    gender_values = [int(x) for x in gender_counts.values]
+    
+    # Weapon usage
+    weapon_counts = df.get('weapon_used', pd.Series()).value_counts().head(10)
+    weapon_labels = list(weapon_counts.index)
+    weapon_values = [int(x) for x in weapon_counts.values]
+    
+    # Hourly crime distribution
+    if 'hour' in df.columns:
+        hourly = df['hour'].value_counts().sort_index()
+        hourly_labels = [str(int(h)) for h in hourly.index]
+        hourly_values = [int(x) for x in hourly.values]
+    else:
+        hourly_labels, hourly_values = [], []
+        
+    # Victim age group
+    if 'victim_age' in df.columns:
+        bins = [0, 18, 35, 60, 100]
+        labels = ['0-18', '19-35', '36-60', '60+']
+        df['age_group'] = pd.cut(df['victim_age'], bins=bins, labels=labels, right=False)
+        agegroup_counts = df['age_group'].value_counts().sort_index()
+        agegroup_labels = [str(x) for x in agegroup_counts.index]
+        agegroup_values = [int(x) for x in agegroup_counts.values]
+    else:
+        agegroup_labels, agegroup_values = [], []
+        
+    # Crime domain breakdown
+    if 'crime_domain' in df.columns:
+        domain_counts = df['crime_domain'].value_counts().head(10)
+        domain_labels = list(domain_counts.index)
+        domain_values = [int(x) for x in domain_counts.values]
+    else:
+        domain_labels, domain_values = [], []
+        
+    # Heatmap data
+    if 'latitude' in df.columns and 'longitude' in df.columns:
+        heatmap_coords = df[['latitude', 'longitude']].dropna().values.tolist()
+    else:
+        heatmap_coords = []
+        
+    # Top suspects
+    if 'criminal_name' in df.columns:
+        suspect_counts = df['criminal_name'].value_counts().head(10)
+        suspect_labels = list(suspect_counts.index)
+        suspect_values = [int(x) for x in suspect_counts.values]
+    else:
+        suspect_labels, suspect_values = [], []
+
     return render_template('analytics.html', 
                          total_crimes=total_crimes,
-                         crime_types=crime_types,
-                         areas=areas)
+                         top_types_labels=top_types_labels,
+                         top_types_values=top_types_values,
+                         area_labels=area_labels,
+                         area_values=area_values,
+                         gender_labels=gender_labels,
+                         gender_values=gender_values,
+                         weapon_labels=weapon_labels,
+                         weapon_values=weapon_values,
+                         hourly_labels=hourly_labels,
+                         hourly_values=hourly_values,
+                         agegroup_labels=agegroup_labels,
+                         agegroup_values=agegroup_values,
+                         domain_labels=domain_labels,
+                         domain_values=domain_values,
+                         heatmap_coords=heatmap_coords,
+                         suspect_labels=suspect_labels,
+                         suspect_values=suspect_values)
