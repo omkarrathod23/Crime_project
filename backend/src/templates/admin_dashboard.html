@@ -111,7 +111,7 @@
 
         .admin-nav-link {
             padding: 1rem 1.5rem;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.85); /* Much brighter default */
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -123,6 +123,7 @@
             font-size: 0.8rem;
             letter-spacing: 1.5px;
             text-transform: uppercase;
+            opacity: 0.9;
         }
 
         .admin-nav-link:hover,
@@ -216,11 +217,48 @@
         }
 
         .extra-small {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             letter-spacing: 0.12rem;
             text-transform: uppercase;
             font-weight: 800;
-            color: rgba(255, 255, 255, 0.7) !important;
+            color: #ffffff !important;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+        }
+
+        /* High-Visibility Modal Overrides */
+        .modal-content {
+            background: #0a0a0d !important;
+            border: 1px solid rgba(239, 35, 60, 0.3) !important;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8), 0 0 20px rgba(239, 35, 60, 0.1) !important;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .modal-body {
+            background: #0a0a0d !important;
+            color: #ffffff !important;
+        }
+
+        .text-muted { color: #cbd5e1 !important; }
+        
+        label, .form-label {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            letter-spacing: 1px !important;
+            opacity: 0.9 !important;
+        }
+
+        .form-select, .form-control {
+            background: rgba(15, 5, 5, 0.8) !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .table-premium td {
+            color: #e2e8f0 !important;
+            background: transparent !important;
         }
     </style>
 </head>
@@ -378,6 +416,10 @@
                                                     <button class="btn btn-sm btn-link text-info p-0 text-decoration-none extra-small letter-spacing-1" onclick="showLocationOnMap('{{ fir.lat|safe }}', '{{ fir.lon|safe }}')">
                                                         <i class="fas fa-location-crosshairs me-1"></i> VIEW GRID
                                                     </button>
+                                                    <form method="POST" action="{{ url_for('fir.verify_fir_location', fir_id=fir.id) }}" class="d-inline">
+                                                        <button type="submit" class="btn sentinel-btn py-1 px-3 extra-small">VERIFY LOCATION</button>
+                                                    </form>
+                                                    <button class="btn btn-outline-danger py-1 px-3 extra-small border-opacity-25" data-bs-toggle="modal" data-bs-target="#rejectModal{{ fir.id }}">REJECT</button>
                                                 </td>
                                                 <td class="text-end">
                                                     <div class="d-flex justify-content-end gap-2">
@@ -511,7 +553,7 @@
                     <h5 class="hud-header-title mb-0" style="font-size: 1.1rem;">DELEGATION PROTOCOL</h5>
                     <button type="button" class="btn-close btn-close-white opacity-50" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" action="{{ url_for('verify_and_assign_fir', fir_id=fir.id) }}">
+                <form method="POST" action="{{ url_for('fir.verify_and_assign_fir', fir_id=fir.id) }}">
                     <div class="modal-body p-4">
                         <div class="mb-4">
                             <label class="extra-small text-danger d-block mb-2">INCIDENT TELEMETRY</label>

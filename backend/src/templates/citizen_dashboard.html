@@ -8,301 +8,517 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --citizen-primary: #4cc9f0;
-            --citizen-secondary: #4895ef;
-            --citizen-success: #4ade80;
+            --sentinel-primary: #10b981;
+            --sentinel-primary-glow: rgba(16, 185, 129, 0.4);
+            --sentinel-secondary: #06b6d4;
+            --sentinel-bg: #05080a;
+            --sentinel-card: rgba(10, 15, 20, 0.6);
+            --sentinel-border: rgba(16, 185, 129, 0.3);
+            --glass-blur: blur(25px);
+            --text-muted: #cbd5e1;
+            --gradient-sentinel: linear-gradient(135deg, #10b981 0%, #059669 100%);
         }
 
-        .citizen-nav {
-            background: white;
-            border-bottom: 1px solid #edf2f7;
+        body {
+            background-color: var(--sentinel-bg);
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
         }
 
-        .timeline-modern {
+        /* Mesh Background */
+        .mesh-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #0a1118 0%, #05080a 100%);
+        }
+
+        .mesh-blob {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: var(--sentinel-primary-glow);
+            filter: blur(120px);
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: move 25s infinite alternate;
+        }
+
+        .blob-1 { top: -100px; right: -100px; background: rgba(16, 185, 129, 0.2); }
+        .blob-2 { bottom: -200px; left: -100px; background: rgba(6, 182, 212, 0.15); }
+
+        @keyframes move {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(100px, 100px) scale(1.1); }
+        }
+
+        /* Sidebar - Sentinel Console */
+        .sentinel-sidebar {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: rgba(5, 8, 10, 0.8);
+            backdrop-filter: var(--glass-blur);
+            border-right: 1px solid var(--sentinel-border);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            padding: 2.5rem 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sentinel-viewport {
+            margin-left: 280px;
+            padding: 3rem;
+            min-height: 100vh;
+        }
+
+        .hud-card {
+            background: var(--sentinel-card);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--sentinel-border);
+            border-radius: 24px;
+            padding: 2rem;
             position: relative;
-            padding-left: 2rem;
-            border-left: 3px solid #e2e8f0;
+            overflow: hidden;
+            transition: all 0.4s;
         }
 
-        .timeline-item {
-            position: relative;
-            margin-bottom: 2rem;
+        .hud-card:hover {
+            border-color: rgba(16, 185, 129, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 20px rgba(16, 185, 129, 0.1);
         }
 
-        .timeline-item::before {
+        .hud-card::after {
             content: '';
             position: absolute;
-            left: -2.4rem;
-            top: 0.2rem;
-            width: 1rem;
-            height: 1rem;
-            background: white;
-            border: 3px solid var(--citizen-primary);
-            border-radius: 50%;
+            top: 15px;
+            right: 15px;
+            width: 10px;
+            height: 10px;
+            border-top: 2px solid var(--sentinel-primary);
+            border-right: 2px solid var(--sentinel-primary);
+            opacity: 0.4;
         }
 
-        .status-pill {
-            padding: 0.25rem 1rem;
-            border-radius: 2rem;
-            font-size: 0.75rem;
-            font-weight: 600;
+        .hud-header-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            letter-spacing: 2px;
             text-transform: uppercase;
+            background: linear-gradient(to right, #fff, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .form-floating > .form-control:focus {
-            border-color: var(--citizen-primary);
-            box-shadow: 0 0 0 0.25rem rgba(76, 201, 240, 0.1);
+        .nav-link-sentinel {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 1rem 1.25rem;
+            color: rgba(255, 255, 255, 0.9); /* Higher contrast */
+            text-decoration: none;
+            border-radius: 12px;
+            transition: 0.3s;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            opacity: 0.85; /* More visible default */
+        }
+
+        .nav-link-sentinel:hover, .nav-link-sentinel.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--sentinel-primary);
+            box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.05);
+        }
+
+        .sentinel-btn {
+            background: var(--gradient-sentinel);
+            border: none;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sentinel-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px var(--sentinel-primary-glow);
+            filter: brightness(1.1);
+        }
+
+        .metric-value {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 2.2rem;
+            color: #fff;
+            text-shadow: 0 0 15px var(--sentinel-primary-glow);
+        }
+
+        /* Timeline Fix */
+        .timeline-tactical {
+            position: relative;
+            padding-left: 3rem;
+        }
+
+        .timeline-tactical::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--sentinel-primary), transparent);
+        }
+
+        .timeline-tactical-item {
+            position: relative;
+            margin-bottom: 2.5rem;
+        }
+
+        .timeline-tactical-item::before {
+            content: '';
+            position: absolute;
+            left: -2.35rem;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            background: var(--sentinel-primary);
+            border: 3px solid var(--sentinel-bg);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--sentinel-primary);
+        }
+
+        /* Enhanced Visibility Classes */
+        .text-muted { color: #cbd5e1 !important; opacity: 0.7; }
+        .extra-small { font-size: 0.65rem; font-weight: 700; color: #fff; } /* Force bright for extra-small */
+        .letter-spacing-2 { letter-spacing: 2px; }
+        
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6) !important; /* Brighter placeholder */
+        }
+
+        .form-select, .form-control {
+            color: #ffffff !important;
+            background: rgba(10, 15, 20, 0.8) !important; /* Slightly darker to pop text */
+        }
+
+        label, .extra-small.text-muted {
+            color: #ffffff !important;
+            opacity: 0.95 !important;
+            font-weight: 700 !important;
+            letter-spacing: 1px;
+        }
+
+        .badge.bg-opacity-10, .badge.bg-opacity-20, .badge.bg-opacity-25 {
+            background-color: rgba(var(--bs-primary-rgb), 0.3) !important;
+            color: #fff !important;
         }
     </style>
 </head>
-<body class="bg-light">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg citizen-nav shadow-sm mb-4">
-        <div class="container">
-            <a class="navbar-brand fw-bold text-primary" href="#">
-                <i class="fas fa-shield-cat me-2"></i>CITIZEN PORTAL
+<body>
+    <div class="mesh-container">
+        <div class="mesh-blob blob-1"></div>
+        <div class="mesh-blob blob-2"></div>
+    </div>
+
+    <!-- Sentinel Sidebar -->
+    <aside class="sentinel-sidebar">
+        <div class="sidebar-header mb-5">
+            <div class="brand-logo mb-2" style="font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 1.3rem; letter-spacing: 2px; color: #fff;">
+                <i class="fas fa-shield-halved text-success me-2" style="filter: drop-shadow(0 0 8px var(--sentinel-primary-glow));"></i>
+                <span>SENTINEL</span>
+            </div>
+            <div class="extra-small text-success opacity-75" style="font-size: 0.6rem; letter-spacing: 4px;">CITIZEN COMMAND v4.0</div>
+        </div>
+
+        <nav class="flex-grow-1">
+            <a href="{{ url_for('main.citizen_dashboard') }}" class="nav-link-sentinel active">
+                <i class="fas fa-th-large"></i> Dashboard
             </a>
-            <div class="d-flex align-items-center gap-3">
-                <span class="d-none d-md-inline small text-muted">
-                    <i class="fas fa-check-circle text-success me-1"></i> {{ current_user.verification_status }}
-                </span>
-                <div class="dropdown">
-                    <a href="#" class="btn btn-light rounded-circle" data-bs-toggle="dropdown">
-                        <i class="fas fa-user-circle"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-3">
-                        <li class="px-3 py-2 small fw-bold">{{ current_user.name }}</li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-                    </ul>
+            <a href="{{ url_for('fir.fir_records') }}" class="nav-link-sentinel">
+                <i class="fas fa-folder-open"></i> My Records
+            </a>
+            <a href="#report-section" class="nav-link-sentinel">
+                <i class="fas fa-plus-circle"></i> File Report
+            </a>
+            <a href="{{ url_for('main.home') }}" class="nav-link-sentinel">
+                <i class="fas fa-globe"></i> Global Feed
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="hud-card p-3 mb-4" style="background: rgba(16, 185, 129, 0.05); border-radius: 15px; border: 1px solid rgba(16,185,129,0.1);">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-success bg-opacity-10 p-2 rounded-circle border border-success border-opacity-20">
+                        <i class="fas fa-user-shield text-success"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="extra-small text-muted" style="font-size: 0.6rem;">CITIZEN ID</div>
+                        <div class="small fw-bold text-white text-truncate">{{ current_user.name|upper }}</div>
+                    </div>
+                </div>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="nav-link-sentinel text-danger" style="text-shadow: 0 0 10px rgba(220, 38, 38, 0.2);">
+                <i class="fas fa-power-off"></i> ABORT SESSION
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Viewport -->
+    <main class="sentinel-viewport">
+        <header class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="hud-header-title mb-1">Citizen Intelligence Center</h2>
+                <div class="extra-small text-muted letter-spacing-2">SYSTEM STATUS: <span class="text-success pulse">CONNECTED</span></div>
+            </div>
+            <div class="d-flex gap-3">
+                <div class="hud-card p-2 px-3 d-flex align-items-center gap-3" style="border-radius: 12px; border: 1px solid rgba(16,185,129,0.2);">
+                    <div class="extra-small text-muted">VERIFICATION</div>
+                    <span class="badge {{ 'bg-success' if current_user.verification_status == 'Verified' else 'bg-warning' }} bg-opacity-20 {{ 'text-success' if current_user.verification_status == 'Verified' else 'text-warning' }} extra-small letter-spacing-1">
+                        {{ current_user.verification_status|upper }}
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <div class="row g-4 mb-5">
+            <!-- Security Intelligence Grid -->
+            <div class="col-md-4">
+                <div class="hud-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="text-muted extra-small text-uppercase letter-spacing-1">Trust Score</div>
+                        <i class="fas fa-shield-check text-success" style="text-shadow: 0 0 10px var(--sentinel-primary-glow);"></i>
+                    </div>
+                    <h2 class="metric-value mb-0">98.4</h2>
+                    <div class="progress mt-3" style="height: 4px; background: rgba(16, 185, 129, 0.1);">
+                        <div class="progress-bar bg-success" style="width: 98%"></div>
+                    </div>
+                    <div class="extra-small text-success mt-2"><i class="fas fa-level-up-alt me-1"></i> OPTIMAL CLEARANCE</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="hud-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="text-muted extra-small text-uppercase letter-spacing-1">Active Trackers</div>
+                        <i class="fas fa-radar text-info" style="text-shadow: 0 0 10px rgba(6, 182, 212, 0.4);"></i>
+                    </div>
+                    <h2 class="metric-value mb-0" style="color: #06b6d4;">{{ fir_reports|length }}</h2>
+                    <div class="progress mt-3" style="height: 4px; background: rgba(6, 182, 212, 0.1);">
+                        <div class="progress-bar bg-info" style="width: 45%"></div>
+                    </div>
+                    <div class="extra-small text-info mt-2"><i class="fas fa-sync fa-spin me-1"></i> UPDATING TELEMETRY...</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="hud-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(10, 15, 20, 0.6) 100%);">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="text-muted extra-small text-uppercase letter-spacing-1">Safety Index</div>
+                        <i class="fas fa-heart-pulse text-danger pulse"></i>
+                    </div>
+                    <h2 class="metric-value mb-0" style="color: #f43f5e; text-shadow: 0 0 15px rgba(244, 63, 94, 0.4);">HIGH</h2>
+                    <div class="extra-small text-muted mt-3">SECURE SECTOR: <span class="text-white">ALPHA-7</span></div>
                 </div>
             </div>
         </div>
-    </nav>
 
-    <div class="container pb-5">
-        <div class="row g-4">
-            <!-- Left Column: Actions & Profile -->
-            <div class="col-lg-4">
-                <div class="glass-card p-4 mb-4 text-center border-0">
-                    <div class="mb-3">
-                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-4">
-                            <i class="fas fa-user fa-3x"></i>
-                        </div>
-                    </div>
-                    <h4 class="fw-bold mb-1">{{ current_user.name }}</h4>
-                    <p class="text-muted small mb-3">{{ current_user.email }}</p>
-                    <span class="status-pill {{ 'bg-success bg-opacity-10 text-success' if current_user.verification_status == 'Verified' else 'bg-warning bg-opacity-10 text-warning' }}">
-                        {{ current_user.verification_status }} Account
-                    </span>
-                </div>
-
-                <div class="glass-card p-4 border-0">
-                    <h5 class="fw-bold mb-4">Quick Navigation</h5>
-                    <div class="list-group list-group-flush">
-                        <a href="{{ url_for('fir.add_fir') }}" class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center">
-                            <span><i class="fas fa-plus-circle text-primary me-2"></i> File New Case</span>
-                            <i class="fas fa-chevron-right small text-muted"></i>
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center">
-                            <span><i class="fas fa-file-invoice text-info me-2"></i> My Records</span>
-                            <i class="fas fa-chevron-right small text-muted"></i>
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center">
-                            <span><i class="fas fa-bell text-warning me-2"></i> Notifications</span>
-                            <span class="badge rounded-pill bg-danger" id="notifications-count">{{ notifications|length }}</span>
-
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column: Dashboard Content -->
-            <div class="col-lg-8 fade-in-up">
-                <!-- Welcome & Summary -->
-                <div class="card border-0 glass-card p-4 mb-4 overflow-hidden" style="background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);">
-                    <div class="position-relative z-1">
-                        <h2 class="text-white fw-bold mb-2">Hello, {{ current_user.name.split(' ')[0] }}</h2>
-                        <p class="text-white opacity-75 mb-0">Stay updated on your reported incidents and safety alerts.</p>
-                    </div>
-                    <i class="fas fa-cloud-sun text-white position-absolute opacity-10" style="bottom: -20px; right: 20px; font-size: 8rem;"></i>
-                </div>
-
+        <div class="row g-4 mb-5">
+            <div class="col-lg-7">
                 <!-- Latest Case Status -->
                 {% if fir_reports %}
-                <div class="glass-card p-4 mb-4 border-0">
+                <div class="hud-card mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="fw-bold mb-0">Latest Case Tracker</h5>
-                        <code class="small fw-bold">ID: {{ fir_reports[0].id|string|truncate(6, True, '') }}</code>
+                        <h5 class="hud-header-title mb-0" style="font-size: 0.95rem;">Operational Tracker</h5>
+                        <code class="extra-small text-success bg-success bg-opacity-10 px-2 py-1 rounded">REF: #{{ fir_reports[0].id|string|truncate(8, True, '') }}</code>
                     </div>
                     
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between mb-2 small fw-bold text-uppercase">
-                            <span>Progress</span>
-                            <span class="text-primary" id="case-status-text">{{ fir_status_text }}</span>
-
+                    <div class="mb-5">
+                        <div class="d-flex justify-content-between mb-3 small fw-bold text-uppercase letter-spacing-1">
+                            <span class="text-muted" style="font-size: 0.7rem;">Mission Progress</span>
+                            <span class="text-success" id="case-status-text" style="font-family: 'Orbitron'; font-size: 0.8rem;">{{ fir_status_text|upper }}</span>
                         </div>
-                        <div class="progress" style="height: 10px; border-radius: 1rem;">
-                            <div class="progress-bar bg-primary rounded-pill progress-bar-striped progress-bar-animated" role="progressbar" id="case-progress" style="width: {{ fir_status_percent }}%;"></div>
-
+                        <div class="progress" style="height: 6px; background: rgba(16, 185, 129, 0.1); border-radius: 10px;">
+                            <div class="progress-bar bg-success rounded-pill" role="progressbar" id="case-progress" style="width: {{ fir_status_percent }}%; box-shadow: 0 0 15px var(--sentinel-primary-glow);"></div>
                         </div>
                     </div>
 
-                    <div class="timeline-modern mt-5">
+                    <div class="timeline-tactical">
                         {% for step in complaint_timeline %}
-                        <div class="timeline-item">
-                            <div class="fw-bold mb-0">{{ step.status }}</div>
-                            <div class="text-muted extra-small mb-2">{{ step.date }}</div>
-                            <div class="small p-3 bg-light rounded">{{ step.note }}</div>
+                        <div class="timeline-tactical-item">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-white small letter-spacing-1">{{ step.status|upper }}</span>
+                                <span class="extra-small text-muted opacity-75">{{ step.date }}</span>
+                            </div>
+                            <div class="small text-muted mt-2 p-3 rounded" style="background: rgba(255, 255, 255, 0.02); border-left: 2px solid var(--sentinel-primary);">
+                                {{ step.note }}
+                            </div>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
                 {% endif %}
+            </div>
 
+            <div class="col-lg-5">
                 <!-- Report Filing Form -->
-                <div class="glass-card p-4 mb-4 border-0" id="report-section">
-                    <h5 class="fw-bold mb-4"><i class="fas fa-pencil-alt text-danger me-2"></i>Lodge a Report</h5>
+                <div class="hud-card mb-4" id="report-section" style="border-left: 4px solid var(--sentinel-primary);">
+                    <h5 class="hud-header-title mb-4" style="font-size: 0.95rem;">
+                        <i class="fas fa-satellite-dish me-2 pulse"></i>Incident Uplink
+                    </h5>
                     <form method="POST" action="{{ url_for('fir.add_fir') }}" enctype="multipart/form-data">
                         <div class="row g-3">
                             <div class="col-md-12">
-                                <div class="mb-3">
-                                    <label class="small fw-bold text-muted mb-2 text-uppercase">Incident Category</label>
-                                    <select name="crime_type" class="form-select border-0 bg-light py-3" required>
-                                        <option value="" selected disabled>Select Type of Incident</option>
-                                        <option value="THEFT">THEFT / LARCENY</option>
-                                        <option value="ROBBERY">ROBBERY / HEIST</option>
-                                        <option value="ASSAULT">ASSAULT / BATTERY</option>
-                                        <option value="CYBER CRIME">CYBER OPERATIONS</option>
-                                        <option value="FRAUD">FINANCIAL FRAUD</option>
-                                        <option value="HARASSMENT">CIVIL HARASSMENT</option>
-                                        <option value="TRAFFIC VIOLATION">TRAFFIC INFRACTION</option>
-                                        <option value="VANDALISM">PROPERTY DAMAGE</option>
-                                        <option value="OTHER">UNCLASSIFIED EVENT</option>
-                                    </select>
-                                </div>
+                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Incident Vector</label>
+                                <select name="crime_type" class="form-select bg-dark bg-opacity-50 border-0 text-white py-3 small" style="border-radius: 12px;" required>
+                                    <option value="" selected disabled>SELECT TYPE</option>
+                                    <option value="THEFT">THEFT / LARCENY</option>
+                                    <option value="ROBBERY">ROBBERY / HEIST</option>
+                                    <option value="ASSAULT">PHYSICAL ASSAULT</option>
+                                    <option value="CYBER CRIME">CYBER OPERATIONS</option>
+                                    <option value="FRAUD">FINANCIAL FRAUD</option>
+                                    <option value="TRAFFIC">TRAFFIC INFRACTION</option>
+                                    <option value="OTHER">UNCLASSIFIED</option>
+                                </select>
                             </div>
 
                             <div class="col-md-6">
-                                <div class="form-floating mb-3">
-                                    <input type="number" step="any" class="form-control border-0 bg-light" id="latitude" name="latitude" placeholder="Lat" required>
-                                    <label for="latitude">Latitude</label>
-                                </div>
+                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Coord X [Lat]</label>
+                                <input type="number" step="any" class="form-control bg-dark bg-opacity-50 border-0 text-white" id="latitude" name="latitude" placeholder="0.000000" style="border-radius: 12px;" required>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-floating mb-3">
-                                    <input type="number" step="any" class="form-control border-0 bg-light" id="longitude" name="longitude" placeholder="Lon" required>
-                                    <label for="longitude">Longitude</label>
-                                </div>
+                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Coord Y [Lon]</label>
+                                <input type="number" step="any" class="form-control bg-dark bg-opacity-50 border-0 text-white" id="longitude" name="longitude" placeholder="0.000000" style="border-radius: 12px;" required>
                             </div>
-                            <div class="col-12 mb-3">
-                                <button type="button" id="getLocationBtn" class="btn btn-outline-primary btn-sm w-100 py-2 border-dashed">
-                                    <i class="fas fa-location-crosshairs me-2"></i>Auto-detect Coordinates
+                            <div class="col-12">
+                                <button type="button" id="getLocationBtn" class="sentinel-btn w-100 py-2 border-0 opacity-75" style="font-size: 0.7rem; background: rgba(16, 185, 129, 0.1); border: 1px dashed var(--sentinel-primary) !important;">
+                                    <i class="fas fa-crosshairs me-2"></i>INITIATE GPS SCAN
                                 </button>
-                                <div id="locationStatus" class="extra-small text-muted mt-1 text-center"></div>
+                                <div id="locationStatus" class="extra-small text-muted mt-2 text-center opacity-50">READY FOR SYNC</div>
                             </div>
                             <div class="col-12">
-                                <div class="form-floating mb-3">
-                                    <textarea class="form-control border-0 bg-light" id="description" name="description" style="height: 120px" placeholder="Details" required></textarea>
-                                    <label for="description">Provide a detailed description of the incident...</label>
-                                </div>
-                            </div>
-                            <div class="col-12 mb-4">
-                                <label class="small fw-bold mb-2 d-block text-uppercase text-muted">Upload Supporting Evidence (Images/Docs)</label>
-                                <input type="file" class="form-control border-0 bg-light py-3" id="evidence_file" name="evidence_file">
+                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Tactical Summary</label>
+                                <textarea class="form-control bg-dark bg-opacity-50 border-0 text-white" id="description" name="description" style="height: 100px; border-radius: 15px;" placeholder="Describe the incident vector..." required></textarea>
                             </div>
                             <div class="col-12">
-                                <button type="submit" class="btn btn-premium btn-premium-primary w-100 py-3 shadow">
-                                    <i class="fas fa-paper-plane me-2"></i>SUBMIT OFFICIAL REPORT
+                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Evidence Buffer</label>
+                                <input type="file" class="form-control bg-dark bg-opacity-50 border-0 text-white small" id="evidence_file" name="evidence_file" style="border-radius: 12px;">
+                            </div>
+                            <div class="col-12 pt-3">
+                                <button type="submit" class="sentinel-btn w-100 py-3 shadow-lg">
+                                    <i class="fas fa-paper-plane me-2"></i>TRANSMIT DATA
                                 </button>
                             </div>
                         </div>
                     </form>
                 </div>
-
-                <!-- My Records Table -->
-                <div class="glass-card p-4 border-0">
-                    <h5 class="fw-bold mb-4">Incident Log History</h5>
-                    <div class="table-responsive">
-                        <table class="table table-modern">
-                            <thead>
-                                <tr class="text-muted extra-small">
-                                    <th>CASE ID</th>
-                                    <th>DATE FILED</th>
-                                    <th>ASSIGNED UNIT</th>
-                                    <th>OFFICIAL STATUS</th>
-                                </tr>
-                            </thead>
-                            <tbody id="incident-log-table">
-
-                                {% if fir_reports %}
-                                {% for fir in fir_reports %}
-                                <tr>
-                                    <td class="small fw-bold text-primary">#{{ fir.id|string|truncate(8, True, '') }}</td>
-                                    <td class="small">{{ fir.timestamp.strftime('%d %b %Y') }}</td>
-                                    <td class="small">{{ fir.department.name if fir.department else 'PROCESSING...' }}</td>
-                                    <td>
-                                        <span class="status-pill 
-                                            {{ 'bg-warning' if fir.status == 'pending' else 'bg-primary' if fir.status == 'assigned' else 'bg-success' if fir.status == 'closed' else 'bg-info' }} bg-opacity-10 
-                                            {{ 'text-warning' if fir.status == 'pending' else 'text-primary' if fir.status == 'assigned' else 'text-success' if fir.status == 'closed' else 'text-info' }}">
-                                            {{ fir.status.upper() }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                                {% else %}
-                                <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted small">No incidents filed by your account yet.</td>
-                                </tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
         </div>
-    </div>
+
+        <!-- Incident Log History -->
+        <div class="hud-card">
+            <h5 class="hud-header-title mb-4" style="font-size: 0.95rem;">Global Incident Log</h5>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+                    <thead>
+                        <tr class="text-muted extra-small text-uppercase letter-spacing-2" style="font-family: 'Orbitron';">
+                            <th class="border-0">ID-REF</th>
+                            <th class="border-0">Timestamp</th>
+                            <th class="border-0">Deployment</th>
+                            <th class="border-0 text-end">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="incident-log-table">
+                        {% if fir_reports %}
+                        {% for fir in fir_reports %}
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                            <td class="small fw-bold text-success">#{{ fir.id|string|truncate(8, True, '') }}</td>
+                            <td class="small text-muted">{{ fir.timestamp.strftime('%d %b %Y | %H:%M') }}</td>
+                            <td class="extra-small text-white opacity-75">{{ fir.department.name if fir.department else 'ORCHESTRATING...' }}</td>
+                            <td class="text-end">
+                                <span class="badge {{ 'bg-warning' if fir.status == 'pending' else 'bg-primary' if fir.status == 'assigned' else 'bg-success' if fir.status == 'closed' else 'bg-info' }} bg-opacity-25 
+                                    {{ 'text-warning' if fir.status == 'pending' else 'text-primary' if fir.status == 'assigned' else 'text-success' if fir.status == 'closed' else 'text-info' }} extra-small letter-spacing-1">
+                                    {{ fir.status|upper }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted small opacity-50">NO ACTIVE INCIDENT TELEMETRY FOUND</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
+        // Initialize Socket.IO for Real-time Strategic Alerts
+        const socket = io();
+        
+        socket.on('connect', () => {
+            console.log("Sentinel Uplink Synchronized.");
+        });
 
-        // Real-time polling for Citizen
+        socket.on('new_alert', (data) => {
+            // Simple toast or alert logic can be added here
+            console.log("Strategic Alert Received:", data);
+        });
+
+        // Real-time polling for Citizen Telemetry
         function updateCitizenStats() {
             fetch('/api/citizen/stats')
                 .then(response => response.json())
                 .then(data => {
-                    // Update notifications
-                    const notifyBadge = document.getElementById('notifications-count');
-                    if (notifyBadge) notifyBadge.innerText = data.notifications_count || 0;
-
                     // Update latest case status (if exists)
                     const statusText = document.getElementById('case-status-text');
                     const progressBar = document.getElementById('case-progress');
                     
                     if (statusText && data.latest_status) {
                         const status_map = {
-                            'pending': { p: 25, t: 'Submitted' },
-                            'verified': { p: 40, t: 'Verified' },
-                            'assigned': { p: 55, t: 'Assigned' },
-                            'in_progress': { p: 75, t: 'In Progress' },
-                            'closed': { p: 100, t: 'Resolved' },
-                            'rejected': { p: 100, t: 'Closed (Rejected)' }
+                            'pending': { p: 25, t: 'SUBMITTED' },
+                            'verified': { p: 40, t: 'VERIFIED' },
+                            'assigned': { p: 55, t: 'ASSIGNED' },
+                            'in_progress': { p: 75, t: 'IN PROGRESS' },
+                            'closed': { p: 100, t: 'RESOLVED' },
+                            'rejected': { p: 100, t: 'CLOSED (REJECTED)' }
                         };
-                        const info = status_map[data.latest_status] || { p: 0, t: 'Unknown' };
+                        const info = status_map[data.latest_status] || { p: 0, t: 'UNKNOWN' };
                         statusText.innerText = info.t;
-                        if (progressBar) progressBar.style.width = info.p + '%';
+                        if (progressBar) {
+                            progressBar.style.width = info.p + '%';
+                            progressBar.style.boxShadow = '0 0 15px var(--sentinel-primary-glow)';
+                        }
                     }
                 })
-                .catch(err => console.error('Error fetching citizen stats:', err));
+                .catch(err => console.error('Uplink Error:', err));
         }
 
-        // Poll every 10 seconds for citizens
+        // Poll every 10 seconds for mission telemetry
         setInterval(updateCitizenStats, 10000);
 
         (function(){
-
             const btn = document.getElementById('getLocationBtn');
             const latInput = document.getElementById('latitude');
             const lonInput = document.getElementById('longitude');
@@ -311,22 +527,26 @@
             if(!btn) return;
             
             btn.addEventListener('click', function(){
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Detecting...';
+                btn.innerHTML = '<i class="fas fa-satellite fa-spin me-2"></i>SYNCHRONIZING...';
+                btn.style.opacity = '1';
+                
                 if(navigator.geolocation){
                     navigator.geolocation.getCurrentPosition(function(pos){
                         latInput.value = pos.coords.latitude.toFixed(6);
                         lonInput.value = pos.coords.longitude.toFixed(6);
-                        statusBox.textContent = 'Location GPS Sync: SUCCESS';
-                        statusBox.className = 'extra-small text-success mt-1 text-center';
-                        btn.innerHTML = '<i class="fas fa-check me-2"></i>Coordinates Captured';
-                        btn.className = 'btn btn-success btn-sm w-100 py-2';
+                        statusBox.textContent = 'GPS LOCK: SECURED';
+                        statusBox.className = 'extra-small text-success mt-2 text-center letter-spacing-1';
+                        btn.innerHTML = '<i class="fas fa-check-double me-2"></i>COORDINATES CAPTURED';
+                        btn.classList.remove('opacity-75');
+                        btn.style.background = 'rgba(16, 185, 129, 0.2)';
+                        btn.style.borderColor = 'var(--sentinel-primary)';
                     }, function(err){
-                        statusBox.textContent = 'GPS Error: Service Unavailable';
-                        statusBox.className = 'extra-small text-danger mt-1 text-center';
-                        btn.innerHTML = '<i class="fas fa-location-crosshairs me-2"></i>Retry Detection';
+                        statusBox.textContent = 'SYNC ERROR: SIGNAL SHIELDED';
+                        statusBox.className = 'extra-small text-danger mt-2 text-center letter-spacing-1';
+                        btn.innerHTML = '<i class="fas fa-redo me-2"></i>RETRY UPLINK';
                     });
                 } else {
-                    statusBox.textContent = 'GPS Error: Not supported by browser';
+                    statusBox.textContent = 'HARDWARE ERROR: NO GPS MODULE';
                 }
             });
         })();
