@@ -3,6 +3,7 @@ matplotlib.use('Agg')
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.utils import secure_filename
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_cors import CORS
 import os
 import pandas as pd
 from datetime import datetime
@@ -18,9 +19,11 @@ from src.auth import admin_required, police_required, citizen_required, get_user
 from models.database import db, User, Department, FIRReport, CrimeData, AnonymousReport, init_db, create_otp_for_user, verify_otp
 from src.auth_jwt import create_token
 from flask import make_response
+from services.ngrok_service import ngrok_service
 
 app = Flask(__name__, template_folder='src/templates')
 app.secret_key = 'your_secret_key'  # Change this in production
+CORS(app, resources={r"/*": {"origins": "*"}}) # Allow all for local dev
 
 # Database configuration
 # Use a fresh DB filename to avoid old schema conflicts
@@ -65,6 +68,10 @@ login_manager.login_view = 'citizen_login'
 
 # Initialize database
 init_db(app)
+
+# Wrap socketio with CORS support
+from extensions import socketio
+socketio.init_app(app, cors_allowed_origins="*")
 
 # @login_manager.user_loader is replaced by request_loader for token support
 # @login_manager.user_loader
@@ -1014,5 +1021,18 @@ def logout():
     flash('Logged out from all portals.', 'info')
     return response
 
+@app.route('/qr')
+def mobile_qr():
+    if not ngrok_service.public_url:
+        return "Ngrok tunnel not active. Please restart the server with NGROK_AUTH_TOKEN.", 503
+    return render_template('mobile_access.html', 
+                         public_url=ngrok_service.public_url, 
+                         qr_base64=ngrok_service.qr_base64)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Start Ngrok Tunnel on Port 5000
+    public_url = ngrok_service.start_tunnel(port=5000)
+    if public_url:
+        ngrok_service.print_terminal_qr(public_url)
+        
+    app.run(host="0.0.0.0", port=5000, debug=True)

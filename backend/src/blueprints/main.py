@@ -4,11 +4,17 @@ from models.database import FIRReport, Department, User, SystemLog
 from src.auth import admin_required, police_required, citizen_required
 from mongoengine import Q
 from datetime import datetime
+from services.ngrok_service import ngrok_service
 
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def home():
+    import os
+    if os.getenv('SENTINEL_MOBILE_MODE') == 'true':
+        # If in mobile mode, we want the proxy to handle it
+        # Actually, let's just make the proxy in app.py handle everything
+        pass 
     return render_template('home.html')
 
 @main_bp.route('/dashboard')
@@ -128,11 +134,10 @@ def citizen_stats():
     }
 
 @main_bp.route('/police/dashboard')
-
 @login_required
 @police_required
 def police_dashboard():
-    fir_reports = FIRReport.objects(department=current_user.department).order_by('-timestamp')
+    fir_reports = FIRReport.objects(department=current_user.department).order_by('-priority', '-timestamp')
     department = current_user.department
     
     # Statistics for this department
@@ -176,8 +181,11 @@ def police_dashboard():
                     "risk_level": "Medium" if crime.victim_age and crime.victim_age > 18 else "High"
                 })
             
-        # Get all coords for heatmap
+        # Heatmap
         heatmap_coords = [[c.latitude, c.longitude] for c in crimes.only('latitude', 'longitude')]
+
+    # Fetch Registered Citizens for this station
+    registered_citizens = User.objects(role='citizen', police_station=department.name if department else None).order_by('-created_at')
 
     return render_template('police_dashboard.html', 
                          fir_reports=fir_reports, 
@@ -190,15 +198,48 @@ def police_dashboard():
                          heatmap_coords=heatmap_coords,
                          fir_new=fir_new,
                          fir_active=fir_active,
-                         fir_closed=fir_closed)
+                         fir_closed=fir_closed,
+                         registered_citizens=registered_citizens)
+
+@main_bp.route('/police/sos-alerts')
+@login_required
+@police_required
+def sos_alerts():
+    try:
+        from models.database import SOSReport
+        department = current_user.department
+        
+        # Log for debugging
+        print(f"DEBUG_SOS_ALERTS: Loading page for officer {current_user.name}, Dept: {department.name if department else 'None'}")
+        
+        # Fetch active SOS reports for this station
+        # Handle case where department might be None
+        station_name = department.name if department else None
+        
+        active_sos = SOSReport.objects(
+            assigned_station=station_name,
+            status__in=['active', 'Active']
+        ).order_by('-created_at')
+        
+        print(f"DEBUG_SOS_ALERTS: Found {active_sos.count()} active alerts")
+        
+        return render_template('sos_command_center.html', 
+                             active_sos=active_sos,
+                             department=department)
+    except Exception as e:
+        import traceback
+        print(f"ERROR_SOS_ALERTS: {str(e)}")
+        traceback.print_exc()
+        return f"Internal Command Error: {str(e)}", 500
 
 @main_bp.route('/daily-report')
 @login_required
 @police_required
 def daily_report():
-    from datetime import datetime, timedelta
+    from datetime import datetime
     today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
     
+    from models.database import FIRReport
     # Get FIR reports for this department filed today
     fir_today = FIRReport.objects(
         department=current_user.department,
@@ -227,10 +268,10 @@ def admin_dashboard():
     if current_user.department:
         pending_firs = (
             FIRReport.objects(
-                status='pending',
+                status__in=['pending', 'assigned'],
                 department__in=[current_user.department, None]
             )
-            .order_by('-timestamp')
+            .order_by('-priority', '-timestamp')
         )
         departments = [current_user.department]
         users = User.objects(department=current_user.department)
@@ -238,7 +279,7 @@ def admin_dashboard():
             department__in=[current_user.department, None]
         ).count()
     else:
-        pending_firs = FIRReport.objects(status='pending').order_by('-timestamp')
+        pending_firs = FIRReport.objects(status__in=['pending', 'assigned']).order_by('-priority', '-timestamp')
         departments = Department.objects.all()
         users = User.objects.all()
         total_fir_count = FIRReport.objects.count()
@@ -290,3 +331,13 @@ def admin_dashboard():
                          user_count=user_count,
                          officers=officers,
                          system_logs=system_logs)
+
+@main_bp.route('/qr')
+def mobile_qr():
+    if not ngrok_service.public_url:
+        return "Ngrok tunnel not active. Please restart the bridge using: python start_mobile.py", 503
+    return render_template('mobile_access.html', 
+                         public_url=ngrok_service.public_url, 
+                         qr_base64=ngrok_service.qr_base64,
+                         frontend_url=ngrok_service.frontend_url,
+                         qr_frontend_base64=ngrok_service.qr_frontend_base64)

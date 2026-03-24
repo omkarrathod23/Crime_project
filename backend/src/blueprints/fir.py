@@ -1,10 +1,15 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
 from flask_login import login_required, current_user
+from flask_jwt_extended import jwt_required
 from models.database import FIRReport, Department, User, get_department_for_location, Alert
 from src.auth import admin_required, police_required, citizen_required
 from extensions import socketio
 from src.utils import save_uploaded_file
 from datetime import datetime
+from services.location_service import assign_nearest_police_station
+import logging
+
+logger = logging.getLogger(__name__)
 
 fir_bp = Blueprint('fir', __name__)
 
@@ -19,6 +24,7 @@ def add_fir():
         lon_str = request.form.get('longitude', '0')
         priority = request.form.get('priority', 'Medium')
         location_name = request.form.get('location_name', '').strip()
+        selected_station = request.form.get('selected_station', '').strip()
         
         try:
             lat = float(lat_str)
@@ -39,11 +45,41 @@ def add_fir():
         # FIR creation logic
         status = 'pending'
         department = None
+        assigned_station_name = None
+        district = None
+        city = None
         
+        # Priority 1: User Selection
+        if selected_station:
+            dept = Department.objects(name=selected_station).first()
+            if dept:
+                department = dept
+                assigned_station_name = dept.name
+                district = dept.district
+                city = dept.city
+                status = 'assigned'
+                logger.info(f"Using manually selected station for FIR: {selected_station}")
+
+        # Priority 2: Auto-assignment if not manually selected
+        if not department:
+            assignment = assign_nearest_police_station(lat, lon, location_name)
+            if assignment:
+                department = assignment['station_id']
+                assigned_station_name = assignment['station_name']
+                district = assignment['district']
+                city = assignment['city']
+                status = 'assigned'
+                logger.info(f"Auto-assigned FIR to {assigned_station_name}")
+        
+        # Override for police filings (should be assigned to their own station if not auto-assigned)
         if current_user.is_police():
-            status = 'assigned'  # Auto-assigned for police filings
-            department = current_user.department
-        
+            status = 'assigned'
+            if not department:
+                department = current_user.department
+                assigned_station_name = department.name if department else None
+                district = department.district if department else None
+                city = department.city if department else None
+
         new_fir = FIRReport(
             user=current_user.id,
             description=description,
@@ -53,6 +89,10 @@ def add_fir():
             evidence_file=evidence_file,
             status=status,
             department=department,
+            selected_station=selected_station,
+            assigned_station=assigned_station_name,
+            district=district,
+            city=city,
             priority=priority,
             location_name=location_name
         )
@@ -71,16 +111,102 @@ def add_fir():
         )
         new_alert.save()
         
-        # Emit real-time alert via SocketIO
-        socketio.emit('new_alert', {
+        # Emit real-time alert via SocketIO to the assigned station room
+        alert_payload = {
             'message': alert_msg,
             'priority': priority,
             'crime_id': str(new_fir.id),
-            'timestamp': new_alert.timestamp.isoformat()
-        }, namespace='/')
+            'timestamp': new_alert.timestamp.isoformat(),
+            'station': assigned_station_name
+        }
+        
+        socketio.emit('new_alert', alert_payload, namespace='/', room=assigned_station_name)
+        # Also emit globally for admin monitoring
+        socketio.emit('new_alert', alert_payload, namespace='/')
         
         flash('FIR submitted successfully!', 'success')
         return redirect(url_for('main.police_dashboard' if current_user.is_police() else 'main.citizen_dashboard'))
+
+@fir_bp.route('/add/api', methods=['POST'])
+@jwt_required()
+def add_fir_api():
+    from flask_jwt_extended import get_jwt_identity
+    user_id = get_jwt_identity()
+    user = User.objects(id=user_id).first()
+    
+    # Handle both JSON and Multipart Form Data
+    if request.is_json:
+        data = request.get_json()
+    else:
+        data = request.form
+
+    description = data.get('description')
+    crime_type = data.get('crime_type')
+    lat = float(data.get('latitude', 0))
+    lon = float(data.get('longitude', 0))
+    location_name = data.get('location_name', '')
+    selected_station = data.get('selected_station', '')
+    priority = data.get('priority', 'Medium')
+
+    evidence_file = None
+    if 'evidence_file' in request.files:
+        file = request.files['evidence_file']
+        if file.filename:
+            evidence_file = save_uploaded_file(file, current_app.config['UPLOAD_FOLDER'])
+
+    status = 'pending'
+    department = None
+    assigned_station_name = None
+    district = None
+    city = None
+
+    if selected_station and selected_station != 'AUTO':
+        dept = Department.objects(name=selected_station).first()
+        if dept:
+            department = dept
+            assigned_station_name = dept.name
+            district = dept.district
+            city = dept.city
+            status = 'assigned'
+
+    if not department:
+        assignment = assign_nearest_police_station(lat, lon, location_name)
+        if assignment:
+            department = assignment['station_id']
+            assigned_station_name = assignment['station_name']
+            district = assignment['district']
+            city = assignment['city']
+            status = 'assigned'
+
+    new_fir = FIRReport(
+        user=user,
+        description=description,
+        crime_type=crime_type,
+        lat=lat,
+        lon=lon,
+        evidence_file=evidence_file,
+        status=status,
+        department=department,
+        selected_station=selected_station,
+        assigned_station=assigned_station_name,
+        district=district,
+        city=city,
+        priority=priority,
+        location_name=location_name
+    )
+    new_fir.save()
+
+    # Emit Socket.IO
+    alert_payload = {
+        'message': f"New {crime_type} reported from Mobile.",
+        'priority': priority,
+        'crime_id': str(new_fir.id),
+        'station': assigned_station_name
+    }
+    socketio.emit('new_alert', alert_payload, namespace='/', room=assigned_station_name)
+    socketio.emit('new_alert', alert_payload, namespace='/')
+
+    return jsonify({"message": "FIR filed successfully", "fir_id": str(new_fir.id)}), 201
     
     return render_template('add_fir.html')
 

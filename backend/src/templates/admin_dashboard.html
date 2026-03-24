@@ -403,6 +403,7 @@
                                                 <th>CITIZEN ID</th>
                                                 <th>VECTOR</th>
                                                 <th>TELEMETRY</th>
+                                                <th>AUTO-ASSIGNMENT</th>
                                                 <th class="text-end">PROTOCOLS</th>
                                             </tr>
                                         </thead>
@@ -420,6 +421,17 @@
                                                         <button type="submit" class="btn sentinel-btn py-1 px-3 extra-small">VERIFY LOCATION</button>
                                                     </form>
                                                     <button class="btn btn-outline-danger py-1 px-3 extra-small border-opacity-25" data-bs-toggle="modal" data-bs-target="#rejectModal{{ fir.id }}">REJECT</button>
+                                                </td>
+                                                <td>
+                                                    {% if fir.assigned_station %}
+                                                    <span class="badge bg-success bg-opacity-10 text-success extra-small">
+                                                        <i class="fas fa-robot me-1"></i> {{ fir.assigned_station|upper }}
+                                                    </span>
+                                                    {% else %}
+                                                    <span class="badge bg-warning bg-opacity-10 text-warning extra-small">
+                                                        <i class="fas fa-hand-pointer me-1"></i> PENDING
+                                                    </span>
+                                                    {% endif %}
                                                 </td>
                                                 <td class="text-end">
                                                     <div class="d-flex justify-content-end gap-2">

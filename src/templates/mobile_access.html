@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Uplink - Sentinel HUD</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sentinel-primary: #10b981;
+            --sentinel-bg: #05080a;
+            --sentinel-card: rgba(10, 15, 20, 0.9);
+            --sentinel-border: rgba(16, 185, 129, 0.4);
+            --accent-glow: 0 0 20px rgba(16, 185, 129, 0.2);
+        }
+
+        body {
+            background-color: var(--sentinel-bg);
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+                #05080a;
+        }
+
+        .hud-card {
+            background: var(--sentinel-card);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--sentinel-border);
+            border-radius: 40px;
+            padding: 3.5rem 2.5rem;
+            text-align: center;
+            max-width: 480px;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .hud-card::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(135deg, var(--sentinel-primary), transparent, var(--sentinel-primary));
+            border-radius: 42px;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .qr-wrapper {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 25px;
+            display: inline-block;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .qr-wrapper:hover {
+            transform: scale(1.02);
+        }
+
+        .qr-img {
+            width: 250px;
+            height: 250px;
+        }
+
+        .url-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px dashed var(--sentinel-border);
+            border-radius: 15px;
+            padding: 1.2rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--sentinel-primary);
+            margin-bottom: 2.5rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .url-box:hover {
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-sentinel {
+            flex: 1;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            color: white;
+            padding: 1rem;
+            border-radius: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+            transition: 0.3s;
+        }
+
+        .btn-outline-sentinel {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--sentinel-primary);
+            color: var(--sentinel-primary);
+            padding: 1rem;
+            border-radius: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            transition: 0.3s;
+        }
+
+        .btn-sentinel:hover, .btn-outline-sentinel:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--sentinel-primary);
+            border-radius: 100px;
+            color: var(--sentinel-primary);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="hud-card">
+        <div class="status-badge"><i class="fas fa-satellite-dish me-2"></i>Live Uplink Active</div>
+        
+        <h2 class="mb-2" style="font-family: 'Orbitron', sans-serif;">MOBILE ACCESS</h2>
+        <p class="text-muted small mb-4">Scan the QR code to bridge your mobile device with the Homeland Security node.</p>
+        
+        <div class="qr-wrapper" id="qr-download-area">
+            <img src="data:image/png;base64,{{ qr_base64 }}" class="qr-img" id="qr-main-img">
+        </div>
+
+        <div class="url-box" onclick="copyUrl()" title="Click to copy">
+            <i class="fas fa-link me-2"></i><span id="target-url">{{ public_url }}</span>
+        </div>
+
+        <div class="action-btns">
+            <button onclick="copyUrl()" class="btn btn-sentinel">
+                <i class="fas fa-copy me-2"></i>Copy Link
+            </button>
+            <button onclick="downloadQR()" class="btn btn-outline-sentinel">
+                <i class="fas fa-download me-2"></i>Save Image
+            </button>
+        </div>
+
+        <div class="mt-4">
+            <a href="{{ public_url }}" target="_blank" class="text-muted small text-decoration-none">
+                <i class="fas fa-external-link-alt me-1"></i>Open Gateway
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function copyUrl() {
+            const url = document.getElementById('target-url').innerText;
+            navigator.clipboard.writeText(url).then(() => {
+                const box = document.querySelector('.url-box');
+                box.style.background = "rgba(16, 185, 129, 0.2)";
+                setTimeout(() => box.style.background = "", 500);
+            });
+        }
+
+        function downloadQR() {
+            const link = document.createElement('a');
+            link.download = 'sentinel_access_qr.png';
+            link.href = document.getElementById('qr-main-img').src;
+            link.click();
+        }
+    </script>
+</body>
+</html>

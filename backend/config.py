@@ -5,7 +5,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.env'))
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard-to-guess-string'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard-to-guess-string-at-least-32-chars-long'
+    JWT_SECRET_KEY = SECRET_KEY
     UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
     MAX_CONTENT_LENGTH = 64 * 1024 * 1024  # 64MB max upload size
 

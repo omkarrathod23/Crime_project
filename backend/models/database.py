@@ -19,6 +19,9 @@ class Department(db.Document):
     max_lat = db.FloatField()
     min_lon = db.FloatField()
     max_lon = db.FloatField()
+    latitude = db.FloatField()
+    longitude = db.FloatField()
+    state = db.StringField(max_length=50, default='Maharashtra')
     created_at = db.DateTimeField(default=datetime.utcnow)
 
 class User(UserMixin, db.Document):
@@ -38,6 +41,27 @@ class User(UserMixin, db.Document):
     
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    # Citizen Safety Fields
+    full_name = db.StringField(max_length=100)
+    phone_number = db.StringField(max_length=15)
+    aadhaar_number = db.StringField(max_length=14)  # Masked: XXXX-XXXX-1234
+    pan_number = db.StringField(max_length=10)      # Masked: ABCDE1234F
+    face_image = db.StringField()                   # Facial scan data
+    fingerprint_data = db.StringField()             # Simulated biometric signature
+    is_verified = db.BooleanField(default=False)
+    
+    # Maharashtra Localization Fields
+    district = db.StringField(max_length=100)
+    police_station = db.StringField(max_length=100)
+    dob = db.StringField(max_length=20)
+    address = db.StringField()
+    
+    emergency_contacts = db.ListField(db.DictField()) # [{'name': '...', 'relation': '...', 'phone': '...'}]
+    
+    # Women Safety Mode Fields
+    safety_mode_active = db.BooleanField(default=False)
+    safety_timer_expiry = db.DateTimeField()
     
     def is_admin(self):
         return self.role == 'admin'
@@ -65,7 +89,19 @@ class FIRReport(db.Document):
     admin_notes = db.StringField()
     police_notes = db.StringField()
     priority = db.StringField(max_length=20, choices=['High', 'Medium', 'Low'], default='Medium')
+    
+    # AI Predictions
+    priority_level = db.StringField(max_length=20)
+    risk_score = db.FloatField()
+    crime_type_predicted = db.StringField(max_length=100)
+    prediction_confidence = db.FloatField()
+
     location_name = db.StringField(max_length=255)
+    selected_station = db.StringField(max_length=100) # User's choice from dropdown
+    assigned_station = db.StringField(max_length=100)
+    district = db.StringField(max_length=100)
+    city = db.StringField(max_length=100)
+    
     timestamp = db.DateTimeField(default=datetime.utcnow)
     updated_at = db.DateTimeField(default=datetime.utcnow)
 
@@ -132,6 +168,21 @@ class SystemLog(db.Document):
     ip_address = db.StringField(max_length=45)
     meta_info = db.StringField()
 
+class SOSReport(db.Document):
+    user = db.ReferenceField(User, reverse_delete_rule=db.CASCADE)
+    latitude = db.FloatField(required=True)
+    longitude = db.FloatField(required=True)
+    status = db.StringField(default='active', choices=['active', 'resolved', 'Active', 'Resolved'])
+    selected_station = db.StringField()
+    assigned_station = db.StringField()
+    district = db.StringField()
+    city = db.StringField()
+    created_at = db.DateTimeField(default=datetime.utcnow)
+    resolved_at = db.DateTimeField()
+    police_notes = db.StringField()
+
+    meta = {'collection': 'sos_reports'}
+
 def init_db(app):
     db.init_app(app)
     # Registration for app context if needed
@@ -140,17 +191,68 @@ def init_db(app):
     with app.app_context():
         if not User.objects(role='admin').first():
             print("Creating default admin and department...")
-            # Create default department
-            dept = Department(
-                name='Rasayani Police Station', 
-                city='Rasayani', 
-                min_lat=18.80, 
-                max_lat=18.90, 
-                min_lon=73.15, 
-                max_lon=73.20
-            )
-            dept.save()
             
+            # Major Maharashtra Police Stations
+            stations_data = [
+                {
+                    "name": "Mumbai Police HQ",
+                    "city": "Mumbai",
+                    "district": "Mumbai City",
+                    "latitude": 18.9438,
+                    "longitude": 72.8361,
+                    "min_lat": 18.89, "max_lat": 19.00, "min_lon": 72.77, "max_lon": 72.90
+                },
+                {
+                    "name": "Pune Police Station",
+                    "city": "Pune",
+                    "district": "Pune",
+                    "latitude": 18.5204,
+                    "longitude": 73.8567,
+                    "min_lat": 18.45, "max_lat": 18.60, "min_lon": 73.75, "max_lon": 73.95
+                },
+                {
+                    "name": "Nagpur Police Station",
+                    "city": "Nagpur",
+                    "district": "Nagpur",
+                    "latitude": 21.1458,
+                    "longitude": 79.0882,
+                    "min_lat": 21.05, "max_lat": 21.25, "min_lon": 78.95, "max_lon": 79.20
+                },
+                {
+                    "name": "Nashik Police Station",
+                    "city": "Nashik",
+                    "district": "Nashik",
+                    "latitude": 19.9975,
+                    "longitude": 73.7898,
+                    "min_lat": 19.90, "max_lat": 20.10, "min_lon": 73.70, "max_lon": 73.90
+                },
+                {
+                    "name": "Panvel Police Station",
+                    "city": "Panvel",
+                    "district": "Raigad",
+                    "latitude": 18.9894,
+                    "longitude": 73.1175,
+                    "min_lat": 18.90, "max_lat": 19.10, "min_lon": 73.00, "max_lon": 73.20
+                },
+                {
+                    "name": "Thane Police Station",
+                    "city": "Thane",
+                    "district": "Thane",
+                    "latitude": 19.2183,
+                    "longitude": 72.9781,
+                    "min_lat": 19.15, "max_lat": 19.30, "min_lon": 72.90, "max_lon": 73.05
+                }
+            ]
+            
+            depts = []
+            for s in stations_data:
+                dept = Department(**s)
+                dept.save()
+                depts.append(dept)
+            
+            # Use Panvel as default for first officer
+            dept = depts[4] 
+
             admin = User(
                 name='Admin User', 
                 email='admin@crime.gov', 
@@ -161,10 +263,10 @@ def init_db(app):
             admin.set_password('admin123')
             admin.save()
             
-            # Create default police officer
+            # Create default police officer for Panvel
             police_user = User(
                 name='Police Officer', 
-                email='officer@rasayani.gov', 
+                email='officer@panvel.gov', 
                 role='police', 
                 department=dept,
                 phone='9876543210'
@@ -172,7 +274,7 @@ def init_db(app):
             police_user.set_password('officer123')
             police_user.save()
             
-            print("Default users and department created in MongoDB!")
+            print("Default users and departments created in MongoDB!")
         
         # Import existing CSV data if crime_data is empty
         if not CrimeData.objects.first():

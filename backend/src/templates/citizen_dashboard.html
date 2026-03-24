@@ -232,6 +232,38 @@
             background-color: rgba(var(--bs-primary-rgb), 0.3) !important;
             color: #fff !important;
         }
+
+        .pulse-red {
+            animation: pulse-red 1s infinite;
+        }
+        @keyframes pulse-red {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .safety-active {
+            border-color: #f43f5e !important;
+            box-shadow: 0 0 20px rgba(244, 63, 94, 0.3);
+            background: rgba(244, 63, 94, 0.1) !important;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 992px) {
+            .sentinel-sidebar {
+                transform: translateX(-100%);
+                width: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+            .sentinel-viewport {
+                margin-left: 0 !important;
+                padding: 1.5rem !important;
+            }
+            .hud-header-title {
+                font-size: 1.2rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -301,41 +333,71 @@
         </header>
 
         <div class="row g-4 mb-5">
+            <!-- SOS Emergency Hub -->
+            <div class="col-12">
+                <div class="hud-card" style="background: rgba(244, 63, 94, 0.05); border: 2px solid rgba(244, 63, 94, 0.5); border-radius: 30px;">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <h3 class="hud-header-title text-danger mb-2" style="font-size: 1.5rem;">
+                                <i class="fas fa-exclamation-triangle pulse-red me-2"></i>EMERGENCY SOS HUB
+                            </h3>
+                            <p class="text-muted small mb-0">Triggering SOS will instantly alert the nearest police station with your live location.</p>
+                        </div>
+                        <div class="col-lg-4 text-end">
+                            <button id="sos-trigger-btn" class="sentinel-btn py-3 px-5 w-100" style="background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%); font-size: 1.2rem; border-radius: 20px;">
+                                <i class="fas fa-bolt me-2"></i>TRIGGER SOS
+                            </button>
+                            <button id="sos-cancel-btn" class="btn btn-outline-light w-100 mt-2 extra-small" style="display: none;">CANCEL ALERT</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Security Intelligence Grid -->
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="hud-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="text-muted extra-small text-uppercase letter-spacing-1">Trust Score</div>
-                        <i class="fas fa-shield-check text-success" style="text-shadow: 0 0 10px var(--sentinel-primary-glow);"></i>
+                        <i class="fas fa-shield-check text-success"></i>
                     </div>
                     <h2 class="metric-value mb-0">98.4</h2>
                     <div class="progress mt-3" style="height: 4px; background: rgba(16, 185, 129, 0.1);">
                         <div class="progress-bar bg-success" style="width: 98%"></div>
                     </div>
-                    <div class="extra-small text-success mt-2"><i class="fas fa-level-up-alt me-1"></i> OPTIMAL CLEARANCE</div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="hud-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="text-muted extra-small text-uppercase letter-spacing-1">Active Trackers</div>
-                        <i class="fas fa-radar text-info" style="text-shadow: 0 0 10px rgba(6, 182, 212, 0.4);"></i>
+                        <div class="text-muted extra-small text-uppercase letter-spacing-1">Active Cases</div>
+                        <i class="fas fa-radar text-info"></i>
                     </div>
                     <h2 class="metric-value mb-0" style="color: #06b6d4;">{{ fir_reports|length }}</h2>
                     <div class="progress mt-3" style="height: 4px; background: rgba(6, 182, 212, 0.1);">
                         <div class="progress-bar bg-info" style="width: 45%"></div>
                     </div>
-                    <div class="extra-small text-info mt-2"><i class="fas fa-sync fa-spin me-1"></i> UPDATING TELEMETRY...</div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="hud-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(10, 15, 20, 0.6) 100%);">
+            <div class="col-md-3">
+                <div class="hud-card {{ 'safety-active' if current_user.safety_mode_active else '' }}" id="safety-mode-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="text-muted extra-small text-uppercase letter-spacing-1">Safety Index</div>
-                        <i class="fas fa-heart-pulse text-danger pulse"></i>
+                        <div class="text-muted extra-small text-uppercase letter-spacing-1">Safety Mode</div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="safety-mode-toggle" {{ 'checked' if current_user.safety_mode_active else '' }}>
+                        </div>
                     </div>
-                    <h2 class="metric-value mb-0" style="color: #f43f5e; text-shadow: 0 0 15px rgba(244, 63, 94, 0.4);">HIGH</h2>
-                    <div class="extra-small text-muted mt-3">SECURE SECTOR: <span class="text-white">ALPHA-7</span></div>
+                    <h2 class="metric-value mb-0" id="safety-status" style="font-size: 1.5rem;">{{ 'ACTIVE' if current_user.safety_mode_active else 'OFF' }}</h2>
+                    <div class="extra-small text-muted mt-2" id="safety-timer">{{ 'TIMER: 30:00' if current_user.safety_mode_active else 'STANDBY' }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="hud-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="text-muted extra-small text-uppercase letter-spacing-1">Identity</div>
+                        <i class="fas fa-id-card {{ 'text-success' if current_user.is_verified else 'text-warning' }}"></i>
+                    </div>
+                    <div class="extra-small {{ 'text-success' if current_user.is_verified else 'text-warning' }}">{{ 'VERIFIED' if current_user.is_verified else 'UNVERIFIED' }}</div>
+                    <button class="btn btn-sm btn-outline-light w-100 mt-3 extra-small" data-bs-toggle="modal" data-bs-target="#verifyModal">UPDATE</button>
                 </div>
             </div>
         </div>
@@ -550,7 +612,118 @@
                 }
             });
         })();
+
+        // Identity Verification Submission
+        document.getElementById('verify-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const payload = Object.fromEntries(formData.entries());
+            
+            fetch('/auth/verify-identity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(r => r.json()).then(data => {
+                if(data.message) {
+                    alert("Verification submitted successfully. Your profile will be updated shortly.");
+                    location.reload();
+                } else {
+                    alert(data.error || "Verification failed.");
+                }
+            });
+        });
+
+        // SOS & Safety Mode Logic
+        let sosId = null;
+        let watchId = null;
+
+        document.getElementById('sos-trigger-btn').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    fetch('/sos/trigger', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            latitude: pos.coords.latitude,
+                            longitude: pos.coords.longitude
+                        })
+                    }).then(r => r.json()).then(data => {
+                        if (data.sos_id) {
+                            sosId = data.sos_id;
+                            document.getElementById('sos-trigger-btn').innerHTML = '<i class="fas fa-satellite fa-spin me-2"></i>SOS ACTIVE';
+                            document.getElementById('sos-trigger-btn').style.background = '#be123c';
+                            
+                            // Start watching position
+                            watchId = navigator.geolocation.watchPosition(updateSOSLocation);
+                            alert("SOS TRIGGERED. HELP IS ON THE WAY.");
+                        }
+                    });
+                });
+            }
+        });
+
+        function updateSOSLocation(pos) {
+            if (!sosId) return;
+            fetch('/sos/update-location', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sos_id: sosId,
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude
+                })
+            });
+        }
+
+        document.getElementById('safety-mode-toggle').addEventListener('change', function(e) {
+            const active = e.target.checked;
+            const endpoint = active ? '/sos/safety-mode/activate' : '/sos/safety-mode/deactivate';
+            
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ duration: 30 })
+            }).then(r => r.json()).then(data => {
+                location.reload();
+            });
+        });
     </script>
+
+    <!-- Verification Modal -->
+    <div class="modal fade" id="verifyModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content hud-card p-0" style="border-radius: 30px;">
+                <div class="modal-header border-0 p-4">
+                    <h5 class="hud-header-title text-success mb-0">IDENTITY VERIFICATION</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 pt-0">
+                    <form id="verify-form">
+                        <div class="mb-3">
+                            <label class="extra-small text-muted mb-2">FULL NAME (AS PER AADHAAR)</label>
+                            <input type="text" name="full_name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="extra-small text-muted mb-2">AADHAAR NUMBER</label>
+                            <input type="text" name="aadhaar" class="form-control" maxlength="12" placeholder="1234 5678 9012" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="extra-small text-muted mb-2">PAN NUMBER</label>
+                            <input type="text" name="pan" class="form-control" maxlength="10" placeholder="ABCDE1234F" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="extra-small text-muted mb-2">FACE CAPTURE (WEBCAM)</label>
+                            <div class="bg-dark rounded p-3 text-center border border-dashed border-success">
+                                <i class="fas fa-camera fa-2x text-muted mb-2"></i>
+                                <div class="extra-small text-muted">FACE VERIFICATION SIMULATED</div>
+                            </div>
+                        </div>
+                        <button type="submit" class="sentinel-btn w-100 py-3">SUBMIT FOR VERIFICATION</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 

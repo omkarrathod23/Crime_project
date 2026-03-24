@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOS TACTICAL COMMAND - {{ department.name if department else 'GLOBAL UNIT' }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --sos-danger: #f43f5e;
+            --sos-bg: #020617;
+            --sos-sidebar: rgba(15, 23, 42, 0.95);
+            --sos-accent: #38bdf8;
+            --glass-card: rgba(255, 255, 255, 0.05);
+            --glass-blur: blur(20px);
+        }
+
+        body {
+            background-color: var(--sos-bg);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            overflow: hidden;
+        }
+
+        #emergency-map {
+            flex-grow: 1;
+            height: 100vh;
+            background: #000;
+        }
+
+        .sidebar {
+            width: 450px;
+            height: 100vh;
+            background: var(--sos-sidebar);
+            backdrop-filter: var(--glass-blur);
+            border-right: 1px solid rgba(244, 63, 94, 0.2);
+            padding: 2rem 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            margin-bottom: 2rem;
+        }
+
+        .brand-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            color: var(--sos-danger);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+        }
+
+        .brand-title i {
+            animation: pulse-danger 1.5s infinite;
+        }
+
+        @keyframes pulse-danger {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .sos-feed {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .card-sos {
+            background: var(--glass-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .card-sos:hover {
+            border-color: var(--sos-danger);
+            background: rgba(244, 63, 94, 0.05);
+            transform: translateX(5px);
+        }
+
+        .card-sos.active {
+            border-left: 4px solid var(--sos-danger);
+        }
+
+        .card-sos::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(244, 63, 94, 0.03), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s;
+        }
+
+        .card-sos:hover::before {
+            transform: translateX(100%);
+        }
+
+        .sos-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.8rem;
+        }
+
+        .citizen-name {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+
+        .sos-time {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+        }
+
+        .sos-body {
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.4rem;
+        }
+
+        .detail-label {
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .detail-value {
+            color: var(--sos-accent);
+            font-weight: 600;
+        }
+
+        .sos-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sos {
+            padding: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 8px;
+            flex-grow: 1;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Leaflet Overrides */
+        .leaflet-container {
+            background: #020617 !important;
+        }
+
+        .sos-marker {
+            background: var(--sos-danger);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--sos-danger);
+            z-index: 1000 !important;
+        }
+
+        .marker-pulse {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(244, 63, 94, 0.4);
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: rgba(7, 10, 15, 0.9) !important;
+            color: #fff !important;
+            border: 1px solid var(--sos-danger) !important;
+            border-radius: 12px !important;
+            backdrop-filter: blur(10px) !important;
+        }
+
+        .leaflet-popup-tip {
+            background: rgba(7, 10, 15, 0.9) !important;
+        }
+
+        #empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            opacity: 0.3;
+            text-align: center;
+        }
+
+        #empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Custom Scrollbar */
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-title mb-1">
+                <i class="fas fa-satellite-dish"></i>
+                <span>Tactical Hub</span>
+            </div>
+            <div class="extra-small text-info" style="font-size: 0.65rem; letter-spacing: 3px; font-family: 'Orbitron';">
+                {{ department.city|upper if department else 'GLOBAL UNIT' }} COMMAND
+            </div>
+        </div>
+
+        <div id="sos-feed" class="sos-feed">
+            {% if active_sos %}
+                {% for sos in active_sos %}
+                <div class="card-sos active" id="sos-{{ sos.id }}">
+                    <div class="sos-header">
+                        <div class="citizen-name">{{ sos.user.name|upper if sos.user else 'CITIZEN' }}</div>
+                        <div class="sos-time">{{ sos.created_at.strftime('%H:%M:%S') }}</div>
+                    </div>
+                    <div class="sos-body">
+                        <div class="detail-row">
+                            <span class="detail-label">Status</span>
+                            <span class="detail-value text-success" style="font-size: 0.7rem;">
+                                {{ 'VERIFIED' if sos.user.is_verified else 'TRUSTED' }}
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Phone</span>
+                            <span class="detail-value">{{ sos.user.phone or 'UNKNOWN' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Location</span>
+                            <span class="detail-value" id="coords-{{ sos.id }}">{{ sos.latitude|round(4) }}, {{ sos.longitude|round(4) }}</span>
+                        </div>
+                    </div>
+                    <div class="sos-actions">
+                        <button class="btn btn-sos btn-danger" onclick="focusMap('{{ sos.id }}', {{ sos.latitude }}, {{ sos.longitude }})">LOCATE</button>
+                        <button class="btn btn-sos btn-outline-light" onclick="resolveSOS('{{ sos.id }}')">DONE</button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div id="empty-state">
+                    <i class="fas fa-shield-cat"></i>
+                    <div class="fw-bold text-uppercase letter-spacing-2">All Sectors Clear</div>
+                    <div class="extra-small mt-2">Standing by for emergency signals...</div>
+                </div>
+            {% endif %}
+        </div>
+
+        <hr class="opacity-10 my-4">
+        <a href="{{ url_for('main.police_dashboard') }}" class="btn btn-sm btn-outline-info w-100 py-2 fw-bold letter-spacing-1" style="font-family: 'Orbitron'; font-size: 0.7rem;">
+            <i class="fas fa-arrow-left me-2"></i> EXIT COMMAND MODE
+        </a>
+    </div>
+
+    <div id="emergency-map"></div>
+
+    <audio id="sos-audio" src="https://assets.mixkit.co/sfx/preview/mixkit-security-facility-breach-alarm-994.mp3" preload="auto"></audio>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        const map = L.map('emergency-map', { zoomControl: false, attributionControl: false }).setView([18.9044, 73.1842], 13);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+        const markers = {};
+        const socket = io('/police', {
+            transports: ['polling'],
+            reconnectionAttempts: 10
+        });
+
+        socket.on('connect', () => {
+            console.log('Tactical Uplink Established');
+            {% if department %}
+            socket.emit('join', { room: "{{ department.name }}" });
+            {% endif %}
+        });
+
+        socket.on('new_sos', (data) => {
+            console.log('New SOS Signal:', data);
+            addSOSCard(data);
+            addMarker(data);
+            playAlarm();
+            
+            // Auto-focus if first alert
+            if (Object.keys(markers).length === 1) {
+                focusMap(data.sos_id, data.latitude, data.longitude);
+            }
+        });
+
+        socket.on('location_update', (data) => {
+            console.log('Signal Update:', data);
+            updateMarker(data);
+            updateCard(data);
+        });
+
+        socket.on('sos_resolved', (data) => {
+            removeSOS(data.sos_id);
+        });
+
+        function addSOSCard(data) {
+            const feed = document.getElementById('sos-feed');
+            const emptyState = document.getElementById('empty-state');
+            if (emptyState) emptyState.remove();
+
+            const card = document.createElement('div');
+            card.className = 'card-sos active';
+            card.id = `sos-${data.sos_id}`;
+            card.innerHTML = `
+                <div class="sos-header">
+                    <div class="citizen-name">${data.user_name.toUpperCase()}</div>
+                    <div class="sos-time">${data.timestamp}</div>
+                </div>
+                <div class="sos-body">
+                    <div class="detail-row">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value text-success" style="font-size: 0.7rem;">
+                            ${data.is_verified ? 'VERIFIED' : 'TRUSTED'}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Phone</span>
+                        <span class="detail-value">${data.phone || 'UNKNOWN'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value" id="coords-${data.sos_id}">${data.latitude.toFixed(4)}, ${data.longitude.toFixed(4)}</span>
+                    </div>
+                </div>
+                <div class="sos-actions">
+                    <button class="btn btn-sos btn-danger" onclick="focusMap('${data.sos_id}', ${data.latitude}, ${data.longitude})">LOCATE</button>
+                    <button class="btn btn-sos btn-outline-light" onclick="resolveSOS('${data.sos_id}')">DONE</button>
+                </div>
+            `;
+            feed.prepend(card);
+        }
+
+        function addMarker(data) {
+            const icon = L.divIcon({
+                className: 'sos-marker',
+                html: '<div class="marker-pulse"></div>',
+                iconSize: [20, 20]
+            });
+            
+            const marker = L.marker([data.latitude, data.longitude], { icon }).addTo(map);
+            marker.bindPopup(`
+                <div style="font-family: 'Orbitron'; padding: 5px;">
+                    <div style="color: #f43f5e; font-weight: 900; margin-bottom: 5px;">EMERGENCY</div>
+                    <div style="font-size: 1rem; margin-bottom: 1rem;">${data.user_name}</div>
+                    <div style="font-size: 0.7rem; opacity: 0.7; margin-bottom: 5px;">PHONE: ${data.phone || 'N/A'}</div>
+                    <div style="font-size: 0.7rem; opacity: 0.7;">TIME: ${data.timestamp || 'NOW'}</div>
+                </div>
+            `);
+            markers[data.sos_id] = marker;
+            return marker;
+        }
+
+        function updateMarker(data) {
+            if (markers[data.sos_id]) {
+                const marker = markers[data.sos_id];
+                marker.setLatLng([data.latitude, data.longitude]);
+                marker.getPopup().setContent(`
+                    <div style="font-family: 'Orbitron'; padding: 5px;">
+                        <div style="color: #f43f5e; font-weight: 900; margin-bottom: 5px;">EMERGENCY</div>
+                        <div style="font-size: 1.1rem; margin-bottom: 1rem;">${data.user_name}</div>
+                        <div style="font-size: 0.75rem; color: #38bdf8; margin-bottom: 5px;">LIVE TRACKING ACTIVE</div>
+                        <div style="font-size: 0.7rem; opacity: 0.7; margin-bottom: 5px;">LOC: ${data.latitude.toFixed(4)}, ${data.longitude.toFixed(4)}</div>
+                        <div style="font-size: 0.7rem; opacity: 0.7;">UPDATED: ${data.timestamp}</div>
+                    </div>
+                `);
+            }
+        }
+
+        function updateCard(data) {
+            const coordSpan = document.getElementById(`coords-${data.sos_id}`);
+            if (coordSpan) {
+                coordSpan.innerText = `${parseFloat(data.latitude).toFixed(4)}, ${parseFloat(data.longitude).toFixed(4)}`;
+                const card = document.getElementById(`sos-${data.sos_id}`);
+                card.style.background = 'rgba(56, 189, 248, 0.1)';
+                setTimeout(() => { card.style.background = ''; }, 1000);
+            }
+        }
+
+        function focusMap(id, lat, lon) {
+            map.setView([lat, lon], 17, { animate: true });
+            if (markers[id]) markers[id].openPopup();
+            
+            // Highlight card
+            document.querySelectorAll('.card-sos').forEach(c => c.style.borderColor = '');
+            const card = document.getElementById(`sos-${id}`);
+            if (card) card.style.borderColor = 'var(--sos-accent)';
+        }
+
+        function resolveSOS(id) {
+            fetch(`/sos/resolve/${id}`, { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(() => removeSOS(id));
+        }
+
+        function removeSOS(id) {
+            const card = document.getElementById(`sos-${id}`);
+            if (card) card.remove();
+            if (markers[id]) {
+                markers[id].remove();
+                delete markers[id];
+            }
+            if (Object.keys(markers).length === 0) {
+                location.reload(); 
+            }
+        }
+
+        function playAlarm() {
+            const audio = document.getElementById('sos-audio');
+            audio.play().catch(e => console.log('Audio blocked'));
+        }
+
+        // Initialize markers for existing SOS
+        {% for sos in active_sos %}
+        addMarker({
+            sos_id: "{{ sos.id }}",
+            latitude: {{ sos.latitude }},
+            longitude: {{ sos.longitude }},
+            user_name: "{{ sos.user.name if sos.user else 'Citizen' }}",
+            phone: "{{ sos.user.phone if sos.user else '' }}",
+            timestamp: "{{ sos.created_at.strftime('%H:%M:%S') }}"
+        });
+        {% endfor %}
+    </script>
+</body>
+</html>

@@ -9,15 +9,35 @@ coordination_bp = Blueprint('coordination', __name__)
 
 @coordination_bp.route('/login', methods=['POST'])
 def api_login():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-    
-    user = User.objects(email=email).first()
-    if user and user.check_password(password):
-        access_token = create_access_token(identity=str(user.id))
-        return jsonify(access_token=access_token, role=user.role, name=user.name), 200
-    return jsonify({"msg": "Bad email or password"}), 401
+    print("LOG: Login attempt received")
+    try:
+        data = request.get_json()
+        print(f"LOG: Login data: {data}")
+        email = data.get('email')
+        password = data.get('password')
+        
+        user = User.objects(email=email).first()
+        if user:
+            print(f"LOG: User found: {user.name}, checking password...")
+            if user.check_password(password):
+                print("LOG: Password correct, creating token...")
+                access_token = create_access_token(identity=str(user.id))
+                return jsonify(
+                    access_token=access_token, 
+                    role=user.role, 
+                    name=user.name,
+                    district=user.district,
+                    police_station=user.police_station
+                ), 200
+            else:
+                print("LOG: Password incorrect")
+        else:
+            print(f"LOG: User not found: {email}")
+            
+        return jsonify({"msg": "Bad email or password"}), 401
+    except Exception as e:
+        print(f"LOG: Login ERROR: {str(e)}")
+        return jsonify({"msg": "Server processing error", "error": str(e)}), 400
 
 @coordination_bp.route('/add-criminal', methods=['POST'])
 @jwt_required()
@@ -55,7 +75,7 @@ def all_criminals():
 @coordination_bp.route('/alerts', methods=['GET'])
 @jwt_required()
 def get_alerts():
-    alerts = Alert.objects.order_by('-timestamp').all()
+    alerts = Alert.objects.order_by('-timestamp').limit(10).all()
     return jsonify([{
         "id": str(a.id),
         "message": a.message,
@@ -153,3 +173,13 @@ def dashboard_stats():
         "caught_criminals": caught_criminals,
         "total_alerts": total_alerts
     }), 200
+
+@coordination_bp.route('/police/stations', methods=['GET'])
+def get_police_stations():
+    stations = Department.objects.all()
+    return jsonify([{
+        "id": str(s.id),
+        "name": s.name,
+        "city": s.city,
+        "district": s.district
+    } for s in stations]), 200

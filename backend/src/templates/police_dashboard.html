@@ -7,7 +7,9 @@
     <title>Command Center - Police Department</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <style>
         :root {
@@ -30,7 +32,7 @@
 
         body {
             background-color: var(--police-bg);
-            background-image: 
+            background-image:
                 radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.12) 0%, transparent 50%),
                 radial-gradient(circle at 100% 100%, rgba(129, 140, 248, 0.1) 0%, transparent 50%);
             color: var(--text-main);
@@ -76,8 +78,13 @@
         }
 
         @keyframes drift {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(10% , 10%) scale(1.1); }
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate(10%, 10%) scale(1.1);
+            }
         }
 
         /* Sidebar HUD */
@@ -95,6 +102,29 @@
             display: flex;
             flex-direction: column;
             padding: 2.5rem 1.5rem;
+            transition: transform 0.4s ease;
+        }
+
+        .police-main {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            padding: 2.5rem;
+            transition: all 0.4s ease;
+        }
+
+        /* Mobile Responsive HUD */
+        @media (max-width: 992px) {
+            .police-sidebar {
+                transform: translateX(-100%);
+                width: 0;
+                padding: 0;
+            }
+
+            .police-main {
+                margin-left: 0 !important;
+                width: 100% !important;
+                padding: 1rem !important;
+            }
         }
 
         .sidebar-header {
@@ -191,12 +221,10 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(
-                90deg,
-                transparent,
-                rgba(56, 189, 248, 0.05),
-                transparent
-            );
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(56, 189, 248, 0.05),
+                    transparent);
             transition: 0.5s;
         }
 
@@ -207,7 +235,7 @@
         .hud-card:hover {
             border-color: rgba(56, 189, 248, 0.4);
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 20px rgba(56, 189, 248, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.1);
         }
 
         .hud-header-title {
@@ -219,12 +247,63 @@
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(255,255,255,0.1);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
         }
 
-        .stat-glow-red { color: #f43f5e; text-shadow: 0 0 15px rgba(244, 63, 94, 0.4); }
-        .stat-glow-blue { color: #38bdf8; text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
-        .stat-glow-green { color: #10b981; text-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+        /* SOS Marker Animation */
+        .sos-marker {
+            background: transparent;
+            border: none;
+        }
+
+        .marker-pulse {
+            width: 20px;
+            height: 20px;
+            background: #ef4444;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 15px #ef4444;
+        }
+
+        .marker-pulse::after {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -100%;
+            left: -10px;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #ef4444;
+            border-radius: 50%;
+            animation: marker-ping 1.5s infinite;
+            opacity: 0;
+        }
+
+        @keyframes marker-ping {
+            0% {
+                transform: scale(0.5);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .stat-glow-red {
+            color: #f43f5e;
+            text-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+        }
+
+        .stat-glow-blue {
+            color: #38bdf8;
+            text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .stat-glow-green {
+            color: #10b981;
+            text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
 
         .search-command {
             background: rgba(15, 23, 42, 0.6) !important;
@@ -308,7 +387,7 @@
             text-transform: uppercase;
             font-weight: 800;
             color: rgba(255, 255, 255, 0.85) !important;
-            text-shadow: 0 0 5px rgba(255,255,255,0.1);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
         }
 
         .jurisdiction-tag {
@@ -324,7 +403,7 @@
             backdrop-filter: blur(40px);
             border: 1px solid rgba(56, 189, 248, 0.4);
             border-radius: 30px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8), 0 0 30px rgba(56, 189, 248, 0.1);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.1);
         }
 
         .btn-premium {
@@ -344,7 +423,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
             transform: rotate(45deg);
             transition: 0.5s;
         }
@@ -392,6 +471,91 @@
             padding: 1rem 0.75rem !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
         }
+
+        /* SOS Alert Animations */
+        @keyframes pulse-red {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .pulse-red {
+            animation: pulse-red 1s infinite;
+        }
+
+        .sos-card-active {
+            border-left: 4px solid #f43f5e !important;
+            box-shadow: 0 0 20px rgba(244, 63, 94, 0.2);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .pulse-border-info {
+            border-color: var(--police-accent) !important;
+            box-shadow: 0 0 15px var(--police-accent-glow);
+        }
+
+        /* High-Impact SOS Overlay */
+        #sos-emergency-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, transparent, rgba(220, 38, 38, 0.2));
+            z-index: 9998;
+            pointer-events: none;
+            display: none;
+            animation: emergency-glow 2s infinite alternate;
+        }
+
+        @keyframes emergency-glow {
+            from { opacity: 0.3; }
+            to { opacity: 1; }
+        }
+
+
+        .sos-marker {
+            background: #f43f5e;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.8);
+        }
+
+        .marker-pulse {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(244, 63, 94, 0.4);
+            animation: marker-pulse 1.5s infinite;
+        }
+
+        @keyframes marker-pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(3); opacity: 0; }
+        }
     </style>
 
 </head>
@@ -401,6 +565,26 @@
         <div class="mesh-blob blob-1"></div>
         <div class="mesh-blob blob-2"></div>
     </div>
+
+    <!-- Emergency HUD Systems -->
+    <div id="sos-emergency-overlay"></div>
+    
+    <!-- SOS Toast Notification Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 10001;">
+        <div id="sosToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <strong id="sos-toast-name">Citizen</strong> has sent an SOS alert!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="p-2 border-top border-white border-opacity-10 d-flex justify-content-end gap-2">
+                <a href="{{ url_for('main.sos_alerts') }}" class="btn btn-sm btn-light py-0 fw-bold" style="font-size: 0.7rem;">TRACK LIVE</a>
+            </div>
+        </div>
+    </div>
+
     <!-- Sidebar -->
     <aside class="police-sidebar">
         <div class="sidebar-header mb-4">
@@ -408,13 +592,17 @@
                 <i class="fas fa-shield-virus text-glow"></i>
                 <span>CMS HUB</span>
             </div>
-            <div class="extra-small text-info brightness-150" style="font-size: 0.65rem; letter-spacing: 3px; color: #7dd3fc !important;">TACTICAL COMMAND v4.0</div>
+            <div class="extra-small text-info brightness-150"
+                style="font-size: 0.65rem; letter-spacing: 3px; color: #7dd3fc !important;">TACTICAL COMMAND v4.0</div>
             <div class="jurisdiction-tag mt-2">{{ department.city|upper if department else 'GLOBAL NET' }}</div>
         </div>
 
         <nav class="flex-grow-1">
             <a href="{{ url_for('main.police_dashboard') }}" class="police-nav-link active">
                 <i class="fas fa-th-large"></i> Dashboard
+            </a>
+            <a href="{{ url_for('main.sos_alerts') }}" class="police-nav-link text-danger">
+                <i class="fas fa-exclamation-circle pulse-red"></i> SOS ALERTS
             </a>
             <a href="{{ url_for('analysis.criminals_list') }}" class="police-nav-link">
                 <i class="fas fa-user-secret"></i> Intelligence
@@ -455,33 +643,47 @@
     <main class="police-viewport">
         <header class="d-flex justify-content-between align-items-center mb-5">
             <div>
-                <h2 class="hud-header-title mb-1">{{ department.name if department else 'Operational Intelligence' }}</h2>
+                <h2 class="hud-header-title mb-1">{{ department.name if department else 'Operational Intelligence' }}
+                </h2>
                 <div class="jurisdiction-tag" style="margin-top: 0;">Command Level: Alpha-1</div>
             </div>
             <div class="d-flex gap-3">
-                <a href="{{ url_for('main.daily_report') }}" target="_blank" class="btn-premium btn-outline py-2 px-4 shadow-sm">
+                <a href="{{ url_for('main.daily_report') }}" target="_blank"
+                    class="btn-premium btn-outline py-2 px-4 shadow-sm">
                     <i class="fas fa-print"></i>
                 </a>
-                <button class="btn-premium btn-primary py-2 px-4 shadow-lg" data-bs-toggle="modal" data-bs-target="#fileCaseModal">
+                <button class="btn-premium btn-primary py-2 px-4 shadow-lg" data-bs-toggle="modal"
+                    data-bs-target="#fileCaseModal">
                     <i class="fas fa-plus-circle me-2"></i> NEW CASE
                 </button>
             </div>
         </header>
-        
+
         <!-- Flash Messages -->
         <div class="flash-messages-container mb-4">
+            <!-- Diagnostics HUD -->
+            <div id="tactical-diagnostics" class="hud-card mb-3 p-2 bg-dark bg-opacity-80" style="font-size: 0.65rem; border: 1px dashed rgba(56, 189, 248, 0.3);">
+                <div class="d-flex gap-3">
+                    <span id="socket-status" class="text-muted"><i class="fas fa-link me-1"></i>UPLINK: OFFLINE</span>
+                    <span id="room-status" class="text-muted"><i class="fas fa-door-closed me-1"></i>ROOM: PENDING</span>
+                </div>
+            </div>
             {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }} alert-dismissible fade show hud-card py-2 px-4 mb-2" role="alert" style="background: rgba(var(--{{ 'danger' if category == 'error' else 'info' }}-rgb), 0.1); border: 1px solid rgba(var(--{{ 'danger' if category == 'error' else 'info' }}-rgb), 0.3);">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="fas fa-{{ 'triangle-exclamation' if category == 'error' else 'circle-info' }} text-{{ 'danger' if category == 'error' else 'info' }}"></i>
-                                <span class="extra-small letter-spacing-1 fw-bold">{{ message|upper }}</span>
-                            </div>
-                            <button type="button" class="btn-close btn-close-white small" data-bs-dismiss="modal" style="font-size: 0.5rem;"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }} alert-dismissible fade show hud-card py-2 px-4 mb-2"
+                role="alert"
+                style="background: rgba(var(--{{ 'danger' if category == 'error' else 'info' }}-rgb), 0.1); border: 1px solid rgba(var(--{{ 'danger' if category == 'error' else 'info' }}-rgb), 0.3);">
+                <div class="d-flex align-items-center gap-3">
+                    <i
+                        class="fas fa-{{ 'triangle-exclamation' if category == 'error' else 'circle-info' }} text-{{ 'danger' if category == 'error' else 'info' }}"></i>
+                    <span class="extra-small letter-spacing-1 fw-bold">{{ message|upper }}</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white small" data-bs-dismiss="modal"
+                    style="font-size: 0.5rem;"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
             {% endwith %}
         </div>
 
@@ -530,228 +732,400 @@
                         <i class="fas fa-database stat-glow-blue"></i>
                     </div>
                     <h2 class="metric-value mb-0" id="stat-total">{{ total_count }}</h2>
-                    <div class="extra-small mt-2 text-info"><i class="fas fa-arrow-up me-1"></i> 12% FROM LAST CYCLE</div>
+                    <div class="extra-small mt-2 text-info"><i class="fas fa-arrow-up me-1"></i> 12% FROM LAST CYCLE
+                    </div>
                 </div>
             </div>
         </div>
 
-                <div class="row g-4">
-                    <!-- Investigations -->
-                    <div class="col-lg-8">
-                        <div class="hud-card mb-4">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h5 class="hud-header-title mb-0">Operational Management Console</h5>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-sm btn-outline-info opacity-50"><i class="fas fa-filter"></i></button>
-                                    <button class="btn btn-sm btn-outline-info opacity-50"><i class="fas fa-download"></i></button>
-                                </div>
-                            </div>
-
-                            <ul class="nav nav-tabs nav-tabs-modern mb-4" role="tablist" style="border-bottom: 1px solid var(--police-border);">
-                                <li class="nav-item">
-                                    <button class="nav-link active py-3 px-4 fw-bold text-uppercase letter-spacing-1" data-bs-toggle="tab" data-bs-target="#new" type="button" style="font-family: 'Orbitron', sans-serif; font-size: 0.75rem;">New Intel</button>
-                                </li>
-                                <li class="nav-item">
-                                    <button class="nav-link py-3 px-4 fw-bold text-uppercase letter-spacing-1" data-bs-toggle="tab" data-bs-target="#active" type="button" style="font-family: 'Orbitron', sans-serif; font-size: 0.75rem;">In Progress</button>
-                                </li>
-                                <li class="nav-item">
-                                    <button class="nav-link py-3 px-4 fw-bold text-uppercase letter-spacing-1" data-bs-toggle="tab" data-bs-target="#closed" type="button" style="font-family: 'Orbitron', sans-serif; font-size: 0.75rem;">Archive</button>
-                                </li>
-                            </ul>
-
-                            <div class="tab-content">
-                                <div class="tab-pane fade show active" id="new">
-                                    <div class="table-responsive">
-                                        <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
-                                            <thead>
-                                                <tr class="text-muted extra-small text-uppercase letter-spacing-1" style="font-family: 'Orbitron', sans-serif;">
-                                                    <th class="border-0">ID-REF</th>
-                                                    <th class="border-0">Origin</th>
-                                                    <th class="border-0">Category</th>
-                                                    <th class="border-0">Timestamp</th>
-                                                    <th class="border-0 text-end">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="fir-new-table">
-                                                {% for f in fir_new %}
-                                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
-                                                    <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
-                                                    <td class="small">{{ f.user.name }}</td>
-                                                    <td><span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1" style="font-size: 0.65rem;">{{ f.crime_type }}</span></td>
-                                                    <td class="extra-small text-muted">{{ f.timestamp.strftime('%H:%M | %d %b') }}</td>
-                                                    <td class="text-end">
-                                                        <form method="POST" action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}">
-                                                            <input type="hidden" name="status" value="in_progress">
-                                                            <button class="btn btn-premium btn-primary py-1 px-3 border-0" style="font-size: 0.65rem;">INITIATE</button>
-                                                        </form>
-                                                    </td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="active">
-                                    <div class="table-responsive">
-                                        <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
-                                            <thead>
-                                                <tr class="text-muted extra-small text-uppercase letter-spacing-1" style="font-family: 'Orbitron', sans-serif;">
-                                                    <th class="border-0">ID-REF</th>
-                                                    <th class="border-0">Operational Brief</th>
-                                                    <th class="border-0">Sync</th>
-                                                    <th class="border-0 text-end">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="fir-active-table">
-                                                {% for f in fir_active %}
-                                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
-                                                    <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
-                                                    <td class="small text-truncate" style="max-width: 200px;">{{ f.police_notes or 'PENDING INTEL' }}</td>
-                                                    <td class="extra-small text-muted">{{ f.updated_at.strftime('%H:%M | %d %b') if f.updated_at else '-' }}</td>
-                                                    <td class="text-end">
-                                                        <form method="POST" action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}">
-                                                            <input type="hidden" name="status" value="closed">
-                                                            <button class="btn btn-premium btn-primary py-1 px-3 border-0 bg-success" style="font-size: 0.65rem; background: var(--police-accent) !important; color: #000;">RESOLVE</button>
-                                                        </form>
-                                                    </td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="closed">
-                                    <div class="table-responsive">
-                                        <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
-                                            <thead>
-                                                <tr class="text-muted extra-small text-uppercase letter-spacing-1" style="font-family: 'Orbitron', sans-serif;">
-                                                    <th class="border-0">ID-REF</th>
-                                                    <th class="border-0">Category</th>
-                                                    <th class="border-0">Closed</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="fir-closed-table">
-                                                {% for f in fir_closed %}
-                                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
-                                                    <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}</td>
-                                                    <td><span class="badge bg-light bg-opacity-10 text-muted px-2 py-1" style="font-size: 0.65rem;">{{ f.crime_type }}</span></td>
-                                                    <td class="extra-small text-muted">{{ f.updated_at.strftime('%d %b %Y') if f.updated_at else '-' }}</td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tactical Board -->
-                        <div class="hud-card mb-4">
-                            <h5 class="hud-header-title mb-4">Field Operations Grid</h5>
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <div class="hud-card p-3" style="background: rgba(15, 23, 42, 0.3); border-style: dashed;">
-                                        <div class="d-flex justify-content-between mb-3">
-                                            <span class="extra-small fw-bold text-muted text-uppercase">Pre-Dispatch</span>
-                                            <span class="badge bg-secondary bg-opacity-10 rounded-pill text-muted">0</span>
-                                        </div>
-                                        <div class="extra-small text-center text-muted mt-4 opacity-50">NO PENDING ASSIGNMENTS</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="hud-card p-3" style="background: rgba(56, 189, 248, 0.05); border-color: var(--police-accent);">
-                                        <div class="d-flex justify-content-between mb-3">
-                                            <span class="extra-small fw-bold text-info text-uppercase">Field Intel</span>
-                                            <span class="badge bg-info bg-opacity-20 rounded-pill text-info">{{ in_progress_count }}</span>
-                                        </div>
-                                        <div id="kanban-active">
-                                            {% for f in fir_active %}
-                                            <div class="hud-card p-2 mb-2" style="background: rgba(255,255,255,0.02); border-radius: 8px;">
-                                                <div class="extra-small fw-bold text-info mb-1">#{{ f.id|string|truncate(6, True, '') }}</div>
-                                                <div class="extra-small opacity-60 text-uppercase" style="font-size: 0.6rem;">{{ f.crime_type }}</div>
-                                            </div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="hud-card p-3" style="background: rgba(16, 185, 129, 0.05); border-color: #10b981;">
-                                        <div class="d-flex justify-content-between mb-3">
-                                            <span class="extra-small fw-bold text-success text-uppercase">Secured</span>
-                                            <span class="badge bg-success bg-opacity-20 rounded-pill text-success">{{ closed_count }}</span>
-                                        </div>
-                                        <div class="extra-small text-center text-success mt-4 opacity-50">STATION SECURE</div>
-                                    </div>
-                                </div>
-                            </div>
+        <div class="row g-4">
+            <!-- Investigations -->
+            <div class="col-lg-8">
+                <div class="hud-card mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="hud-header-title mb-0">Operational Management Console</h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-info opacity-50"><i
+                                    class="fas fa-filter"></i></button>
+                            <button class="btn btn-sm btn-outline-info opacity-50"><i
+                                    class="fas fa-download"></i></button>
                         </div>
                     </div>
 
-                    <!-- Side Panels -->
-                    <div class="col-lg-4">
-                        <!-- Criminal Database -->
-                        <div class="hud-card mb-4">
-                            <h5 class="hud-header-title mb-3">High-Value Target Database</h5>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text bg-transparent border-end-0 border-light border-opacity-10">
-                                    <i class="fas fa-search text-muted"></i>
-                                </span>
-                                <input type="text" class="form-control search-command border-start-0" placeholder="IDENTITY LOOKUP...">
-                            </div>
-                            <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
-                                {% for criminal in criminals %}
-                                <div class="list-group-item bg-transparent border-0 px-0 d-flex justify-content-between align-items-center mb-2">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="bg-danger bg-opacity-10 p-2 rounded-circle" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-user-secret text-danger" style="font-size: 0.8rem;"></i>
-                                        </div>
-                                        <div>
-                                            <div class="small fw-bold text-white letter-spacing-1">{{ criminal.name|upper }}</div>
-                                            <div class="extra-small text-muted">{{ criminal.crimes|truncate(25) }}</div>
-                                        </div>
-                                    </div>
-                                    <span class="badge {{ 'bg-danger' if criminal.risk_level == 'High' else 'bg-warning' }} bg-opacity-10 {{ 'text-danger' if criminal.risk_level == 'High' else 'text-warning' }} extra-small letter-spacing-1">{{ criminal.risk_level|upper }}</span>
-                                </div>
-                                {% endfor %}
+                    <ul class="nav nav-tabs nav-tabs-modern mb-4" role="tablist"
+                        style="border-bottom: 1px solid var(--police-border);">
+                        <li class="nav-item">
+                            <button class="nav-link active py-3 px-4 fw-bold text-uppercase letter-spacing-1"
+                                data-bs-toggle="tab" data-bs-target="#new" type="button"
+                                style="font-family: 'Orbitron', sans-serif; font-size: 0.75rem;">New Intel</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link py-3 px-4 fw-bold text-uppercase letter-spacing-1"
+                                data-bs-toggle="tab" data-bs-target="#active" type="button"
+                                style="font-family: 'Orbitron', sans-serif; font-size: 0.75rem;">In Progress</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link py-3 px-4 fw-bold text-uppercase letter-spacing-1"
+                                data-bs-toggle="tab" data-bs-target="#closed" type="button"
+                                style="font-family: 'Orbitron', sans-serif; font-size: 0.75rem;">Archive</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link py-3 px-4 fw-bold text-uppercase letter-spacing-1"
+                                data-bs-toggle="tab" data-bs-target="#citizens" type="button"
+                                style="font-family: 'Orbitron', sans-serif; font-size: 0.75rem;">Citizens List</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="new">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover align-middle mb-0"
+                                    style="background: transparent;">
+                                    <thead>
+                                        <tr class="text-muted extra-small text-uppercase letter-spacing-1"
+                                            style="font-family: 'Orbitron', sans-serif;">
+                                            <th class="border-0">ID-REF</th>
+                                            <th class="border-0">Origin</th>
+                                            <th class="border-0">Category</th>
+                                            <th class="border-0">Priority</th>
+                                            <th class="border-0">Risk</th>
+                                            <th class="border-0">Timestamp</th>
+                                            <th class="border-0 text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fir-new-table">
+                                        {% for f in fir_new %}
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                                            <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}
+                                            </td>
+                                            <td class="small">{{ f.user.name }}</td>
+                                            <td><span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1"
+                                                    style="font-size: 0.65rem;">{{ f.crime_type }}</span></td>
+                                            <td>
+                                                <span
+                                                    class="badge bg-{{ 'danger' if f.priority == 'High' else 'warning' if f.priority == 'Medium' else 'info' }} bg-opacity-10 text-{{ 'danger' if f.priority == 'High' else 'warning' if f.priority == 'Medium' else 'info' }} px-2 py-1"
+                                                    style="font-size: 0.65rem;">{{ f.priority|upper }}</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-1">
+                                                    <span
+                                                        class="extra-small {{ 'text-danger' if (f.risk_score or 0) > 0.7 else 'text-warning' if (f.risk_score or 0) > 0.4 else 'text-success' }}">
+                                                        {{ (f.risk_score * 100)|round|int if f.risk_score else 'N/A' }}%
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="extra-small text-muted">{{ f.timestamp.strftime('%H:%M | %d %b')
+                                                }}</td>
+                                            <td class="text-end">
+                                                <form method="POST"
+                                                    action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}">
+                                                    <input type="hidden" name="status" value="in_progress">
+                                                    <button class="btn btn-premium btn-primary py-1 px-3 border-0"
+                                                        style="font-size: 0.65rem;">INITIATE</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-
-                        <!-- AI Prediction -->
-                        <div class="hud-card mb-4" style="border-left: 4px solid var(--police-accent);">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="hud-header-title mb-0" style="font-size: 0.9rem;"><i class="fas fa-brain me-2"></i>PREDICTIVE INTEL</h5>
-                                <span class="badge bg-info bg-opacity-20 text-info extra-small pulse">LIVE</span>
-                            </div>
-                            <div class="p-3 bg-info bg-opacity-5 rounded border border-info border-opacity-10 mb-3">
-                                <div class="extra-small text-info fw-bold mb-1 letter-spacing-1"><i class="fas fa-bolt me-1"></i> HIGH-PROBABILITY ANOMALY</div>
-                                <div class="small opacity-80" style="font-size: 0.75rem;">Elevated risk of vehicle theft detected in Sector 4 [22:00 - 02:00]. Tactical deployment recommended.</div>
-                            </div>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="flex-grow-1">
-                                    <div class="extra-small text-muted mb-1 letter-spacing-1">CONFIDENCE COEFFICIENT</div>
-                                    <div class="progress" style="height: 4px; background: rgba(56, 189, 248, 0.1);">
-                                        <div class="progress-bar bg-info shadow-glow" style="width: 88%;"></div>
-                                    </div>
-                                </div>
-                                <span class="small fw-bold text-info" style="font-family: 'Orbitron', sans-serif;">88%</span>
+                        <div class="tab-pane fade" id="active">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover align-middle mb-0"
+                                    style="background: transparent;">
+                                    <thead>
+                                        <tr class="text-muted extra-small text-uppercase letter-spacing-1"
+                                            style="font-family: 'Orbitron', sans-serif;">
+                                            <th class="border-0">ID-REF</th>
+                                            <th class="border-0">Operational Brief</th>
+                                            <th class="border-0">Sync</th>
+                                            <th class="border-0 text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fir-active-table">
+                                        {% for f in fir_active %}
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                                            <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}
+                                            </td>
+                                            <td class="small text-truncate" style="max-width: 200px;">{{ f.police_notes
+                                                or 'PENDING INTEL' }}</td>
+                                            <td class="extra-small text-muted">{{ f.updated_at.strftime('%H:%M | %d %b')
+                                                if f.updated_at else '-' }}</td>
+                                            <td class="text-end">
+                                                <form method="POST"
+                                                    action="{{ url_for('fir.update_fir_status', fir_id=f.id) }}">
+                                                    <input type="hidden" name="status" value="closed">
+                                                    <button
+                                                        class="btn btn-premium btn-primary py-1 px-3 border-0 bg-success"
+                                                        style="font-size: 0.65rem; background: var(--police-accent) !important; color: #000;">RESOLVE</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
+                        <div class="tab-pane fade" id="closed">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover align-middle mb-0"
+                                    style="background: transparent;">
+                                    <thead>
+                                        <tr class="text-muted extra-small text-uppercase letter-spacing-1"
+                                            style="font-family: 'Orbitron', sans-serif;">
+                                            <th class="border-0">ID-REF</th>
+                                            <th class="border-0">Category</th>
+                                            <th class="border-0">Closed</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fir-closed-table">
+                                        {% for f in fir_closed %}
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                                            <td class="small fw-bold text-info">#{{ f.id|string|truncate(8, True, '') }}
+                                            </td>
+                                            <td><span class="badge bg-light bg-opacity-10 text-muted px-2 py-1"
+                                                    style="font-size: 0.65rem;">{{ f.crime_type }}</span></td>
+                                            <td class="extra-small text-muted">{{ f.updated_at.strftime('%d %b %Y') if
+                                                f.updated_at else '-' }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="citizens">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover align-middle mb-0"
+                                    style="background: transparent;">
+                                    <thead>
+                                        <tr class="text-muted extra-small text-uppercase letter-spacing-1"
+                                            style="font-family: 'Orbitron', sans-serif;">
+                                            <th class="border-0">IDENTITY-REF</th>
+                                            <th class="border-0">Full Name</th>
+                                            <th class="border-0">Contact Node</th>
+                                            <th class="border-0">Tactical Address</th>
+                                            <th class="border-0">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for citizen in registered_citizens %}
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                                            <td class="small fw-bold text-info">#{{ citizen.id|string|truncate(8, True,
+                                                '') }}</td>
+                                            <td class="small fw-bold text-white">{{ citizen.name|upper }}</td>
+                                            <td>
+                                                <div class="extra-small text-muted">{{ citizen.email }}</div>
+                                                <div class="extra-small text-info">{{ citizen.phone or 'NO PH#' }}</div>
+                                            </td>
+                                            <td class="extra-small opacity-75" style="max-width: 150px;">{{
+                                                citizen.address|truncate(40) }}</td>
+                                            <td>
+                                                {% if citizen.is_verified %}
+                                                <span class="badge bg-info bg-opacity-10 text-info px-2 py-1"
+                                                    style="font-size: 0.6rem;">VERIFIED</span>
+                                                {% else %}
+                                                <span class="badge bg-warning bg-opacity-10 text-warning px-2 py-1"
+                                                    style="font-size: 0.6rem;">PENDING</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="5" class="py-5 text-center text-muted opacity-50">
+                                                <div class="extra-small letter-spacing-2 mt-2">NO REGISTERED OPERATIVES
+                                                    IN RANGE</div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                        <!-- Heatmap -->
-                        <div class="hud-card">
-                            <h5 class="hud-header-title mb-3" style="font-size: 0.9rem;"><i class="fas fa-satellite me-2"></i>JURISDICTIONAL HEATMAP</h5>
-                            <div id="police-map" class="rounded overflow-hidden" style="height: 250px; border: 1px solid var(--police-border); position: relative;">
-                                <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50">
-                                    <div class="text-center">
-                                        <i class="fas fa-satellite-dish text-info mb-2 fs-2 pulse"></i>
-                                        <div class="extra-small text-white letter-spacing-1">SYNCHRONIZING GLOBAL FEEDS...</div>
-                                    </div>
+                <!-- Tactical Board -->
+                <div class="hud-card mb-4">
+                    <h5 class="hud-header-title mb-4">Field Operations Grid</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="hud-card p-3" style="background: rgba(15, 23, 42, 0.3); border-style: dashed;">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="extra-small fw-bold text-muted text-uppercase">Pre-Dispatch</span>
+                                    <span class="badge bg-secondary bg-opacity-10 rounded-pill text-muted">0</span>
                                 </div>
+                                <div class="extra-small text-center text-muted mt-4 opacity-50">NO PENDING ASSIGNMENTS
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="hud-card p-3"
+                                style="background: rgba(56, 189, 248, 0.05); border-color: var(--police-accent);">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="extra-small fw-bold text-info text-uppercase">Field Intel</span>
+                                    <span class="badge bg-info bg-opacity-20 rounded-pill text-info">{{
+                                        in_progress_count }}</span>
+                                </div>
+                                <div id="kanban-active">
+                                    {% for f in fir_active %}
+                                    <div class="hud-card p-2 mb-2"
+                                        style="background: rgba(255,255,255,0.02); border-radius: 8px;">
+                                        <div class="extra-small fw-bold text-info mb-1">#{{ f.id|string|truncate(6,
+                                            True, '') }}</div>
+                                        <div class="extra-small opacity-60 text-uppercase" style="font-size: 0.6rem;">{{
+                                            f.crime_type }}</div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="hud-card p-3"
+                                style="background: rgba(16, 185, 129, 0.05); border-color: #10b981;">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="extra-small fw-bold text-success text-uppercase">Secured</span>
+                                    <span class="badge bg-success bg-opacity-20 rounded-pill text-success">{{
+                                        closed_count }}</span>
+                                </div>
+                                <div class="extra-small text-center text-success mt-4 opacity-50">STATION SECURE</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Side Panels -->
+            <div class="col-lg-4">
+                <!-- Criminal Database -->
+                <div class="hud-card mb-4">
+                    <h5 class="hud-header-title mb-3">High-Value Target Database</h5>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text bg-transparent border-end-0 border-light border-opacity-10">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control search-command border-start-0"
+                            placeholder="IDENTITY LOOKUP...">
+                    </div>
+                    <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
+                        {% for criminal in criminals %}
+                        <div
+                            class="list-group-item bg-transparent border-0 px-0 d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-danger bg-opacity-10 p-2 rounded-circle"
+                                    style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-user-secret text-danger" style="font-size: 0.8rem;"></i>
+                                </div>
+                                <div>
+                                    <div class="small fw-bold text-white letter-spacing-1">{{ criminal.name|upper }}
+                                    </div>
+                                    <div class="extra-small text-muted">{{ criminal.crimes|truncate(25) }}</div>
+                                </div>
+                            </div>
+                            <span
+                                class="badge {{ 'bg-danger' if criminal.risk_level == 'High' else 'bg-warning' }} bg-opacity-10 {{ 'text-danger' if criminal.risk_level == 'High' else 'text-warning' }} extra-small letter-spacing-1">{{
+                                criminal.risk_level|upper }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- REGISTERED CITIZENS NODE -->
+                <div class="hud-card mb-4" style="border-right: 4px solid var(--police-accent);">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="hud-header-title mb-0" style="font-size: 0.9rem;"><i
+                                class="fas fa-users-viewfinder me-2"></i>REGISTERED CITIZENS</h5>
+                        <span
+                            class="badge bg-info bg-opacity-20 text-info extra-small border border-info border-opacity-25">{{
+                            registered_citizens|length }}</span>
+                    </div>
+                    <div class="list-group list-group-flush" style="max-height: 250px; overflow-y: auto;">
+                        {% for citizen in registered_citizens %}
+                        <div
+                            class="list-group-item bg-transparent border-0 px-0 d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-cyan-500 bg-opacity-10 p-2 rounded-circle"
+                                    style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(56, 189, 248, 0.2);">
+                                    <i class="fas fa-user text-info" style="font-size: 0.8rem;"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="small fw-bold text-white letter-spacing-1 truncate"
+                                        title="{{ citizen.name }}">{{ citizen.name|upper }}</div>
+                                    <div class="extra-small text-muted truncate" style="font-size: 0.6rem;">{{
+                                        citizen.email|truncate(20) }}</div>
+                                </div>
+                            </div>
+                            {% if citizen.is_verified %}
+                            <i class="fas fa-certificate text-info" style="font-size: 0.7rem;"
+                                title="Verified Identity"></i>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="py-3 text-center opacity-50">
+                            <div class="extra-small text-muted letter-spacing-2">NO REGISTERED OPERATIVES</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- SOS EMERGENCY PANEL -->
+                <div class="hud-card mb-4 border-danger border-opacity-50" id="sos-panel"
+                    style="display: none; background: rgba(220, 38, 38, 0.05);">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="hud-header-title text-danger mb-0">
+                            <i class="fas fa-exclamation-triangle pulse-red me-2"></i>LIVE SOS ALERTS
+                        </h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="{{ url_for('main.sos_alerts') }}" class="btn btn-xs btn-outline-danger py-0 px-2" style="font-size: 0.6rem;">FULL VIEW</a>
+                            <span class="badge bg-danger rounded-pill" id="sos-count">0</span>
+                        </div>
+                    </div>
+                    <div id="sos-alerts-container" style="max-height: 400px; overflow-y: auto;">
+                        <!-- SOS Cards will be injected here -->
+                    </div>
+                </div>
+
+                <!-- AI Prediction -->
+                <div class="hud-card mb-4" style="border-left: 4px solid var(--police-accent);">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="hud-header-title mb-0" style="font-size: 0.9rem;"><i
+                                class="fas fa-brain me-2"></i>PREDICTIVE INTEL</h5>
+                        <span class="badge bg-info bg-opacity-20 text-info extra-small pulse">LIVE</span>
+                    </div>
+                    <div class="p-3 bg-info bg-opacity-5 rounded border border-info border-opacity-10 mb-3">
+                        <div class="extra-small text-info fw-bold mb-1 letter-spacing-1"><i
+                                class="fas fa-bolt me-1"></i> HIGH-PROBABILITY ANOMALY</div>
+                        <div class="small opacity-80" style="font-size: 0.75rem;">Elevated risk of vehicle theft
+                            detected in Sector 4 [22:00 - 02:00]. Tactical deployment recommended.</div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="flex-grow-1">
+                            <div class="extra-small text-muted mb-1 letter-spacing-1">CONFIDENCE COEFFICIENT</div>
+                            <div class="progress" style="height: 4px; background: rgba(56, 189, 248, 0.1);">
+                                <div class="progress-bar bg-info shadow-glow" style="width: 88%;"></div>
+                            </div>
+                        </div>
+                        <span class="small fw-bold text-info" style="font-family: 'Orbitron', sans-serif;">88%</span>
+                    </div>
+                </div>
+
+                <!-- Heatmap -->
+                <div class="hud-card">
+                    <h5 class="hud-header-title mb-3" style="font-size: 0.9rem;"><i
+                            class="fas fa-satellite me-2"></i>JURISDICTIONAL HEATMAP</h5>
+                    <div id="police-map" class="rounded overflow-hidden"
+                        style="height: 500px; border: 1px solid var(--police-border); position: relative;">
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50">
+                            <div class="text-center">
+                                <i class="fas fa-satellite-dish text-info mb-2 fs-2 pulse"></i>
+                                <div class="extra-small text-white letter-spacing-1">SYNCHRONIZING GLOBAL FEEDS...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
         </div>
     </main>
 
@@ -769,7 +1143,9 @@
                     <div class="modal-body p-4">
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Incident Category</label>
+                                <label
+                                    class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Incident
+                                    Category</label>
                                 <select name="crime_type" class="form-select search-command" required>
                                     <option value="" selected disabled>SELECT VECTOR</option>
                                     <option value="THEFT">THEFT / LARCENY</option>
@@ -782,7 +1158,9 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Priority Level</label>
+                                <label
+                                    class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Priority
+                                    Level</label>
                                 <select name="priority" class="form-select search-command" required>
                                     <option value="Low">LOW / ROUTINE</option>
                                     <option value="Medium" selected>MEDIUM / STANDARD</option>
@@ -790,35 +1168,55 @@
                                 </select>
                             </div>
                             <div class="col-md-12">
-                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Tactical Location Name</label>
-                                <input type="text" name="location_name" class="form-control search-command" placeholder="ENTER SECTOR / STREET ADDRESS..." required>
+                                <label
+                                    class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Tactical
+                                    Location Name</label>
+                                <input type="text" name="location_name" class="form-control search-command"
+                                    placeholder="ENTER SECTOR / STREET ADDRESS..." required>
                             </div>
                             <div class="col-md-6">
-                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Latitude [X]</label>
-                                <input type="number" step="any" name="latitude" id="modal-lat" class="form-control search-command" placeholder="0.000000" required>
+                                <label
+                                    class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Latitude
+                                    [X]</label>
+                                <input type="number" step="any" name="latitude" id="modal-lat"
+                                    class="form-control search-command" placeholder="0.000000" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Longitude [Y]</label>
-                                <input type="number" step="any" name="longitude" id="modal-lon" class="form-control search-command" placeholder="0.000000" required>
+                                <label
+                                    class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Longitude
+                                    [Y]</label>
+                                <input type="number" step="any" name="longitude" id="modal-lon"
+                                    class="form-control search-command" placeholder="0.000000" required>
                             </div>
                             <div class="col-12">
-                                <button type="button" id="modal-getLocationBtn" class="btn-premium btn-outline w-100 py-2">
+                                <button type="button" id="modal-getLocationBtn"
+                                    class="btn-premium btn-outline w-100 py-2">
                                     <i class="fas fa-crosshairs me-2"></i>INITIALIZE GEOLOCATION SYNC
                                 </button>
-                                <div id="modal-locationStatus" class="extra-small text-info mt-2 text-center letter-spacing-1">READY FOR SCAN...</div>
+                                <div id="modal-locationStatus"
+                                    class="extra-small text-info mt-2 text-center letter-spacing-1">READY FOR SCAN...
+                                </div>
                             </div>
                             <div class="col-12">
-                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Operational Briefing</label>
-                                <textarea name="description" class="form-control search-command" style="height: 120px;" placeholder="ENTER TACTICAL DATA..." required></textarea>
+                                <label
+                                    class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Operational
+                                    Briefing</label>
+                                <textarea name="description" class="form-control search-command" style="height: 120px;"
+                                    placeholder="ENTER TACTICAL DATA..." required></textarea>
                             </div>
                             <div class="col-12">
-                                <label class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Evidence Attachment [ENCRYPTED]</label>
-                                <input type="file" name="evidence_file" class="form-control search-command" id="evidenceFile">
+                                <label
+                                    class="extra-small fw-bold text-muted text-uppercase mb-2 letter-spacing-2">Evidence
+                                    Attachment [ENCRYPTED]</label>
+                                <input type="file" name="evidence_file" class="form-control search-command"
+                                    id="evidenceFile">
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-link text-muted text-decoration-none extra-small letter-spacing-1" data-bs-dismiss="modal">ABORT COMMAND</button>
+                        <button type="button"
+                            class="btn btn-link text-muted text-decoration-none extra-small letter-spacing-1"
+                            data-bs-dismiss="modal">ABORT COMMAND</button>
                         <button type="submit" class="btn-premium btn-primary px-5 py-2">
                             <i class="fas fa-upload me-2"></i>TRANSMIT DATA
                         </button>
@@ -832,6 +1230,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
         function updateStats() {
             fetch('/api/police/stats')
@@ -906,6 +1305,166 @@
         setInterval(updateStats, 5000);
         console.log("Tactical Sync Initialized.");
 
+        // Socket.IO Tactical Stream
+        const socket = io('/police', {
+            transports: ['polling'],
+            reconnectionAttempts: 10,
+            reconnectionDelay: 2000
+        });
+        const sosPanel = document.getElementById('sos-panel');
+        const sosContainer = document.getElementById('sos-alerts-container');
+        const sosCountBadge = document.getElementById('sos-count');
+        let map; // Declare map in outer scope
+        let activeSOSList = new Set();
+        let sosMarkers = {}; // Store Leaflet markers for active SOS
+
+        socket.on('connect', () => {
+            console.log('Connected to Police Command Stream');
+            document.getElementById('socket-status').innerHTML = '<i class="fas fa-link me-1 text-success"></i>UPLINK: SECURED';
+            document.getElementById('socket-status').className = 'text-success';
+            
+            {% if department %}
+            const roomName = {{ department.name | tojson | safe }};
+            socket.emit('join', { room: roomName });
+            console.log('Joined Room:', roomName);
+            document.getElementById('room-status').innerHTML = '<i class="fas fa-door-open me-1 text-info"></i>ROOM: ' + roomName.toUpperCase();
+            document.getElementById('room-status').className = 'text-info';
+            {% else %}
+            document.getElementById('room-status').innerHTML = '<i class="fas fa-exclamation-triangle me-1 text-warning"></i>ROOM: STANDALONE';
+            {% endif %}
+        });
+
+        socket.on('disconnect', () => {
+            document.getElementById('socket-status').innerHTML = '<i class="fas fa-unlink me-1 text-danger"></i>UPLINK: SEVERED';
+            document.getElementById('socket-status').className = 'text-danger';
+        });
+
+        socket.on('connect_error', (err) => {
+            console.error('Socket Error:', err);
+            document.getElementById('socket-status').innerHTML = '<i class="fas fa-bug me-1 text-warning"></i>UPLINK: ERROR (' + err.message + ')';
+        });
+
+        socket.on('new_alert', (data) => {
+            console.log('Tactical Alert Received:', data);
+            // Refresh stats and tables
+            updateStats();
+
+            // Notification sound
+            new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3').play().catch(e => { });
+        });
+
+        socket.on('new_sos', (data) => {
+            if (activeSOSList.has(data.sos_id)) return;
+            activeSOSList.add(data.sos_id);
+
+            sosPanel.style.display = 'block';
+            document.getElementById('sos-emergency-overlay').style.display = 'block';
+            sosCountBadge.innerText = activeSOSList.size;
+
+            const sosCard = document.createElement('div');
+            sosCard.className = 'hud-card p-3 mb-3 border-danger border-opacity-25 sos-card-active';
+            sosCard.id = `sos-${data.sos_id}`;
+            sosCard.style.background = 'rgba(255, 255, 255, 0.03)';
+
+            sosCard.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="small fw-bold text-danger letter-spacing-1">${data.user_name.toUpperCase()}</div>
+                    <div class="extra-small text-muted">${data.timestamp}</div>
+                </div>
+                <div class="extra-small text-info mb-2"><i class="fas fa-phone-alt me-1"></i> ${data.phone}</div>
+                <div class="d-flex gap-2 mb-3">
+                    <span class="badge bg-danger bg-opacity-10 text-danger extra-small">URGENT</span>
+                    ${data.is_verified ? '<span class="badge bg-success bg-opacity-10 text-success extra-small">VERIFIED</span>' : ''}
+                </div>
+                <div class="extra-small text-muted mb-3">
+                    <i class="fas fa-location-arrow me-1"></i> LOC: <span id="loc-${data.sos_id}">${data.latitude.toFixed(4)}, ${data.longitude.toFixed(4)}</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="https://www.google.com/maps?q=${data.latitude},${data.longitude}" target="_blank" class="btn btn-sm btn-outline-info flex-grow-1 extra-small">TRACK</a>
+                    <button onclick="resolveSOS('${data.sos_id}')" class="btn btn-sm btn-success flex-grow-1 extra-small">RESOLVE</button>
+                </div>
+            `;
+            sosContainer.prepend(sosCard);
+
+            // Show Message Popup (Toast)
+            const toastElement = document.getElementById('sosToast');
+            document.getElementById('sos-toast-name').innerText = data.user_name;
+            const toast = new bootstrap.Toast(toastElement, { delay: 10000 });
+            toast.show();
+
+            // Add Map Marker if map exists
+            if (typeof map !== 'undefined') {
+                const marker = L.marker([data.latitude, data.longitude], {
+                    icon: L.divIcon({
+                        className: 'sos-marker',
+                        html: `<div class="marker-pulse"></div>`,
+                        iconSize: [20, 20]
+                    })
+                }).addTo(map);
+                
+                marker.bindPopup(`<b class="text-danger">EMERGENCY: ${data.user_name}</b><br>Signal Active`).openPopup();
+                sosMarkers[data.sos_id] = marker;
+                
+                // Pan map to new SOS
+                map.setView([data.latitude, data.longitude], 15);
+            }
+
+            const alertSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-security-facility-breach-alarm-994.mp3');
+            alertSound.play().catch(e => console.log('Audio play blocked'));
+        });
+
+        socket.on('location_update', (data) => {
+            const locSpan = document.getElementById(`loc-${data.sos_id}`);
+            if (locSpan) {
+                locSpan.innerText = `${parseFloat(data.latitude).toFixed(4)}, ${parseFloat(data.longitude).toFixed(4)}`;
+                const card = document.getElementById(`sos-${data.sos_id}`);
+                if (card) {
+                    card.style.background = 'rgba(56, 189, 248, 0.2)';
+                    card.classList.add('pulse-border-info');
+                    setTimeout(() => {
+                        card.style.background = 'rgba(220, 38, 38, 0.05)';
+                        card.classList.remove('pulse-border-info');
+                    }, 500);
+                }
+            }
+            
+            // Update Map Marker
+            if (sosMarkers[data.sos_id] && map) {
+                sosMarkers[data.sos_id].setLatLng([data.latitude, data.longitude]);
+                
+                // Auto-pan if it's the only active SOS or first update
+                if (activeSOSList.size === 1) {
+                    map.panTo([data.latitude, data.longitude], { animate: true });
+                }
+            }
+        });
+
+        socket.on('sos_resolved', (data) => {
+            const card = document.getElementById(`sos-${data.sos_id}`);
+            if (card) {
+                card.remove();
+                activeSOSList.delete(data.sos_id);
+                sosCountBadge.innerText = activeSOSList.size;
+                if (activeSOSList.size === 0) sosPanel.style.display = 'none';
+            }
+            
+            // Remove Map Marker
+            if (sosMarkers[data.sos_id]) {
+                sosMarkers[data.sos_id].remove();
+                delete sosMarkers[data.sos_id];
+            }
+        });
+
+        function resolveSOS(sosId) {
+            fetch(`/sos/resolve/${sosId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notes: "Resolved from Command Center" })
+            }).then(r => r.json()).then(data => {
+                console.log('SOS Resolved:', data);
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const btn = document.getElementById('modal-getLocationBtn');
             const latInput = document.getElementById('modal-lat');
@@ -930,9 +1489,10 @@
                 });
             }
 
-            const coords = {{ heatmap_coords | tojson | safe if heatmap_coords else '[]' }};
+            const coords = {{ heatmap_coords | tojson | safe if heatmap_coords else '[]'
+        }};
             if (coords.length > 0) {
-                const map = L.map('police-map', { zoomControl: false }).setView(coords[0], 13);
+                map = L.map('police-map', { zoomControl: false }).setView(coords[0], 13);
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                     attribution: '&copy; CARTO'
                 }).addTo(map);
@@ -947,4 +1507,5 @@
         });
     </script>
 </body>
-</html>
+
+</html>
