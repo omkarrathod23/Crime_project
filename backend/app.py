@@ -64,6 +64,7 @@ def create_app(config_name='default'):
     from src.blueprints.analysis import analysis_bp
     from src.blueprints.coordination import coordination_bp
     from src.blueprints.sos import sos_bp
+    from src.blueprints.user import user_bp
     
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(main_bp)
@@ -71,6 +72,7 @@ def create_app(config_name='default'):
     app.register_blueprint(analysis_bp, url_prefix='/analysis')
     app.register_blueprint(coordination_bp, url_prefix='/api')
     app.register_blueprint(sos_bp, url_prefix='/sos')
+    app.register_blueprint(user_bp, url_prefix='/user')
     
     # Unified Mobile Proxy: Intercept non-API requests and forward to Vite
     if os.getenv('SENTINEL_MOBILE_MODE') == 'true':

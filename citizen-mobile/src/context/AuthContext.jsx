@@ -49,7 +49,8 @@ export const AuthProvider = ({ children }) => {
         district: userData.district,
         policeStation: userData.policeStation,
         dob: userData.dob,
-        address: userData.address
+        address: userData.address,
+        face_image: userData.face_image
       };
       const response = await api.post('/auth/register/citizen', payload);
       return { success: true, data: response.data };
@@ -67,8 +68,20 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const uploadPhoto = async (faceImage) => {
+    try {
+      const response = await api.post('/user/upload-photo', { face_image: faceImage });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { 
+        success: false, 
+        message: error.response?.data?.error || 'Photo upload failed' 
+      };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, uploadPhoto, loading }}>
       {children}
     </AuthContext.Provider>
   );

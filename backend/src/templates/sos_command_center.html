@@ -165,17 +165,50 @@
         .sos-actions {
             display: flex;
             gap: 0.5rem;
+            margin-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 1rem;
         }
 
         .btn-sos {
-            padding: 0.5rem;
-            font-size: 0.7rem;
+            padding: 0.6rem;
+            font-size: 0.65rem;
             font-weight: 800;
             font-family: 'Orbitron', sans-serif;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             border-radius: 8px;
             flex-grow: 1;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid transparent;
+        }
+
+        .btn-sos-danger {
+            background: rgba(244, 63, 94, 0.1);
+            color: var(--sos-danger);
+            border-color: rgba(244, 63, 94, 0.2);
+        }
+
+        .btn-sos-danger:hover {
+            background: var(--sos-danger);
+            color: white;
+            box-shadow: 0 0 15px var(--sos-danger);
+        }
+
+        .btn-sos-resolve {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--sos-accent);
+            border-color: rgba(56, 189, 248, 0.2);
+        }
+
+        .btn-sos-resolve:hover {
+            background: var(--sos-accent);
+            color: #000;
+            box-shadow: 0 0 15px var(--sos-accent);
         }
 
         @keyframes slideIn {
@@ -258,29 +291,51 @@
             {% if active_sos %}
                 {% for sos in active_sos %}
                 <div class="card-sos active" id="sos-{{ sos.id }}">
-                    <div class="sos-header">
-                        <div class="citizen-name">{{ sos.user.name|upper if sos.user else 'CITIZEN' }}</div>
-                        <div class="sos-time">{{ sos.created_at.strftime('%H:%M:%S') }}</div>
+                    <div class="d-flex gap-3 mb-3">
+                        {% if sos.user.face_image %}
+                        <div style="width: 70px; height: 70px; border-radius: 12px; overflow: hidden; border: 2px solid var(--sos-danger); flex-shrink: 0; box-shadow: 0 0 15px rgba(244, 63, 94, 0.2);">
+                            <img src="{{ sos.user.face_image }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Identity">
+                        </div>
+                        {% else %}
+                        <div style="width: 70px; height: 70px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-user-shield text-muted fs-3"></i>
+                        </div>
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <div class="sos-header mb-1">
+                                <div class="citizen-name">{{ sos.user.name|upper if sos.user else 'CITIZEN' }}</div>
+                                <div class="sos-time">{{ sos.created_at.strftime('%H:%M:%S') }}</div>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Status</span>
+                                <span class="detail-value text-danger" style="font-size: 0.65rem; font-family: 'Orbitron';">
+                                    <i class="fas fa-circle-exclamation me-1"></i> EMERGENCY
+                                </span>
+                            </div>
+                            <div class="extra-small text-info opacity-75 mt-1" style="font-size: 0.6rem; letter-spacing: 1px;">
+                                <i class="fas fa-id-card me-1"></i> ID SECURED
+                            </div>
+                        </div>
                     </div>
+                    
                     <div class="sos-body">
-                        <div class="detail-row">
-                            <span class="detail-label">Status</span>
-                            <span class="detail-value text-success" style="font-size: 0.7rem;">
-                                {{ 'VERIFIED' if sos.user.is_verified else 'TRUSTED' }}
-                            </span>
+                        <div class="detail-row mb-1">
+                            <span class="detail-label">Tactical Link</span>
+                            <span class="detail-value">{{ sos.user.phone or 'LINK SEVERED' }}</span>
                         </div>
                         <div class="detail-row">
-                            <span class="detail-label">Phone</span>
-                            <span class="detail-value">{{ sos.user.phone or 'UNKNOWN' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Location</span>
-                            <span class="detail-value" id="coords-{{ sos.id }}">{{ sos.latitude|round(4) }}, {{ sos.longitude|round(4) }}</span>
+                            <span class="detail-label">Geolocation</span>
+                            <span class="detail-value" id="coords-{{ sos.id }}" style="font-family: monospace;">{{ sos.latitude|round(4) }}, {{ sos.longitude|round(4) }}</span>
                         </div>
                     </div>
+
                     <div class="sos-actions">
-                        <button class="btn btn-sos btn-danger" onclick="focusMap('{{ sos.id }}', {{ sos.latitude }}, {{ sos.longitude }})">LOCATE</button>
-                        <button class="btn btn-sos btn-outline-light" onclick="resolveSOS('{{ sos.id }}')">DONE</button>
+                        <button class="btn-sos btn-sos-danger" onclick="focusMap('{{ sos.id }}', {{ sos.latitude }}, {{ sos.longitude }})">
+                            <i class="fas fa-crosshairs"></i> LOCATE
+                        </button>
+                        <button class="btn-sos btn-sos-resolve" onclick="resolveSOS('{{ sos.id }}')">
+                            <i class="fas fa-check-double"></i> DISMISS
+                        </button>
                     </div>
                 </div>
                 {% endfor %}
@@ -353,29 +408,48 @@
             card.className = 'card-sos active';
             card.id = `sos-${data.sos_id}`;
             card.innerHTML = `
-                <div class="sos-header">
-                    <div class="citizen-name">${data.user_name.toUpperCase()}</div>
-                    <div class="sos-time">${data.timestamp}</div>
+                <div class="d-flex gap-3 mb-3">
+                    ${data.face_image ? 
+                        `<div style="width: 70px; height: 70px; border-radius: 12px; overflow: hidden; border: 2px solid var(--sos-danger); flex-shrink: 0; box-shadow: 0 0 15px rgba(244, 63, 94, 0.2);">
+                            <img src="${data.face_image}" style="width: 100%; height: 100%; object-fit: cover;" alt="Identity">
+                        </div>` : 
+                        `<div style="width: 70px; height: 70px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-user-shield text-muted fs-3"></i>
+                        </div>`
+                    }
+                    <div class="flex-grow-1">
+                        <div class="sos-header mb-1">
+                            <div class="citizen-name">${data.user_name.toUpperCase()}</div>
+                            <div class="sos-time">${data.timestamp}</div>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Status</span>
+                            <span class="detail-value text-danger" style="font-size: 0.65rem; font-family: 'Orbitron';">
+                                <i class="fas fa-circle-exclamation me-1"></i> EMERGENCY
+                            </span>
+                        </div>
+                        <div class="extra-small text-info opacity-75 mt-1" style="font-size: 0.6rem; letter-spacing: 1px;">
+                            <i class="fas fa-id-card me-1"></i> ID SECURED
+                        </div>
+                    </div>
                 </div>
                 <div class="sos-body">
-                    <div class="detail-row">
-                        <span class="detail-label">Status</span>
-                        <span class="detail-value text-success" style="font-size: 0.7rem;">
-                            ${data.is_verified ? 'VERIFIED' : 'TRUSTED'}
-                        </span>
+                    <div class="detail-row mb-1">
+                        <span class="detail-label">Tactical Link</span>
+                        <span class="detail-value">${data.phone || 'LINK SEVERED'}</span>
                     </div>
                     <div class="detail-row">
-                        <span class="detail-label">Phone</span>
-                        <span class="detail-value">${data.phone || 'UNKNOWN'}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Location</span>
-                        <span class="detail-value" id="coords-${data.sos_id}">${data.latitude.toFixed(4)}, ${data.longitude.toFixed(4)}</span>
+                        <span class="detail-label">Geolocation</span>
+                        <span class="detail-value" id="coords-${data.sos_id}" style="font-family: monospace;">${data.latitude.toFixed(4)}, ${data.longitude.toFixed(4)}</span>
                     </div>
                 </div>
                 <div class="sos-actions">
-                    <button class="btn btn-sos btn-danger" onclick="focusMap('${data.sos_id}', ${data.latitude}, ${data.longitude})">LOCATE</button>
-                    <button class="btn btn-sos btn-outline-light" onclick="resolveSOS('${data.sos_id}')">DONE</button>
+                    <button class="btn-sos btn-sos-danger" onclick="focusMap('${data.sos_id}', ${data.latitude}, ${data.longitude})">
+                        <i class="fas fa-crosshairs"></i> LOCATE
+                    </button>
+                    <button class="btn-sos btn-sos-resolve" onclick="resolveSOS('${data.sos_id}')">
+                        <i class="fas fa-check-double"></i> DISMISS
+                    </button>
                 </div>
             `;
             feed.prepend(card);
@@ -390,13 +464,14 @@
             
             const marker = L.marker([data.latitude, data.longitude], { icon }).addTo(map);
             marker.bindPopup(`
-                <div style="font-family: 'Orbitron'; padding: 5px;">
-                    <div style="color: #f43f5e; font-weight: 900; margin-bottom: 5px;">EMERGENCY</div>
-                    <div style="font-size: 1rem; margin-bottom: 1rem;">${data.user_name}</div>
-                    <div style="font-size: 0.7rem; opacity: 0.7; margin-bottom: 5px;">PHONE: ${data.phone || 'N/A'}</div>
-                    <div style="font-size: 0.7rem; opacity: 0.7;">TIME: ${data.timestamp || 'NOW'}</div>
+                <div style="font-family: 'Orbitron'; padding: 5px; width: 150px;">
+                    <div style="color: #f43f5e; font-weight: 900; margin-bottom: 8px; font-size: 0.6rem; letter-spacing: 1px;">EMERGENCY UPLINK</div>
+                    ${data.face_image ? `<img src="${data.face_image}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(244,63,94,0.3);">` : ''}
+                    <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 5px; color: #fff;">${data.user_name}</div>
+                    <div style="font-size: 0.65rem; opacity: 0.7; margin-bottom: 3px;">PH: ${data.phone || 'N/A'}</div>
+                    <div style="font-size: 0.65rem; opacity: 0.7;">TIME: ${data.timestamp || 'NOW'}</div>
                 </div>
-            `);
+            `, { maxWidth: 200 });
             markers[data.sos_id] = marker;
             return marker;
         }
@@ -471,7 +546,8 @@
             longitude: {{ sos.longitude }},
             user_name: "{{ sos.user.name if sos.user else 'Citizen' }}",
             phone: "{{ sos.user.phone if sos.user else '' }}",
-            timestamp: "{{ sos.created_at.strftime('%H:%M:%S') }}"
+            timestamp: "{{ sos.created_at.strftime('%H:%M:%S') }}",
+            face_image: "{{ sos.user.face_image if sos.user.face_image else '' }}"
         });
         {% endfor %}
     </script>

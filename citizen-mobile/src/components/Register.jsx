@@ -21,6 +21,70 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
+  const [showCamera, setShowCamera] = useState(false);
+  const [capturedImage, setCapturedImage] = useState(null);
+  const videoRef = React.useRef(null);
+  const canvasRef = React.useRef(null);
+
+  const [cameraStream, setCameraStream] = useState(null);
+
+  useEffect(() => {
+    if (showCamera && !cameraStream) {
+      const initCamera = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'user' },
+            audio: false 
+          });
+          setCameraStream(stream);
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        } catch (err) {
+          console.error("Camera error:", err);
+          setError("CAMERA ACCESS DENIED. PLEASE ENABLE PERMISSIONS.");
+          setShowCamera(false);
+        }
+      };
+      initCamera();
+    }
+
+    return () => {
+      if (cameraStream && !showCamera) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        setCameraStream(null);
+      }
+    };
+  }, [showCamera, cameraStream]);
+
+  // Ensure video src is set when ref becomes available
+  useEffect(() => {
+    if (showCamera && cameraStream && videoRef.current && !videoRef.current.srcObject) {
+      videoRef.current.srcObject = cameraStream;
+    }
+  }, [showCamera, cameraStream]);
+
+  const startCamera = () => {
+    setShowCamera(true);
+    setError('');
+  };
+
+  const capturePhoto = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (video && canvas && cameraStream) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      const data = canvas.toDataURL('image/jpeg', 0.8);
+      setCapturedImage(data);
+      
+      // Stop stream
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+      setShowCamera(false);
+    }
+  };
 
   useEffect(() => {
     const fetchStations = async () => {
@@ -36,6 +100,17 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!capturedImage && !showCamera) {
+      alert("FOR SECURITY PROTOCOL, A FACIAL SCAN IS REQUIRED FOR ENROLLMENT.");
+      startCamera();
+      return;
+    }
+
+    if (!capturedImage) {
+      setError("PLEASE CAPTURE YOUR IDENTITY SCAN.");
+      return;
+    }
+
     setError('');
     setLoading(true);
     
@@ -47,7 +122,8 @@ const Register = () => {
       district: formData.district,
       policeStation: formData.station,
       dob: formData.dob,
-      address: formData.address
+      address: formData.address,
+      face_image: capturedImage
     });
 
     if (result.success) {
@@ -82,6 +158,43 @@ const Register = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {showCamera && (
+            <div className="relative rounded-lg overflow-hidden border border-cyan-500/50 mb-4 bg-black aspect-video">
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                playsInline 
+                muted 
+                className="w-full h-full object-cover" 
+              />
+              <button 
+                type="button"
+                onClick={capturePhoto}
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-cyan-500 text-white p-3 rounded-full shadow-lg glow-border"
+              >
+                <User size={24} />
+              </button>
+            </div>
+          )}
+
+          {capturedImage && !showCamera && (
+            <div className="relative rounded-lg overflow-hidden border border-green-500/50 mb-4 bg-black aspect-video">
+              <img src={capturedImage} className="w-full h-full object-cover opacity-70" alt="Captured Identity" />
+              <div className="absolute top-2 right-2 bg-green-500 text-[8px] px-2 py-1 rounded text-white font-bold tracking-widest uppercase">
+                IDENTITY SCANNED
+              </div>
+              <button 
+                type="button"
+                onClick={startCamera}
+                className="absolute bottom-2 right-2 text-cyan-400 text-[8px] font-bold underline uppercase"
+              >
+                RE-SCAN
+              </button>
+            </div>
+          )}
+
+          <canvas ref={canvasRef} className="hidden" />
+
           <div className="grid grid-cols-1 gap-4">
             <div className="relative">
               <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />

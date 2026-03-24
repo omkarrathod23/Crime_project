@@ -241,6 +241,14 @@ def init_db(app):
                     "latitude": 19.2183,
                     "longitude": 72.9781,
                     "min_lat": 19.15, "max_lat": 19.30, "min_lon": 72.90, "max_lon": 73.05
+                },
+                {
+                    "name": "Rasayani Police Station",
+                    "city": "Rasayani",
+                    "district": "Raigad",
+                    "latitude": 18.8997,
+                    "longitude": 73.1764,
+                    "min_lat": 18.80, "max_lat": 19.00, "min_lon": 73.10, "max_lon": 73.30
                 }
             ]
             

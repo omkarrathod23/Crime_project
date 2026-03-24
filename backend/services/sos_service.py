@@ -59,7 +59,8 @@ def trigger_sos(user_id, lat, lon, selected_station=None):
         "time_full": sos_report.created_at.strftime('%d %b, %H:%M'),
         "is_verified": getattr(user, 'is_verified', False),
         "aadhaar": user.aadhaar_number or "N/A",
-        "district": sos_report.district or "Unknown"
+        "district": sos_report.district or "Unknown",
+        "face_image": user.face_image or None
     }
 
     # Broadcast to the specific station room
